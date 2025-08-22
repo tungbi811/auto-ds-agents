@@ -57,12 +57,34 @@ auto-ds-agents/
 
 ## ⚙️ Installation
 
-Clone the repository and install dependencies:
+Follow these steps to set up the project:
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/auto-ds-agents.git
 cd auto-ds-agents
+```
+
+### 2. Create a Conda Environment
+
+```bash
+conda create -n auto-ds-agents python=3.10 -y
+conda activate auto-ds-agents
+```
+
+### 3. Install Dependencies
+
+```bash
 pip install -r requirements.txt
+```
+
+### 4. Configure Environment Variables
+
+Add your **OpenAI API Key** into the `.env` file:
+
+```
+OPENAI_API_KEY=your_api_key_here
 ```
 
 ---
@@ -109,7 +131,15 @@ pytest tests/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please fork the repo, create a branch, and open a pull request.
+Contributions are welcome! Please fork the repo, create a branch, and open a pull request
+
+### Contributors
+- Monika Shakya  
+- Van Thang Doan
+- Yamuna G C  
+- Linh Chi Tong  
+- Szu-Yu Lin
+- Duy Tung Nguyen
 
 ---
 
