@@ -69,7 +69,7 @@ cd auto-ds-agents
 ### 2. Create a Conda Environment
 
 ```bash
-conda create -n auto-ds-agents python=3.10 -y
+conda create -n auto-ds-agents python=3.11 -y
 conda activate auto-ds-agents
 ```
 
@@ -146,3 +146,4 @@ Contributions are welcome! Please fork the repo, create a branch, and open a pul
 ## 📜 License
 
 This project is licensed under the MIT License.
+
