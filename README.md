@@ -16,45 +16,6 @@ It orchestrates specialized agents that handle different stages of the ML lifecy
 
 ---
 
-## 📂 Project Structure
-
-```
-auto-ds-agents/
-├── .env                     # Environment variables (API keys, secrets, etc.)
-├── .gitignore
-├── README.md
-├── requirements.txt         # Python dependencies
-│
-├── prompts/                 # YAML prompts to guide agents
-│   ├── data_cleaner.yaml
-│   ├── feature_engineer.yaml
-│   ├── model_selector.yaml
-│   ├── evaluator.yaml
-│   └── business_action_translator.yaml
-│
-├── data/                    # Data storage
-│   ├── raw/                 # Unprocessed input data
-│   └── processed/           # Cleaned/engineered datasets
-│
-├── src/
-│   └── auto_ds_agents/
-│       ├── __init__.py
-│       ├── app.py           # Orchestrator: runs agents in sequence
-│       ├── utils.py         # Helper functions (I/O, metrics, etc.)
-│       └── agents/          # Individual agent implementations
-│           ├── __init__.py
-│           ├── data_cleaner.py
-│           ├── feature_engineer.py
-│           ├── model_selector.py
-│           ├── evaluator.py
-│           └── business_action_translator.py
-│
-└── tests/
-    └── test_app.py          # Unit tests for the orchestrator
-```
-
----
-
 ## ⚙️ Installation
 
 Follow these steps to set up the project:
@@ -146,4 +107,5 @@ Contributions are welcome! Please fork the repo, create a branch, and open a pul
 ## 📜 License
 
 This project is licensed under the MIT License.
+
 
