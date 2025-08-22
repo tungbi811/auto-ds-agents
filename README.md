@@ -52,24 +52,10 @@ OPENAI_API_KEY=your_api_key_here
 
 ## ▶️ Usage
 
-1. **Set up environment variables** in `.env` (e.g., API keys if using LLMs).
-2. **Prepare data** inside the `data/raw/` directory.
-3. **Run the orchestrator**:
+Run the Streamlit application:
 
 ```bash
-python src/auto_ds_agents/app.py
-```
-
-4. **Processed outputs** will be saved in `data/processed/`.
-
----
-
-## 🧪 Testing
-
-Run tests with:
-
-```bash
-pytest tests/
+streamlit run src/auto_ds_agents/app.py
 ```
 
 ---
@@ -99,6 +85,7 @@ Contributions are welcome! Please fork the repo, create a branch, and open a pul
 ## 📜 License
 
 This project is licensed under the MIT License.
+
 
 
 
