@@ -77,16 +77,8 @@ pytest tests/
 ## 🔧 Customization
 
 * Modify YAML prompt files in `prompts/` to adjust agent behaviors.
-* Extend agents by adding new modules under `src/auto_ds_agents/agents/`.
-* Integrate with external APIs by updating `utils.py`.
-
----
-
-## 📌 Roadmap
-
-* [ ] Add visualization module for pipeline runs
-* [ ] Support for distributed orchestration
-* [ ] Additional business action translators for domain-specific use cases
+* Extend agents by adding new modules under `agents/`.
+* Integrate with external tools by updating `utils/`.
 
 ---
 
@@ -107,5 +99,6 @@ Contributions are welcome! Please fork the repo, create a branch, and open a pul
 ## 📜 License
 
 This project is licensed under the MIT License.
+
 
 
