@@ -9,7 +9,7 @@ def agent_workflow(message, client, file_path=None, use_uploaded_file=False):
         "web_search": ["search", "google", "find", "latest", "current", "news"],
         "code_execute": ["calculate", "compute", "solve", "plot", "graph", "math"],
         "pdf_analysis": ["analyze pdf", "read pdf", "pdf", "document"],
-        "data_analysis": ["csv", "data analysis", "eda", "dataset"]
+        "data_analysis": ["csv", "data analysis", "eda", "dataset", "analyze", "data"]
     }
     
     message_lower = message.lower()
