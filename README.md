@@ -46,7 +46,7 @@ A sophisticated multi-agent AI assistant that orchestrates specialized tools to 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows.git
+   git clone -b chi --single-branch https://github.com/tungbi811/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows.git
    cd Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows
    ```
 
