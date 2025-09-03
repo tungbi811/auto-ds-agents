@@ -107,7 +107,7 @@ def generate_eda_report(csv_file_path):
             report.append("## 3. Correlation Analysis")
             corr_matrix = df[numeric_cols].corr()
             
-            # Find strong correlations
+            # Find strong correlations if there's any
             strong_correlations = []
             for i in range(len(corr_matrix.columns)):
                 for j in range(i+1, len(corr_matrix.columns)):

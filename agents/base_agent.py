@@ -13,7 +13,7 @@ def agent_workflow(message, client, file_path=None, use_uploaded_file=False):
     }
     
     message_lower = message.lower()
-    
+    # Check for intents
     for intent, keywords in intents.items():
         if any(keyword in message_lower for keyword in keywords):
             if intent == "web_search":

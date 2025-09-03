@@ -17,7 +17,7 @@ def make_ai_request(prompt, prompt_type="general", client=None):
         raise ValueError("OpenAI client is required")
         
     prompt_config = get_prompt_config(prompt_type)
-    
+    # Default to GPT-3.5 Turbo if not specified
     model = prompt_config.get("model", "gpt-3.5-turbo")
     temperature = prompt_config.get("temperature", 0.7)
     
