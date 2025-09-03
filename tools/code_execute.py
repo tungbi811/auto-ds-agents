@@ -123,22 +123,24 @@ def extract_python_code(text: str) -> str:
     
     return None
 
-# Add this function to code_execute.py
 def handle_code_execution(message, make_ai_request_func, get_prompt_config_func, client):
-    """Handle code generation and execution requests - matches other tools"""
     try:
         # 1. Generate code using LLM
         llm_response = make_ai_request_func(message, "code_generation", client)
         
-        # 2. Execute the generated code
-        code_result = extract_python_code(llm_response)  # Your existing function
+        # 2. Extract and execute the code
+        code = extract_python_code(llm_response)
+        if not code:
+            return {"response": "No Python code was generated.", "search_used": False}
+        
+        # 3. Execute the code
+        executor = CodeExecutor()
+        code_result = executor.execute_code(code)  
         
         if code_result and code_result.get('success'):
             response = f"Here's the solution:\n\n```python\n{code_result.get('code', '')}\n```\n\n**Output:**\n{code_result.get('output', '')}"
-        elif code_result:
-            response = f"I generated code but there was an error:\n\n**Error:** {code_result.get('error', 'Unknown error')}"
         else:
-            response = "Failed to generate or execute code."
+            response = f"I generated code but there was an error:\n\n**Error:** {code_result.get('error', 'Unknown error')}"
             
         return {"response": response, "search_used": False}
         
