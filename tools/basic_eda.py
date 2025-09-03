@@ -20,7 +20,7 @@ def generate_eda_report(csv_file_path):
         report.append("")
         
         # Dataset Overview
-        report.append("## I. Dataset Overview")
+        report.append("# I. Dataset Overview")
         report.append(f"- **Rows:** {len(df):,}")
         report.append(f"- **Columns:** {len(df.columns)}")
         report.append(f"- **Memory Usage:** {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
@@ -28,7 +28,7 @@ def generate_eda_report(csv_file_path):
         report.append("")
         
         # Column Types
-        report.append("## II. Column Information")
+        report.append("# II. Column Information")
         report.append("| Column | Type | Missing | Missing % | Unique Values |")
         report.append("|--------|------|---------|-----------|---------------|")
         
