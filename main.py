@@ -140,7 +140,5 @@ def main():
         st.session_state.messages = []
         st.rerun()
 
-
-# Monika Trail
 if __name__ == "__main__":
     main()

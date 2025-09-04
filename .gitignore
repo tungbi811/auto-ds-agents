@@ -1,5 +1,6 @@
 # .gitignore
 .DS_Store
+
 # Python-generated files
 __pycache__/
 *.py[oc]
