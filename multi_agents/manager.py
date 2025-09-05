@@ -27,6 +27,7 @@ class Manager(GroupChatManager):
         super().__init__(
             groupchat=group_chat,
             llm_config=llm_config,
+            human_input_mode="NEVER",
             system_message=f"""
                 You are the Manager Agent.
                 Coordinate the CRISP-DM workflow and route agents correctly.

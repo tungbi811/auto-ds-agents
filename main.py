@@ -13,12 +13,12 @@ def speaker_selection_method(last_speaker, group_chat):
 
 llm_config = LLMConfig(
     api_type="openai", 
-    model="gpt-4o-mini",
+    model="gpt-4.1-mini",
     temperature=0,
     timeout=120
 )
 
-user = UserProxyAgent(name="user", code_execution_config=False)
+user = UserProxyAgent(name="user", code_execution_config=False, human_input_mode="NEVER")
 
 biz_analyst = BusinessAnalyst(llm_config)
 data_explorer = DataExplorer(llm_config)
@@ -70,11 +70,8 @@ responses = user.run(manager, message=task)
 responses.process()
 
 # for event in responses.events:
-#     if hasattr(event.content, "sender") and hasattr(event.content, "recipient") and hasattr(event.content, "content"):
-#         print("Sender: ", event.content.sender)
-#         print("Recipient: ", event.content.recipient)
-#         print("Content: ", event.content.content)
-#         print("-"*100)
+#     print(event.content)
+#     print('-'*50)
 
 # st.title("💸 Multi Agent Data Science Workflow Chat")
 

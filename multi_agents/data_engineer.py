@@ -7,7 +7,7 @@ class DataEngineer(ConversableAgent):
             llm_config=llm_config,
             system_message="""
                 You are the Data Engineer Agent (CRISP-DM: Data Preparation).
-                Your job is to prepare clean, usable data for modeling.
+                Your job is writing python code to prepare clean, usable data for modeling.
 
                 Tasks:
                 - Clean, transform, and integrate data sources.

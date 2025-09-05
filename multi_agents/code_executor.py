@@ -4,13 +4,10 @@ from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
 
 class CodeExecutor(UserProxyAgent):
     def __init__(self):
-        log_path = Path("../logs/jupyter_gateway.log")
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-
-        output_dir = Path("../artifacts")
+        output_dir = Path("./artifacts")
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        server = LocalJupyterServer(log_file=str(log_path))
+        server = LocalJupyterServer(log_file='./logs/jupyter_gateway.log')
         executor = JupyterCodeExecutor(server, output_dir=output_dir)
 
         super().__init__(
