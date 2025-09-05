@@ -1,39 +1,40 @@
-import json
-import autogen
+import streamlit as st
+from autogen import ConversableAgent, LLMConfig
 
-config_list = autogen.LLMConfig(
-    cache_seed=41,
-    api_type = 'openai',
-    model = 'gpt-4o-mini',
-    temperature = 0
+# Configure the LLM
+llm_config = LLMConfig(
+    api_type="openai", 
+    model="gpt-4o-mini",
+    temperature=0,
+    timeout=120,
+    stream=True
 )
 
-# create an AssistantAgent instance named "assistant"
-assistant = autogen.AssistantAgent(
-    name="assistant",
-    llm_config=config_list
-)
-# create a UserProxyAgent instance named "user_proxy"
-user_proxy = autogen.UserProxyAgent(
-    name="user_proxy",
-    human_input_mode="ALWAYS",
-    is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
-    code_execution_config={
-        "use_docker": False
-    },  # Please set use_docker=True if docker is available to run the generated code. Using docker is safer than running the generated code directly.
+# Create a financial agent
+finance_agent = ConversableAgent(
+    name="finance_agent",
+    system_message="You are a financial assistant who helps analyze financial data and transactions.",
+    llm_config=llm_config,
 )
 
-math_problem_to_solve = """
-Find $a + b + c$, given that $x+y \\neq -1$ and
-\\begin{align}
-    ax + by + c & = x + 7,\\
-    a + bx + cy & = 2x + 6y,\\
-    ay + b + cx & = 4x + y.
-\\end{align}.
-"""
+st.title("💸 Financial Agent Chat")
 
-# the assistant receives a message from the user, which contains the task description
-user_proxy.initiate_chat(assistant, message=math_problem_to_solve)
+# Input box for user query
+user_prompt = st.text_input("Ask the financial agent something:", 
+                            "Can you explain what makes a transaction suspicious?")
 
-print(user_proxy.chat_messages[assistant])
-json.dump(user_proxy.chat_messages[assistant], open("conversations.json", "w"), indent=2)  # noqa: SIM115
+if st.button("Run Agent"):
+    # Run the agent
+    responses = finance_agent.run(message=user_prompt, max_turns=1)
+
+    # Placeholder for live streaming
+    placeholder = st.empty()
+    buffer = ""
+
+    # Iterate through events as they arrive
+    for event in responses.events:
+        # Each event may be a message, tool call, or metadata
+        if hasattr(event.content, "content"):
+            # Append and update display
+            buffer += event.content.content
+            placeholder.markdown(buffer)
