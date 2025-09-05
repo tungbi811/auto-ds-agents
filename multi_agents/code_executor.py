@@ -7,7 +7,7 @@ class CodeExecutor(UserProxyAgent):
         log_path = Path("../logs/jupyter_gateway.log")
         log_path.parent.mkdir(parents=True, exist_ok=True)
 
-        output_dir = Path("../artifacts")
+        output_dir = Path("./artifacts")
         output_dir.mkdir(parents=True, exist_ok=True)
 
         server = LocalJupyterServer(log_file=str(log_path))
@@ -34,3 +34,42 @@ class CodeExecutor(UserProxyAgent):
                 "quiet": True,                # suppress extra chatter
             },
         )
+
+if __name__ == "__main__":
+    from pathlib import Path
+
+    # Create executor
+    user = UserProxyAgent(
+        name="user",
+        llm_config={"model": "gpt-4o-mini"},
+        code_execution_config=False
+    )
+    executor = CodeExecutor()
+
+    # Test code block
+    message = """
+        ```python
+        import pandas as pd
+        import numpy as np
+
+        # Create a simple DataFrame
+        df = pd.DataFrame({
+            "x": np.arange(5),
+            "y": np.arange(5) * 2
+        })
+
+        # Save to artifacts
+        out_path = "../artifacts/test.csv"
+        df.to_csv(out_path, index=False)
+        print("SAVED:", out_path)
+        <RUN_THIS>
+    """
+
+    reply = executor.initiate_chat(messages=[{"role": "user", "content": message}])
+
+    print("=== Executor Reply ===")
+    print(reply)
+
+    print("\n=== Artifacts Folder ===")
+    for p in Path("../artifacts").glob("*"):
+        print("-", p)
