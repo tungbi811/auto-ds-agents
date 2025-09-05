@@ -52,13 +52,13 @@ A sophisticated multi-agent AI assistant that orchestrates specialized tools to 
 
 2. **Create and activate virtual environment**
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   uv venv
+   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
    ```
 
 3. **Install dependencies**
    ```bash
-   pip install -r requirements.txt
+   uv pip install -r requirements.txt
    ```
 
 4. **Configure environment**
