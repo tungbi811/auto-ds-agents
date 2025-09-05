@@ -1,3 +1,4 @@
+import streamlit as st
 from autogen import UserProxyAgent, LLMConfig, GroupChat, GroupChatManager, OpenAIWrapper
 from multi_agents import Manager, CodeExecutor, CodeSummarizer, DataExplorer, DataProcessor, ModelTrainer
 from utils.utils import custom_speaker_selection_func, save_agent_code
@@ -6,7 +7,7 @@ llm_config = LLMConfig(
     api_type="openai", 
     model="gpt-4o-mini",
     temperature=0,
-    timeout=120
+    timeout=10
 )
 
 user = UserProxyAgent(name="user", code_execution_config=False)
@@ -31,9 +32,34 @@ task = """
     - All code will be executed in a Jupyter notebook, where previous states are saved.
 """
 
-result = user.initiate_chat(
-    manager,
-    message=task,
-)
+responses = user.run(manager, message=task, max_turns=2)
 
-save_agent_code(result)
+for event in responses.events:
+    if hasattr(event.content, "sender") and hasattr(event.content, "recipient") and hasattr(event.content, "content"):
+        print("Sender: ", event.content.sender)
+        print("Recipient: ", event.content.recipient)
+        print("Content: ", event.content.content)
+        print("-"*100)
+
+# st.title("💸 Multi Agent Data Science Workflow Chat")
+
+# # Input box for user query
+# user_prompt = st.text_input("Please input your enquiry: ", task)
+
+# if st.button("Run Agent"):
+#     # Run the agent
+#     responses = user.run(manager, message=task)
+
+#     # Placeholder for live streaming
+#     placeholder = st.empty()
+#     buffer = ""
+
+#     # Iterate through events as they arrive
+#     for event in responses.events:
+#         # Each event may be a message, tool call, or metadata
+#         if hasattr(event.content, "content"):
+#             # Append and update display
+#             buffer += event.content.content
+#             placeholder.markdown(buffer)
+
+# save_agent_code(result)
