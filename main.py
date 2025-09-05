@@ -5,13 +5,10 @@ from multi_agents import (
 )
 
 def speaker_selection_method(last_speaker, group_chat):
-    # last_speaker is an Agent or None; get its name safely
     last_name = getattr(last_speaker, "name", None)
     last_msg = ""
     if group_chat.messages and isinstance(group_chat.messages[-1], dict):
         last_msg = group_chat.messages[-1].get("content", "") or ""
-
-    # manager is attached as group_chat.manager (created below)
     return manager.route_next(group_chat.agents, last_name, last_msg)
 
 llm_config = LLMConfig(
