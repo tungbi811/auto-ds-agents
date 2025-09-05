@@ -16,15 +16,20 @@ class CodeExecutor(UserProxyAgent):
         super().__init__(
             name="CodeExecutor",
             human_input_mode="NEVER",
-            system_message=(
-                "You are a Code Executor. Execute the single fenced code block you receive and "
-                "return stdout/stderr and any printed paths to artifacts. "
-                "If no runnable code block is present, respond with an error message."
+            system_message=("""
+                You are the Code Executor Agent.
+                Your job is to run code provided by other agents.
+
+                Rules:
+                - Accept exactly one fenced code block per request.
+                - Prefer Python; bash is allowed only for simple file operations.
+                - Run the code in a persistent Jupyter kernel.
+                - Save all artifacts to ./artifacts.
+                - Return stdout, stderr, and any printed file paths.
+                """
             ),
-            human_input_mode="NEVER",
             code_execution_config={
                 "executor": executor,         # REQUIRED to actually run the code
-                "use_docker": False,          # set True if you want container isolation (needs setup)
                 "last_n_messages": 1,         # only consider the latest message for execution
                 "quiet": True,                # suppress extra chatter
             },
