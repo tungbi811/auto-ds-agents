@@ -5,6 +5,6 @@ from multi_agents.model_builder import ModelBuilder
 from multi_agents.evaluator import Evaluator
 from multi_agents.business_translator import BusinessTranslator
 from multi_agents.manager import Manager
+from multi_agents.code_executor import CodeExecutor
 
-
-__all__ = [BusinessAnalyst, DataExplorer, DataEngineer, ModelBuilder, Evaluator, BusinessTranslator, Manager]
+__all__ = [BusinessAnalyst, DataExplorer, DataEngineer, ModelBuilder, Evaluator, BusinessTranslator, CodeExecutor, Manager]

@@ -3,7 +3,7 @@ from autogen import ConversableAgent, LLMConfig
 class DataExplorer(ConversableAgent):
     def __init__(self, llm_config):
         super().__init__(
-            name = "Data_Explorer",
+            name = "DataExplorer",
             llm_config = llm_config,
             system_message = """
                 You are the Data Explorer Agent in a CRISP-DM workflow.
@@ -28,7 +28,8 @@ class DataExplorer(ConversableAgent):
                   "usefulness_for_problem": "",
                   "suggested_additional_data": [],
                   "handoff_notes_for_data_engineer": "",
-                  "open_questions": []
+                  "open_questions": [],
+                  "code": ""
                 }
             """
         )

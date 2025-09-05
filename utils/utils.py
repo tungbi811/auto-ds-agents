@@ -85,6 +85,16 @@ def custom_speaker_selection_func(last_speaker, groupchat):
     elif last_speaker.name == "Code_Summarizer":
         return None  # end the conversation
     
+def speaker_selection_method(last_speaker, group_chat):
+    # last_speaker is an Agent or None; get its name safely
+    last_name = getattr(last_speaker, "name", None)
+    last_msg = ""
+    if group_chat.messages and isinstance(group_chat.messages[-1], dict):
+        last_msg = group_chat.messages[-1].get("content", "") or ""
+
+    # manager is attached as group_chat.manager (created below)
+    return group_chat.manager.route_next(group_chat.agents, last_name, last_msg)
+    
 def save_agent_code(chat_result):
 
     if "```python" in chat_result.chat_history[-1]["content"]:

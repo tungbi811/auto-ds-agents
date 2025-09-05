@@ -1,7 +1,7 @@
 import re
 from autogen import GroupChatManager
 
-PHASES = ["BusinessAnalyst", "DataExplorer","DataEngineer", "ModelBuilder", "Evaluator", "BusinessTranslationAgent"]
+PHASES = ["BusinessAnalyst", "DataExplorer", "DataEngineer", "ModelBuilder", "Evaluator", "BusinessTranslator"]
 
 ALLOWED_LOOPS = {
     ("DataExplorer", "BusinessAnalyst"),
@@ -13,8 +13,7 @@ LOOP_PATTERN = re.compile(r"<<REQUEST_LOOP:(?P<to>[A-Za-z0-9_]+)\|(?P<reason>.+?
 STOP_TOKEN = "<END_OF_WORKFLOW>"
 
 class Manager(GroupChatManager):
-    def __init__(self, group_chat, llm_config, stop_token: str = STOP_TOKEN):
-        self.stop_token = stop_token
+    def __init__(self, group_chat, llm_config):
         super().__init__(
             groupchat=group_chat,
             llm_config=llm_config,
@@ -29,6 +28,9 @@ class Manager(GroupChatManager):
                 - ModelBuilder → DataEngineer     (data prep/features/transforms insufficient)
                 - Evaluator → BusinessAnalyst     (results don't meet business success criteria)
 
+                Code execution protocol:
+                - If an agent's JSON output contains a top-level field "code" (string) is not null, route to CodeExecutor.
+
                 How agents request a loop:
                 - An agent that needs to loop back MUST end its message with:
                   <<REQUEST_LOOP:TargetAgent|short reason>>
@@ -42,7 +44,7 @@ class Manager(GroupChatManager):
                 - Coordinate only; do NOT produce domain content yourself.
 
                 Auto-stop:
-                - When BusinessTranslationAgent posts the final business summary, it must end with the token: {self.stop_token}
+                - When BusinessTranslator posts the final business summary, it must end with the token: {STOP_TOKEN}
                 - As soon as a message contains that token, stop the conversation.
             """
         )
@@ -50,11 +52,11 @@ class Manager(GroupChatManager):
     # Helper used by a speaker_selection_method to choose who speaks next.
     def route_next(self, agents, last_speaker, last_message: str):
         # Stop if final token present
-        if STOP_TOKEN in (last_message or ""):
+        if STOP_TOKEN in (last_message):
             return None  # Autogen will terminate if selection returns None
 
         # Loop request?
-        m = LOOP_PATTERN.search(last_message or "")
+        m = LOOP_PATTERN.search(last_message)
         if m:
             target = m.group("to")
             if (last_speaker, target) in ALLOWED_LOOPS:
@@ -76,6 +78,7 @@ class Manager(GroupChatManager):
         for a in agents:
             if a.name == next_name:
                 return a
-
+        
+        print("No next speaker selected")
         # Fallback: no match → end
         return None

@@ -21,10 +21,8 @@ class CodeExecutor(UserProxyAgent):
                 "return stdout/stderr and any printed paths to artifacts. "
                 "If no runnable code block is present, respond with an error message."
             ),
-            human_input_mode="NEVER",
             code_execution_config={
                 "executor": executor,         # REQUIRED to actually run the code
-                "use_docker": False,          # set True if you want container isolation (needs setup)
                 "last_n_messages": 1,         # only consider the latest message for execution
                 "quiet": True,                # suppress extra chatter
             },
