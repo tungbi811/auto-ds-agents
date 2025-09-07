@@ -1,8 +1,8 @@
 from pathlib import Path
-from autogen import UserProxyAgent
+from autogen import ConversableAgent
 from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
 
-class CodeExecutor(UserProxyAgent):
+class CodeExecutor(ConversableAgent):
     def __init__(self):
         output_dir = Path("./artifacts")
         output_dir.mkdir(parents=True, exist_ok=True)

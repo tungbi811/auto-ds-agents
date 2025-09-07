@@ -6,17 +6,14 @@ from multi_agents import (
 
 def speaker_selection_method(last_speaker, group_chat):
     last_name = getattr(last_speaker, "name", None)
+    if last_name == 'user':
+        return group_chat.agent_by_name('')
     last_msg = ""
     if group_chat.messages and isinstance(group_chat.messages[-1], dict):
         last_msg = group_chat.messages[-1].get("content", "") or ""
     return manager.route_next(group_chat.agents, last_name, last_msg)
 
-llm_config = LLMConfig(
-    api_type="openai", 
-    model="gpt-4.1-mini",
-    temperature=0,
-    timeout=120
-)
+llm_config = LLMConfig.from_json(path="configs/llm_config.json")
 
 user = UserProxyAgent(name="user", code_execution_config=False, human_input_mode="NEVER")
 
@@ -30,7 +27,7 @@ code_executor = CodeExecutor()
 
 group_chat = GroupChat(
     agents=[user, biz_analyst, data_explorer, data_engineer, model_builder, evaluator, biz_translator, code_executor],
-    max_round=20,
+    max_round=10,
     speaker_selection_method=speaker_selection_method,
     messages=[]
 )
@@ -67,11 +64,18 @@ task = task = """
 """
 
 responses = user.run(manager, message=task)
-responses.process()
+# responses.process()
 
-# for event in responses.events:
-#     print(event.content)
-#     print('-'*50)
+i=0
+
+for event in responses.events:
+    if hasattr(event.content, "content") \
+        and hasattr(event.content, "sender") \
+            and hasattr(event.content, "recipient"):
+        print(event.content)
+        print('-'*50)
+        i+=1
+        print(i)
 
 # st.title("💸 Multi Agent Data Science Workflow Chat")
 

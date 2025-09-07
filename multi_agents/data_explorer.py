@@ -15,7 +15,6 @@ class DataExplorer(ConversableAgent):
                 - Identify data quality issues (missing values, outliers, duplicates).
                 - Assess whether the data supports the business problem.
                 - Suggest additional data that may be needed.
-                - Provide handoff notes for the Data Engineer Agent.
 
                 Rules:
                 - Do not modify or clean data; just explore.
