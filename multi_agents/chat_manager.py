@@ -70,13 +70,13 @@ class Manager(GroupChatManager):
                     return a
 
         # 4. Feedback loop request
-        m = LOOP_PATTERN.search(last_message or "")
-        if m:
-            target = m.group("to")
-            if (last_speaker, target) in ALLOWED_LOOPS:
-                return next((a for a in agents if a.name == target), None)
-            # invalid loop → retry same agent
-            return next((a for a in agents if a.name == last_speaker), None)
+        # m = LOOP_PATTERN.search(last_message or "")
+        # if m:
+        #     target = m.group("to")
+        #     if (last_speaker, target) in ALLOWED_LOOPS:
+        #         return next((a for a in agents if a.name == target), None)
+        #     # invalid loop → retry same agent
+        #     return next((a for a in agents if a.name == last_speaker), None)
 
         # 5. Default sequential order
         try:

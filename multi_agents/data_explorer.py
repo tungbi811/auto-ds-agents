@@ -1,26 +1,22 @@
-from autogen import ConversableAgent, LLMConfig
+from autogen import AssistantAgent
 
-class DataExplorer(ConversableAgent):
+class DataExplorer(AssistantAgent):
     def __init__(self, llm_config):
         super().__init__(
             name = "DataExplorer",
             llm_config = llm_config,
             system_message = """
-                You are the Data Explorer Agent (CRISP-DM: Data Understanding).
-                Your job is to perform lightweight exploration of the dataset.
+                You are the data explorer. Given a dataset and a task, please write code to explore and understand the properties of the dataset.
+                For example, you can:
+                - get the shape of the dataset
+                - get the first several rows of the dataset
+                - get the information of the dataset use `df.info()` or `df.describe()`
+                - plot the plots as needed (i.e. histogram, distribution)
+                - check the missing values
+                Only perform necessary data exploration steps.
 
-                Tasks:
-                - Describe the dataset (shape, schema, sample rows).
-                - Report basic statistics, distributions, and correlations.
-                - Identify data quality issues (missing values, outliers, duplicates).
-                - Assess whether the data supports the business problem.
-                - Suggest additional data that may be needed.
-                - Provide handoff notes for the Data Engineer Agent.
-
-                Rules:
-                - Do not modify or clean data; just explore.
-                - If you include code, provide it in a fenced Python block and end with <RUN_THIS>.
-                }
+                If a data preprocessing step is performed, you only need to check whether the changes are good. Perform the exploration on the data as needed.
+                You should not train models in any time. If you think the data is ready and there are no more exploration or processing steps needed, please reply with "Ready for training".
             """
         )
 
