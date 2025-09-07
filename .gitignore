@@ -16,5 +16,4 @@ venv/
 .env
 
 # Python files
-test.py
 test_ui.py
