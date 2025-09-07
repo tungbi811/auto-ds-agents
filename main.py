@@ -35,32 +35,7 @@ group_chat = GroupChat(
 manager = Manager(group_chat, llm_config)
 
 task = task = """
-    You are a team of agents working together under CRISP-DM workflow,
-    coordinated by the Manager agent.
-
-    Your overall task:
-    - Build a machine learning model that predicts the **sales price** of each house.
-
-    Context:
-    - Dataset path: ./data/house_prices/house_prices_train.csv
-    - All code will be executed in a persistent Jupyter kernel (via CodeExecutor).
-    - Outputs such as datasets, models, and reports should be written under ./artifacts.
-
-    Guidelines:
-    - Follow CRISP-DM phases in order:
-    1. BusinessAnalyst → clarify business objective, KPIs, and success criteria.
-    2. DataExplorer → summarize and assess dataset, flag data quality issues.
-    3. DataEngineer → clean/transform data, engineer features, produce training-ready dataset.
-    4. ModelBuilder → train candidate models, tune, select the best.
-    5. Evaluator → validate performance, check robustness/fairness, compare with acceptance criteria.
-    6. BusinessTranslationAgent → translate results into business insights and recommendations.
-
-    Special rules:
-    - When any agent needs code executed, include exactly one fenced code block
-    (```python ...``` or ```bash ...```) and end the message with <RUN_THIS>.
-    - All artifacts (prepared datasets, models, logs, reports) must be saved to ./artifacts.
-    - The workflow stops once the BusinessTranslationAgent delivers the final summary
-    with the token .
+    
 """
 
 responses = user.run(manager, message=task)

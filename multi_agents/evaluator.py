@@ -1,6 +1,6 @@
-from autogen import ConversableAgent
+from autogen import AssistantAgent
 
-class Evaluator(ConversableAgent):
+class Evaluator(AssistantAgent):
     def __init__(self, llm_config):
         super().__init__(
             name="Evaluator",
