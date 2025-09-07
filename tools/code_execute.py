@@ -6,51 +6,126 @@ import re
 from typing import Dict, Any
 
 class CodeExecutor:
-    def __init__(self):
-        # Allowed imports for safety
+    """CodeExecutor optimized for real-world data science workflows"""
+    
+    def __init__(self, workspace_dir: str = "workspace"):
+        self.workspace_dir = workspace_dir
+        os.makedirs(workspace_dir, exist_ok=True)
+        
+        # Comprehensive allowed imports for data science
         self.allowed_imports = {
-            'math', 'statistics', 'datetime', 'json', 'csv', 'random',
-            'pandas', 'numpy', 'matplotlib.pyplot', 'seaborn', 'scipy'
+            # Standard library
+            'math', 'statistics', 'datetime', 'json', 'csv', 'random', 'time',
+            'collections', 'itertools', 'functools', 'operator', 'copy', 'pickle',
+            're', 'string', 'typing', 'warnings', 'io', 'pathlib',
+            
+            # Data science core
+            'pandas', 'numpy', 'scipy', 'sklearn', 'scikit-learn',
+            
+            # Machine learning
+            'xgboost', 'lightgbm', 'catboost', 'tensorflow', 'torch', 'keras',
+            'joblib', 'pickle',
+            
+            # Visualization
+            'matplotlib', 'seaborn', 'plotly', 'bokeh', 'altair',
+            
+            # Statistical analysis
+            'statsmodels', 'pingouin', 'lifelines',
+            
+            # Text processing
+            'nltk', 'spacy', 'gensim', 'transformers', 'textblob',
+            
+            # Image processing
+            'PIL', 'cv2', 'opencv', 'skimage',
+            
+            # Web and data
+            'requests', 'beautifulsoup4', 'bs4', 'lxml', 'html5lib',
+            
+            # Utilities
+            'tqdm', 'logging', 'argparse', 'configparser',
+            
+            # Jupyter/notebook
+            'IPython', 'ipywidgets',
+            
+            # File handling (controlled)
+            'os', 'glob', 'shutil'  # Allow but monitor usage
         }
         
-        # Forbidden patterns for security
+        # Critical security patterns to block
         self.forbidden_patterns = [
-            r'import\s+os',
-            r'import\s+subprocess',
-            r'import\s+sys',
-            r'__import__',
-            r'eval\s*\(',
-            r'exec\s*\(',
-            r'open\s*\(',
-            r'file\s*\(',
-            r'input\s*\(',
-            r'raw_input\s*\(',
+            r'import\s+subprocess',      # Prevent system command execution
+            r'import\s+sys',             # Prevent Python interpreter manipulation  
+            r'__import__\s*\(',          # Prevent dynamic imports
+            r'eval\s*\(',                # Prevent code evaluation
+            r'exec\s*\(',                # Prevent code execution
+            r'compile\s*\(',             # Prevent code compilation
+            r'input\s*\(',               # Prevent input blocking
+            r'raw_input\s*\(',           # Prevent input blocking
+            r'open\s*\(.*/etc/',         # Prevent system file access
+            r'open\s*\(.*/proc/',        # Prevent process info access
+            r'\.system\s*\(',            # Prevent os.system calls
+            r'\.popen\s*\(',             # Prevent process opening
+            r'\.spawn\s*\(',             # Prevent process spawning
+        ]
+        
+        # Allowed file operations patterns
+        self.safe_file_patterns = [
+            r'open\s*\([\'"][^/\'"]+[\'"]',           # Local files only
+            r'pd\.read_csv\s*\(',                     # Pandas read operations
+            r'np\.load\s*\(',                         # Numpy load operations
+            r'\.to_csv\s*\(',                         # Save to CSV
+            r'\.to_json\s*\(',                        # Save to JSON
+            r'\.save\s*\(',                           # Model save operations
+            r'\.dump\s*\(',                           # Pickle dump operations
         ]
     
     def is_safe_code(self, code: str) -> tuple[bool, str]:
-        """Check if code is safe to execute"""
+        """Enhanced security check for practical data science"""
         
-        # Check for forbidden patterns
+        # Check for strictly forbidden patterns
         for pattern in self.forbidden_patterns:
             if re.search(pattern, code, re.IGNORECASE):
-                return False, f"Forbidden operation detected: {pattern}"
+                return False, f"Security violation: {pattern}"
         
-        # Check imports
+        # Check file operations are safe
+        if 'open(' in code:
+            # Allow only if it matches safe patterns
+            has_safe_file_op = any(
+                re.search(pattern, code, re.IGNORECASE) 
+                for pattern in self.safe_file_patterns
+            )
+            
+            # Check for dangerous file paths
+            dangerous_paths = ['/etc/', '/proc/', '/sys/', '/dev/', '~/', '../']
+            has_dangerous_path = any(path in code for path in dangerous_paths)
+            
+            if has_dangerous_path and not has_safe_file_op:
+                return False, "File operation outside workspace not allowed"
+        
+        # Validate imports (more permissive)
         import_lines = re.findall(r'^\s*(import\s+\S+|from\s+\S+\s+import)', code, re.MULTILINE)
         for imp in import_lines:
-            # Extract module name
-            if imp.startswith('import'):
+            # Extract base module name
+            if imp.strip().startswith('import'):
                 module = imp.split()[1].split('.')[0]
             else:  # from X import Y
                 module = imp.split()[1].split('.')[0]
             
+            # Check if module is allowed
             if module not in self.allowed_imports:
-                return False, f"Import not allowed: {module}"
+                # Special case: allow submodules of allowed packages
+                allowed = any(
+                    module.startswith(allowed_mod) for allowed_mod in self.allowed_imports
+                    if '.' not in allowed_mod  # Only check base modules
+                )
+                
+                if not allowed:
+                    return False, f"Import not allowed: {module}"
         
         return True, "Code appears safe"
     
     def execute_code(self, code: str) -> Dict[str, Any]:
-        """Execute Python code safely and return results"""
+        """Execute code with enhanced workspace support"""
         
         # Safety check
         is_safe, message = self.is_safe_code(code)
@@ -61,19 +136,68 @@ class CodeExecutor:
                 'output': None
             }
         
-        # Create temporary file
+        # Enhanced workspace setup
+        workspace_setup = f'''
+import os
+import json
+import warnings
+warnings.filterwarnings('ignore')  # Suppress common data science warnings
+
+# Workspace setup
+WORKSPACE_DIR = "{self.workspace_dir}"
+os.makedirs(WORKSPACE_DIR, exist_ok=True)
+os.chdir(WORKSPACE_DIR)
+
+def save_to_workspace(filename, content):
+    """Save content for agent coordination"""
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            if isinstance(content, (dict, list)):
+                json.dump(content, f, indent=2, ensure_ascii=False)
+            else:
+                f.write(str(content))
+        print(f"Saved to workspace: {{filename}}")
+        return filename
+    except Exception as e:
+        print(f"Error saving {{filename}}: {{e}}")
+        return None
+
+def load_from_workspace(filename):
+    """Load content from workspace"""
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            content = f.read()
+            try:
+                return json.loads(content)
+            except json.JSONDecodeError:
+                return content
+    except FileNotFoundError:
+        print(f"File not found: {{filename}}")
+        return None
+    except Exception as e:
+        print(f"Error loading {{filename}}: {{e}}")
+        return None
+
+print(f"Working in workspace: {{os.getcwd()}}")
+
+# User code starts here
+'''
+        
+        full_code = workspace_setup + code
+        
+        # Create temporary file and execute
         with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-            f.write(code)
+            f.write(full_code)
             temp_file = f.name
         
         try:
-            # Execute code with timeout
+            # Execute with extended timeout for ML operations
             result = subprocess.run(
                 [sys.executable, temp_file],
                 capture_output=True,
                 text=True,
-                timeout=30,  # 30 second timeout
-                cwd=tempfile.gettempdir()  # Run in temp directory
+                timeout=300,  # 5 minutes for ML operations
+                cwd=self.workspace_dir
             )
             
             return {
@@ -86,7 +210,7 @@ class CodeExecutor:
         except subprocess.TimeoutExpired:
             return {
                 'success': False,
-                'error': "Code execution timed out (30s limit)",
+                'error': "Code execution timed out (5 minutes)",
                 'output': None
             }
         except Exception as e:
@@ -102,48 +226,6 @@ class CodeExecutor:
             except:
                 pass
 
-def extract_python_code(text: str) -> str:
-    """Extract Python code from LLM response (looks for ```python blocks)"""
-    
-    # Look for ```python code blocks
-    python_pattern = r'```python\s*\n(.*?)\n```'
-    matches = re.findall(python_pattern, text, re.DOTALL)
-    
-    if matches:
-        return matches[0].strip()
-    
-    # Look for ``` code blocks
-    general_pattern = r'```\s*\n(.*?)\n```'
-    matches = re.findall(general_pattern, text, re.DOTALL)
-    
-    if matches:
-        code = matches[0].strip()
-        if any(keyword in code for keyword in ['print(', 'import ', 'def ', 'for ', 'if ']):
-            return code
-    
-    return None
-
-def handle_code_execution(message, make_ai_request_func, get_prompt_config_func, client):
-    try:
-        # 1. Generate code using LLM
-        llm_response = make_ai_request_func(message, "code_generation", client)
-        
-        # 2. Extract and execute the code
-        code = extract_python_code(llm_response)
-        if not code:
-            return {"response": "No Python code was generated.", "search_used": False}
-        
-        # 3. Execute the code
-        executor = CodeExecutor()
-        code_result = executor.execute_code(code)  
-        
-        if code_result and code_result.get('success'):
-            response = f"Here's the solution:\n\n```python\n{code_result.get('code', '')}\n```\n\n**Output:**\n{code_result.get('output', '')}"
-        else:
-            response = f"I generated code but there was an error:\n\n**Error:** {code_result.get('error', 'Unknown error')}"
-            
-        return {"response": response, "search_used": False}
-        
-    except Exception as e:
-        return {"response": f"Code execution failed: {str(e)}", "search_used": False}
-
+def create_multi_agent_executor(workspace_dir: str = "workspace"):
+    """Create executor for multi-agent use"""
+    return CodeExecutor(workspace_dir)

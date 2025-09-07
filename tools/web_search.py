@@ -13,7 +13,7 @@ def handle_web_search(message, make_ai_request_func, get_prompt_config_func, cli
         prompt_config = get_prompt_config_func("web_search")
         prompt = prompt_config["template"].format(search_results=search_results, message=message)
 
-        response = make_ai_request_func(prompt, "web_search")
+        response = make_ai_request_func(prompt, "web_search", client)
         return {"response": response, "search_used": True}
     except Exception as e:
         return {"response": f"Search failed: {str(e)}. Here's a regular AI response instead.", "search_used": False}

@@ -387,7 +387,16 @@ def main():
             try:
                 os.unlink(temp_path)
             except:
-                pass 
+                pass  # File might already be cleaned up
+    
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style='text-align: center; color: #666;'>
+    🔬 <strong>Research Implementation</strong>: This system demonstrates multi-agent coordination 
+    using CodeAct paradigm and LangGraph orchestration based on Manus and AutoKaggle research
+    </div>
+    """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()

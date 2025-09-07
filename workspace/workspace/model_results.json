@@ -1,0 +1,20 @@
+{
+  "best_model": "LinearRegression",
+  "performance_metrics": {
+    "rmse": 1514173.5520492233,
+    "mae": 1127483.352323519,
+    "r2_score": 0.5464062355495871
+  },
+  "all_results": {
+    "RandomForest": {
+      "rmse": 1611964.8151505743,
+      "mae": 1151368.499235474,
+      "r2_score": 0.4859245319313156
+    },
+    "LinearRegression": {
+      "rmse": 1514173.5520492233,
+      "mae": 1127483.352323519,
+      "r2_score": 0.5464062355495871
+    }
+  }
+}

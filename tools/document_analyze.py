@@ -26,7 +26,7 @@ def analyze_pdf_from_path(file_path):
     except Exception as e:
         raise Exception(f"Error reading PDF: {str(e)}")
 
-def handle_pdf_analysis(message, make_ai_request_func, get_prompt_config_func, client, file_path=None, use_uploaded_file=False):
+def handle_pdf_analysis(message, make_ai_request_func, get_prompt_config_func, client, file_path=None):
     """Handle PDF analysis requests"""
     try:
         if not file_path:
