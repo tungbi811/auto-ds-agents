@@ -1,205 +1,56 @@
-# Multi-Agent Collaboration for Automated Data Science Workflows
+# {{crew_name}} Crew
 
-A sophisticated multi-agent AI assistant that orchestrates specialized tools to handle diverse tasks including web search, document analysis, code execution, and data science workflows. Built with a modular architecture that intelligently routes user requests to the most appropriate agent based on intent detection.
+Welcome to the {{crew_name}} Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
 
-## 🚀 Features
+## Installation
 
-### Multi-Agent Architecture
-- **Intelligent Intent Detection**: Automatically routes requests to specialized agents
-- **Web Search Agent**: Real-time information retrieval and synthesis
-- **Document Analysis Agent**: PDF processing and content extraction  
-- **Code Execution Agent**: Safe Python code generation and execution
-- **Data Analysis Agent**: Automated exploratory data analysis (EDA)
+Ensure you have Python >=3.10 <3.14 installed on your system. This project uses [UV](https://docs.astral.sh/uv/) for dependency management and package handling, offering a seamless setup and execution experience.
 
-### Key Capabilities
-- **Smart File Handling**: Upload and analyze PDFs and CSV files
-- **Interactive Chat Interface**: Streamlit-based web UI with chat history
-- **Configurable Prompts**: YAML-based prompt templates for easy customization
-- **Visualization Support**: Automatic chart generation and display
-- **Safety-First Code Execution**: Sandboxed environment with restricted imports
-
-## 🏗️ Architecture
-
-```
-├── main.py              # Streamlit web application
-├── agents/              # Core agent system
-│   ├── base_agent.py    # Main workflow orchestrator
-│   └── __init__.py      # Agent exports
-├── tools/               # Specialized tool implementations
-│   ├── web_search.py    # Web search functionality
-│   ├── document_analyze.py  # PDF analysis tools
-│   ├── code_execute.py  # Safe code execution
-│   └── basic_eda.py     # Data analysis tools
-├── utils/               # Shared utilities
-│   └── utils.py         # Helper functions and AI client
-└── prompts/             # Configuration files
-    └── prompt.yaml      # Agent prompt templates
-```
-
-## ⚙️ Installation
-
-### Prerequisites
-- Python 3.11+
-- OpenAI API key
-
-### Setup Steps
-
-1. **Clone the repository**
-   ```bash
-   git clone -b chi --single-branch https://github.com/tungbi811/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows.git
-   cd Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows
-   ```
-
-2. **Create and activate virtual environment**
-   ```bash
-   uv venv
-   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-   ```
-
-3. **Install dependencies**
-   ```bash
-   uv pip install -r requirements.txt
-   ```
-
-4. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your OpenAI API key:
-   OPENAI_API_KEY=your_api_key_here
-   ```
-
-## 🎯 Usage
-
-### Start the Application
-```bash
-streamlit run main.py
-```
-
-The web interface will open at `http://localhost:8501`
-
-### Supported Query Types
-
-**Web Search Queries**
-- "Search for the latest AI developments"
-- "Find current weather in Tokyo"
-- "What are the recent news about cryptocurrency?"
-
-**Code Execution**
-- "Calculate the factorial of 10"
-- "Plot a sine wave"
-- "Generate 100 random numbers and show statistics"
-
-**Document Analysis**
-- Upload a PDF and ask: "Summarize this document"
-- "Extract key findings from the uploaded report"
-
-**Data Analysis** 
-- Upload a CSV file and ask: "Analyze this dataset"
-- "Show me the correlation matrix for this data"
-- "Generate visualizations for the uploaded data"
-
-## 🔧 Configuration
-
-### Customizing Agent Behavior
-
-Edit `prompts/prompt.yaml` to modify how agents respond:
-
-```yaml
-web_search:
-  template: |
-    Your custom prompt template here...
-  model: "gpt-3.5-turbo"
-  temperature: 0.7
-
-code_generation:
-  template: |
-    Your custom code generation prompt...
-  model: "gpt-3.5-turbo" 
-  temperature: 0.1
-```
-
-### Adding New Tools
-
-1. Create a new tool in `tools/your_tool.py`
-2. Add the handler function following the existing pattern
-3. Update `agents/base_agent.py` to include your new intent detection
-4. Add corresponding prompts in `prompts/prompt.yaml`
-
-## 🛡️ Security Features
-
-- **Sandboxed Code Execution**: Limited to approved Python libraries
-- **No File System Access**: Code execution restricted from system operations
-- **Input Validation**: All user inputs are sanitized and validated
-- **API Key Protection**: Environment variables for sensitive credentials
-
-## 🧪 Testing
-
-The project includes comprehensive testing for all components:
+First, if you haven't already, install uv:
 
 ```bash
-# Run tests (when available)
-python -m pytest tests/
+pip install uv
 ```
 
-## 🤝 Contributing
+Next, navigate to your project directory and install the dependencies:
 
-We welcome contributions! Please follow these steps:
+(Optional) Lock the dependencies and install them by using the CLI command:
+```bash
+crewai install
+```
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+### Customizing
 
-### Development Guidelines
-- Follow PEP 8 style guidelines
-- Add tests for new features
-- Update documentation for API changes
-- Ensure all agents maintain the same interface pattern
+**Add your `OPENAI_API_KEY` into the `.env` file**
 
-## 📋 Dependencies
+- Modify `src/data_science_team/config/agents.yaml` to define your agents
+- Modify `src/data_science_team/config/tasks.yaml` to define your tasks
+- Modify `src/data_science_team/crew.py` to add your own logic, tools and specific args
+- Modify `src/data_science_team/main.py` to add custom inputs for your agents and tasks
 
-### Core Dependencies
-- **streamlit**: Web interface framework
-- **openai**: OpenAI API client
-- **pandas**: Data manipulation and analysis
-- **matplotlib**: Plotting and visualization
-- **beautifulsoup4**: Web scraping and HTML parsing
-- **PyPDF2**: PDF processing
-- **python-dotenv**: Environment variable management
+## Running the Project
 
-See `requirements.txt` for the complete list of dependencies.
+To kickstart your flow and begin execution, run this from the root folder of your project:
 
-## 🎨 Future Enhancements
+```bash
+crewai run
+```
 
-- [ ] Additional agent types (image analysis, audio processing)
-- [ ] Multi-model support (Anthropic Claude, Google Gemini)
-- [ ] Advanced data visualization options
-- [ ] Conversation memory and context persistence
-- [ ] Plugin system for custom agents
-- [ ] REST API endpoints
-- [ ] Docker containerization
+This command initializes the data-science-team Flow as defined in your configuration.
 
-## 👥 Contributors
+This example, unmodified, will run the create a `report.md` file with the output of a research on LLMs in the root folder.
 
-- Monika Shakya
-- Van Thang Doan  
-- Yamuna G C
-- Linh Chi Tong
-- Szu-Yu Lin
-- Duy Tung Nguyen
+## Understanding Your Crew
 
-## 📜 License
+The data-science-team Crew is composed of multiple AI agents, each with unique roles, goals, and tools. These agents collaborate on a series of tasks, defined in `config/tasks.yaml`, leveraging their collective skills to achieve complex objectives. The `config/agents.yaml` file outlines the capabilities and configurations of each agent in your crew.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Support
 
-## 🆘 Support
+For support, questions, or feedback regarding the {{crew_name}} Crew or crewAI.
 
-For questions and support:
-1. Check the [Issues](https://github.com/your-username/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows/issues) page
-2. Create a new issue with detailed description
-3. Join our community discussions
+- Visit our [documentation](https://docs.crewai.com)
+- Reach out to us through our [GitHub repository](https://github.com/joaomdmoura/crewai)
+- [Join our Discord](https://discord.com/invite/X4JWnZnxPb)
+- [Chat with our docs](https://chatg.pt/DWjSBZn)
 
----
-
-**Built with ❤️ for the data science and AI community**
+Let's create wonders together with the power and simplicity of crewAI.
