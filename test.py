@@ -22,7 +22,7 @@ code_executor = CodeExecutor()
 
 group_chat = GroupChat(
     agents=[user, data_explorer, data_engineer, model_builder, code_executor],
-    max_round=10,
+    max_round=20,
     speaker_selection_method=custom_speaker_selection_func,
     messages=[]
 )
