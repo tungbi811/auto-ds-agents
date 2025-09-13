@@ -17,3 +17,6 @@ venv/
 
 # Python files
 test_ui.py
+
+# Folder
+template/

@@ -1,4 +1,19 @@
 from autogen import OpenAIWrapper
+from typing import Annotated
+from autogen.agentchat.group import ContextVariables, ReplyResult, RevertToUserTarget
+
+def request_clarification(
+    clarification_question: Annotated[str, "Question to ask user for clarification"],
+    # context_variables: ContextVariables,
+) -> ReplyResult:
+    """
+    Request clarification from the user when the query is ambiguous
+    """
+    return ReplyResult(
+        message=f"Further clarification is required to determine the correct domain: {clarification_question}",
+        # context_variables=context_variables,
+        target=RevertToUserTarget(),
+    )
 
 def custom_speaker_selection_func(last_speaker, group_chat):
     messages = group_chat.messages
