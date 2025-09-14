@@ -30,7 +30,7 @@ code_executor = ConversableAgent(
     name="CodeExecutor",
     llm_config=False,               # stays tool-only / non-reasoning
     human_input_mode="NEVER",
-    code_execution_config={"executor": executor},  # will execute fenced ```python blocks
+    code_execution_config={"use_docker": False},  # will execute fenced ```python blocks
 )
 
 data_explorer = AssistantAgent(
@@ -49,7 +49,7 @@ data_explorer = AssistantAgent(
     """,
 )
 
-user = UserProxyAgent(name="User")
+user = UserProxyAgent(name="User",code_execution_config={"use_docker": False})
 
 task_prompt = """Please help me to build a model predict the sales price for each house.
 - The train dataset is downloaded to this location: ./data/house_prices/train.csv.
