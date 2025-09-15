@@ -1,0 +1,392 @@
+business_context_analysis:
+  description: >
+    MANDATORY: Create a comprehensive business_issue.md file using the requirements 
+    from the chatbot-generated JSON file in the workspace.
+    
+    WORKFLOW:
+    1. Look for requirements_*.json files in the workspace (from chatbot interface)
+    2. Read the most recent requirements JSON file
+    3. Extract the structured requirements data
+    4. Transform into the standardized business_issue.md format
+    5. Save EXACTLY to workspace/business_issue.md
+    
+    DO NOT ask questions. DO NOT create any other files. ONLY create business_issue.md.
+    Use the requirements from the JSON file to populate all sections.
+    
+    REQUIRED structure for business_issue.md:
+    
+    # Business Issue Analysis
+    
+    ## Business Objective
+    [Extract from business_problem field]
+    
+    ## Success Metrics
+    [Format success_metrics array as bullet points]
+    
+    ## Timeline
+    [Extract from timeline field]
+    
+    ## Stakeholders
+    [Format stakeholders array as bullet points]
+    
+    ## Problem Type
+    [Extract from problem_type field]
+    
+    ## Constraints
+    [Format constraints array as bullet points]
+    
+    ## Available Data
+    [Extract from available_data field]
+    
+    ## Additional Notes
+    [Extract from additional_notes field if present]
+  
+  expected_output: >
+    A comprehensive business_issue.md document containing:
+    
+    1. **Business Objective** - Clear problem statement extracted from chatbot requirements
+    2. **Success Metrics** - Formatted list of success criteria from JSON
+    3. **Timeline** - Project timeline from requirements
+    4. **Stakeholders** - List of stakeholders formatted as bullet points
+    5. **Problem Type** - ML problem classification (regression, classification, etc.)
+    6. **Constraints** - Any limitations or constraints formatted as bullet points
+    7. **Available Data** - Description of available datasets and sources
+    8. **Additional Notes** - Any extra context from the chatbot interaction
+    
+    The document must be saved as workspace/business_issue.md and serve as the 
+    foundation for all subsequent agent tasks.
+  
+  json_processing_requirements: >
+    MANDATORY JSON PROCESSING STEPS:
+    
+    1. **File Discovery**
+       - Search workspace for requirements_*.json files
+       - Select the most recent file based on timestamp
+       - Handle cases where no requirements file exists
+    
+    2. **Data Extraction**
+       - Load JSON and access the 'requirements' object
+       - Extract all required fields with fallback values
+       - Handle missing or malformed data gracefully
+    
+    3. **Data Formatting**
+       - Convert arrays (success_metrics, stakeholders, constraints) to bullet points
+       - Ensure proper markdown formatting
+       - Handle empty or null values appropriately
+    
+    4. **Validation**
+       - Verify all required sections are populated
+       - Ensure the file is saved in the correct location
+       - Validate the markdown structure is correct
+  
+  tools_required:
+    - read_file (for JSON requirements)
+    - list_files (to find requirements files)
+    - write_file (for business_issue.md)
+  
+  validation_criteria:
+    - Requirements JSON file successfully loaded and parsed
+    - All fields from JSON are properly extracted and formatted
+    - Business_issue.md file is created with correct structure
+    - All sections contain actual data from chatbot requirements
+    - File is saved in workspace directory as business_issue.md
+    - No placeholder or fictional data is used
+
+planning:
+  description: >
+    Analyze business requirements from business_issue.md and create detailed 
+    project plan with specific task delegation to appropriate agents. Ensure 
+    comprehensive coverage of all requirements while optimizing workflow efficiency.
+  
+  expected_output: >
+    A detailed todo.md file containing:
+    
+    1. **Project Overview** - Summary, objectives, and technical approach
+    2. **Phase Breakdown** - Detailed tasks assigned to specific agents
+    3. **Timeline & Dependencies** - Critical path, resource allocation, and risk mitigation
+    4. **Success Criteria** - Technical targets, business metrics, and quality standards
+    5. **Agent Coordination Plan** - Communication protocols and handoff procedures
+    
+    Each task must include:
+    - Clear deliverables and acceptance criteria
+    - Estimated complexity and time requirements
+    - Dependencies on other tasks or external resources
+    - Success metrics and validation approaches
+  
+  task_delegation_framework: >
+    SYSTEMATIC TASK ASSIGNMENT:
+    
+    **Data Analyst Responsibilities:**
+    - Comprehensive EDA with statistical analysis
+    - Data quality assessment and preprocessing
+    - Feature engineering and selection
+    - Visualization and insight generation
+    - Data pipeline documentation
+    
+    **ML Engineer Responsibilities:**
+    - Model architecture selection and design
+    - Training pipeline development and optimization
+    - Hyperparameter tuning and validation
+    - Performance evaluation and comparison
+    - Model deployment preparation
+    
+    **Business Translator Responsibilities:**
+    - Technical results interpretation
+    - Business impact quantification
+    - Stakeholder communication materials
+    - Implementation recommendations
+    - ROI analysis and value proposition
+  
+  tools_required:
+    - read_file (business_issue.md)
+    - write_file (todo.md)
+  
+  validation_criteria:
+    - All business requirements are addressed in project plan
+    - Tasks are appropriately assigned based on agent expertise
+    - Dependencies and critical path are clearly identified
+    - Success criteria align with business requirements
+    - Resource allocation is realistic and optimized
+
+analysis:
+  description: >
+    Perform comprehensive exploratory data analysis (EDA) and data preprocessing 
+    to understand data characteristics, quality issues, and prepare datasets for 
+    machine learning. Generate insights that inform both technical development 
+    and business understanding.
+  
+  expected_output: >
+    A comprehensive data_analysis_report.md containing:
+    
+    1. **Dataset Overview** - Structure, size, and general characteristics
+    2. **Data Quality Assessment** - Missing data, outliers, inconsistencies
+    3. **Statistical Analysis** - Distributions, correlations, patterns
+    4. **Visual Analytics** - Charts, plots, and visualizations
+    5. **Feature Analysis** - Feature importance, relationships, engineering opportunities
+    6. **Business Insights** - Key findings and their business implications
+    7. **Preprocessing Recommendations** - Data cleaning and transformation strategies
+    8. **Model Development Guidance** - Recommendations for ML approach
+  
+  technical_requirements: >
+    MANDATORY TECHNICAL DELIVERABLES:
+    
+    **Data Quality Assessment:**
+    - Missing data analysis with handling recommendations
+    - Outlier detection and treatment strategies
+    - Data type validation and correction needs
+    - Consistency checks across variables
+    - Data completeness and coverage analysis
+    
+    **Statistical Analysis:**
+    - Descriptive statistics for all variables
+    - Correlation analysis and multicollinearity detection
+    - Distribution analysis and normality testing
+    - Target variable analysis (if supervised learning)
+    - Temporal patterns and trends (if applicable)
+    
+    **Feature Engineering:**
+    - Feature importance preliminary analysis
+    - New feature creation opportunities
+    - Categorical encoding recommendations
+    - Scaling and normalization strategies
+    - Feature selection methodology
+    
+    **Preprocessing Pipeline:**
+    - Data cleaning procedures
+    - Transformation pipelines
+    - Train/validation/test split strategy
+    - Cross-validation approach
+    - Data quality validation procedures
+  
+  visualization_requirements:
+    - Distribution plots for all numeric variables
+    - Correlation heatmap with annotations
+    - Missing data patterns visualization
+    - Outlier analysis plots (box plots, scatter plots)
+    - Target variable distribution and relationships
+    - Feature importance preliminary charts
+  
+  tools_required:
+    - execute_python_code
+    - load_dataset_info
+    - write_file
+    - read_file
+  
+  documentation_requirements:
+    - Document questions about business meaning of variables
+    - Note areas needing domain expertise for outlier interpretation
+    - Document assumptions for handling missing data
+    - Note business rules for data transformation
+    - Document insights and patterns found for stakeholder review
+
+modeling:
+  description: >
+    Design, develop, and evaluate machine learning models based on preprocessed 
+    data and business requirements. Compare multiple approaches and select optimal 
+    solution that balances performance, interpretability, and business needs.
+  
+  expected_output: >
+    A comprehensive model_report.md containing:
+    
+    1. **Model Development Strategy** - Approach, algorithms tested, rationale
+    2. **Model Architecture** - Detailed description of chosen model(s)
+    3. **Training Process** - Methodology, hyperparameter tuning, validation
+    4. **Performance Evaluation** - Comprehensive metrics and comparisons
+    5. **Model Analysis** - Feature importance, interpretability, robustness
+    6. **Business Performance** - Expected impact and ROI estimation
+    7. **Deployment Recommendations** - Implementation strategy and requirements
+    8. **Monitoring Plan** - Performance tracking and maintenance procedures
+  
+  modeling_methodology: >
+    COMPREHENSIVE MODEL DEVELOPMENT:
+    
+    **Phase 1: Baseline Development**
+    - Simple baseline model establishment
+    - Initial performance benchmarking
+    - Basic feature set validation
+    - Preliminary business impact assessment
+    
+    **Phase 2: Model Experimentation**
+    - Multiple algorithm testing and comparison
+    - Feature engineering integration and testing
+    - Hyperparameter optimization
+    - Cross-validation and robustness testing
+    
+    **Phase 3: Advanced Optimization**
+    - Ensemble methods exploration
+    - Advanced feature selection techniques
+    - Model interpretability enhancement
+    - Performance optimization for production
+    
+    **Phase 4: Final Validation**
+    - Hold-out test set evaluation
+    - Business performance validation
+    - Stress testing and edge case analysis
+    - Production readiness assessment
+  
+  evaluation_framework: >
+    MULTI-DIMENSIONAL EVALUATION:
+    
+    **Technical Performance:**
+    - Primary metrics (accuracy, precision, recall, RMSE, etc.)
+    - Cross-validation scores with confidence intervals
+    - Learning curves and overfitting analysis
+    - Feature importance and model interpretability
+    - Computational efficiency and scalability
+    
+    **Business Performance:**
+    - Expected business impact quantification
+    - ROI estimation and cost-benefit analysis
+    - Risk assessment and failure mode analysis
+    - Implementation complexity and resource requirements
+    - Maintenance and monitoring considerations
+    
+    **Comparative Analysis:**
+    - Algorithm comparison with statistical significance
+    - Performance vs. complexity trade-off analysis
+    - Interpretability vs. accuracy assessment
+    - Deployment feasibility comparison
+  
+  tools_required:
+    - execute_python_code
+    - read_file
+    - write_file
+    - load_dataset_info
+  
+  documentation_requirements:
+    - Document model interpretability requirements from specifications
+    - Note performance vs. complexity trade-offs
+    - Document risk tolerance and error cost considerations
+    - Extract deployment environment constraints
+    - Note monitoring and maintenance requirements
+
+business_translation:
+  description: >
+    Transform technical model results and analytical findings into clear, 
+    actionable business recommendations that drive strategic decision-making 
+    and provide measurable business value.
+  
+  expected_output: >
+    A comprehensive business_recommendations.md containing:
+    
+    1. **Executive Summary** - Key findings and strategic implications
+    2. **Business Impact Analysis** - Quantified value and ROI projections
+    3. **Strategic Recommendations** - Prioritized action items with implementation guidance
+    4. **Implementation Roadmap** - Phased approach with timelines and milestones
+    5. **Risk Assessment** - Implementation risks and mitigation strategies
+    6. **Success Monitoring** - KPIs, metrics, and monitoring procedures
+    7. **Stakeholder Communication Plan** - Tailored messages for different audiences
+    8. **Next Steps** - Immediate actions and long-term strategic directions
+  
+  translation_methodology: >
+    SYSTEMATIC BUSINESS TRANSLATION:
+    
+    **Phase 1: Technical Results Analysis**
+    - Model performance interpretation in business context
+    - Statistical significance vs. practical significance
+    - Confidence levels and uncertainty quantification
+    - Limitations and assumption validation
+    
+    **Phase 2: Business Value Quantification**
+    - ROI calculation with multiple scenarios
+    - Cost-benefit analysis including implementation costs
+    - Time-to-value estimation
+    - Competitive advantage assessment
+    
+    **Phase 3: Strategic Recommendations Development**
+    - Actionable recommendations with clear steps
+    - Priority ranking based on impact and feasibility
+    - Resource requirements and timeline estimation
+    - Change management considerations
+    
+    **Phase 4: Communication Strategy**
+    - Audience-specific messaging and materials
+    - Visualization and storytelling approaches
+    - Risk communication and mitigation plans
+    - Success metrics and monitoring approaches
+  
+  stakeholder_communication: >
+    MULTI-LEVEL COMMUNICATION STRATEGY:
+    
+    **C-Level Executives:**
+    - Strategic impact and competitive advantages
+    - High-level ROI and resource requirements
+    - Risk assessment and mitigation strategies
+    - Long-term strategic implications
+    
+    **Department Managers:**
+    - Operational changes and process integration
+    - Team impact and training requirements
+    - Performance monitoring and success metrics
+    - Resource allocation and timeline planning
+    
+    **Technical Teams:**
+    - Implementation specifications and requirements
+    - Integration with existing systems and processes
+    - Monitoring and maintenance procedures
+    - Technical documentation and support needs
+    
+    **End Users:**
+    - User experience and interface changes
+    - Training materials and support procedures
+    - Feedback mechanisms and continuous improvement
+    - Benefits and impact on daily workflows
+  
+  tools_required:
+    - read_file
+    - write_file
+    - search_web (for industry benchmarks)
+  
+  documentation_requirements:
+    - Extract stakeholder communication preferences from requirements
+    - Document implementation timeline constraints
+    - Note risk tolerance and mitigation preferences
+    - Extract success metric prioritization
+    - Document resource allocation and budget constraints
+  
+  validation_criteria:
+    - Business impact is quantified with clear metrics
+    - Recommendations are actionable and specific
+    - Implementation roadmap is realistic and detailed
+    - Risks are identified with mitigation strategies
+    - Communication materials are audience-appropriate

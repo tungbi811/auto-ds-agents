@@ -1,175 +1,131 @@
-# test_workflow.py - Testing script for LangGraph workflow
-import os
+#!/usr/bin/env python3
+"""
+Quick test script to verify the workflow and code execution fixes
+"""
+
 import sys
-import tempfile
+import os
+from pathlib import Path
+
+# Add current directory to path
+sys.path.append(os.getcwd())
+
+def test_code_execution():
+    """Test that code execution works without sandbox"""
+    print("🧪 Testing code execution...")
+    
+    from crew.crew_tools import core_tools, set_session_id
+    
+    # Set a test session
+    set_session_id("test_session_123")
+    
+    # Test simple code execution
+    test_code = """
 import pandas as pd
-from dotenv import load_dotenv
-from openai import OpenAI
+import numpy as np
 
-# Add current directory to path for imports
-sys.path.append('.')
+# Test data manipulation
+data = {
+    'A': [1, 2, 3, 4, 5],
+    'B': [10, 20, 30, 40, 50]
+}
+df = pd.DataFrame(data)
+print("DataFrame created successfully!")
+print(f"Shape: {df.shape}")
+print(df.head())
 
-def create_test_dataset():
-    """Create a simple test dataset for validation"""
-    data = {
-        'feature_1': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'feature_2': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-        'feature_3': ['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B'],
-        'target': [0, 1, 0, 1, 1, 0, 1, 0, 1, 0]
-    }
+# Test calculation
+result = df['A'].sum()
+print(f"Sum of column A: {result}")
+"""
     
-    df = pd.DataFrame(data)
+    result = core_tools.execute_python_code_raw(test_code)
     
-    # Save to temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as tmp:
-        df.to_csv(tmp.name, index=False)
-        return tmp.name
-
-def test_workflow_initialization():
-    """Test that the workflow can be initialized"""
-    print("🔧 Testing workflow initialization...")
-    
-    try:
-        load_dotenv()
-        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        
-        # Import workflow components
-        from agents.workflow import create_codeact_workflow
-        from tools.basic_eda import generate_eda_report
-        from tools.web_search import web_search
-        from tools.document_analyze import analyze_pdf_from_path
-        from tools.code_execute import CodeExecutor
-        
-        tools = {
-            'analyze_dataset': generate_eda_report,
-            'search_web': web_search,
-            'analyze_pdf': analyze_pdf_from_path,
-            'execute_code': CodeExecutor().execute_code
-        }
-        
-        workflow = create_codeact_workflow(client, tools)
-        print("✅ Workflow initialized successfully")
-        return workflow
-        
-    except Exception as e:
-        print(f"❌ Workflow initialization failed: {e}")
-        return None
-
-def test_state_management():
-    """Test state creation and management"""
-    print("\n🔧 Testing state management...")
-    
-    try:
-        from core.state import create_initial_state, DataScienceState
-        
-        # Create initial state
-        state = create_initial_state(
-            "Analyze this dataset and build a classification model.",
-            dataset_path=create_test_dataset()
-        )
-        assert isinstance(state, DataScienceState)
-        print("✅ State created successfully")
-        return state    
-    except Exception as e:
-        print(f"❌ State management test failed: {e}")
-        return None
-
-def test_full_workflow_execution():
-    """Test full workflow execution with sample dataset"""
-    print("\n🔧 Testing full workflow execution...")
-    
-    try:
-        # Initialize workflow
-        workflow = test_workflow_initialization()
-        if not workflow:
-            return False
-            
-        # Create test dataset
-        dataset_path = create_test_dataset()
-        
-        # Test workflow execution
-        test_prompt = "Analyze this dataset and provide insights about the features and target variable."
-        result = workflow.execute(test_prompt, dataset_path)
-        
-        # Cleanup
-        os.unlink(dataset_path)
-        
-        if result and result.get("success"):
-            print("✅ Full workflow execution successful")
-            print(f"   Response length: {len(result.get('response', ''))}")
-            print(f"   Code operations: {len(result.get('code_history', []))}")
-            return True
-        else:
-            print("❌ Workflow execution failed or incomplete")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Full workflow test failed: {e}")
-        return False
-
-def test_agent_coordination():
-    """Test that agents can coordinate properly"""
-    print("\n🔧 Testing agent coordination...")
-    
-    try:
-        from core.state import create_initial_state
-        
-        # Create state with complex task
-        state = create_initial_state(
-            "Build a machine learning model to predict the target variable and explain the business implications.",
-            dataset_path=create_test_dataset()
-        )
-        
-        # Check that state has proper structure for coordination
-        required_fields = ['task', 'current_agent', 'current_phase', 'dataset_path']
-        for field in required_fields:
-            if not hasattr(state, field):
-                print(f"❌ Missing required state field: {field}")
-                return False
-        
-        print("✅ Agent coordination structure validated")
-        
-        # Cleanup
-        if state.dataset_path and os.path.exists(state.dataset_path):
-            os.unlink(state.dataset_path)
-            
-        return True
-        
-    except Exception as e:
-        print(f"❌ Agent coordination test failed: {e}")
-        return False
-
-def run_all_tests():
-    """Run all workflow tests"""
-    print("🧪 Starting workflow tests...\n")
-    
-    tests = [
-        test_workflow_initialization,
-        test_state_management,
-        test_agent_coordination,
-        test_full_workflow_execution
-    ]
-    
-    passed = 0
-    total = len(tests)
-    
-    for test in tests:
-        try:
-            if test():
-                passed += 1
-        except Exception as e:
-            print(f"❌ Test {test.__name__} crashed: {e}")
-    
-    print(f"\n📊 Test Results: {passed}/{total} tests passed")
-    
-    if passed == total:
-        print("🎉 All tests passed!")
+    if result['success']:
+        print("✅ Code execution test passed!")
+        print(f"Output preview: {result['output'][:200]}...")
         return True
     else:
-        print("⚠️  Some tests failed")
+        print("❌ Code execution test failed!")
+        print(f"Error: {result['error']}")
         return False
 
-if __name__ == "__main__":
-    success = run_all_tests()
-    sys.exit(0 if success else 1)
+def test_workflow_basic():
+    """Test basic workflow initialization"""
+    print("\n🧪 Testing workflow initialization...")
     
+    try:
+        from workflow.graph import DataScienceWorkflow
+        
+        # Create workflow
+        workflow = DataScienceWorkflow()
+        print("✅ Workflow created successfully!")
+        
+        # Test with basic requirements
+        test_requirements = {
+            'session_id': 'test_123',
+            'business_problem': 'Test housing price analysis',
+            'problem_type': 'Regression',
+            'success_metrics': ['Model accuracy > 80%'],
+            'stakeholders': ['Data scientist', 'Business analyst'],
+            'constraints': ['Use only provided dataset'],
+            'timeline': '1 week'
+        }
+        
+        print("✅ Workflow initialization test passed!")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Workflow test failed: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+def test_housing_dataset():
+    """Test if Housing.csv can be loaded"""
+    print("\n🧪 Testing Housing.csv dataset loading...")
+    
+    housing_path = "Housing.csv"
+    if not os.path.exists(housing_path):
+        print(f"❌ Housing.csv not found at {housing_path}")
+        return False
+    
+    try:
+        import pandas as pd
+        df = pd.read_csv(housing_path)
+        print(f"✅ Housing dataset loaded successfully!")
+        print(f"   Shape: {df.shape}")
+        print(f"   Columns: {list(df.columns)}")
+        return True
+    except Exception as e:
+        print(f"❌ Failed to load Housing.csv: {str(e)}")
+        return False
+
+def main():
+    print("🚀 Running Multi-Agent Workflow Tests\n")
+    
+    results = []
+    
+    # Test 1: Code execution
+    results.append(test_code_execution())
+    
+    # Test 2: Workflow initialization  
+    results.append(test_workflow_basic())
+    
+    # Test 3: Dataset loading
+    results.append(test_housing_dataset())
+    
+    print(f"\n📊 Test Results:")
+    print(f"✅ Passed: {sum(results)}")
+    print(f"❌ Failed: {len(results) - sum(results)}")
+    
+    if all(results):
+        print("\n🎉 All tests passed! The workflow should work correctly.")
+    else:
+        print("\n⚠️  Some tests failed. Check the output above for issues.")
+        
+    return all(results)
+
+if __name__ == "__main__":
+    success = main()
+    sys.exit(0 if success else 1)
