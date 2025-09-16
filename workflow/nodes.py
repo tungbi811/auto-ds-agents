@@ -96,70 +96,11 @@ class DataScienceNodes:
             """
             
             task = self.crew_workflow.understand_task()
-            
-            task.description = f"""
-            MANDATORY: Create a comprehensive business_issue.md file using the provided requirements.
-            DO NOT ask questions. DO NOT create any other files. ONLY create business_issue.md.
-            
-            Requirements to use:
-            {context}
-            
-            REQUIRED structure for business_issue.md:
-            # Business Issue Analysis
-            
-            ## Business Objective
-            {requirements.get('business_problem', 'Not specified')}
-            
-            ## Success Metrics
-            - {chr(10).join(requirements.get('success_metrics', ['Not specified']))}
-            
-            ## Timeline
-            {requirements.get('timeline', 'Not specified')}
-            
-            ## Stakeholders  
-            - {chr(10).join(requirements.get('stakeholders', ['Not specified']))}
-            
-            ## Problem Type
-            {requirements.get('problem_type', 'Not specified')}
-            
-            ## Constraints
-            - {chr(10).join(requirements.get('constraints', ['None specified']))}
-            
-            Save this EXACTLY to workspace/business_issue.md. No other files should be created.
-            """
-            
-            result = business_analyst.execute_task(task)
-            
-            business_issue_path = "workspace/business_issue.md"
-            if not os.path.exists(business_issue_path):
-                business_content = f"""# Business Issue Analysis
+            result = business_analyst.execute_task(task, context=context)
+            output = toolkit.write_file("/workspace/business_issue.md", result)
 
-## Business Objective
-{requirements.get('business_problem', 'Market housing prices trend analysis for a real estate agency')}
-
-## Success Metrics
-{chr(10).join('- ' + metric for metric in requirements.get('success_metrics', ['Accuracy of the trend analysis', 'Identification of the most important features affecting housing prices']))}
-
-## Timeline
-{requirements.get('timeline', 'As soon as possible')}
-
-## Stakeholders
-{chr(10).join('- ' + stakeholder for stakeholder in requirements.get('stakeholders', ['Real estate agents']))}
-
-## Problem Type
-{requirements.get('problem_type', 'Regression')}
-
-## Constraints
-{chr(10).join('- ' + constraint for constraint in requirements.get('constraints', [])) or 'No specific constraints identified'}
-
-## Analysis Approach
-This is a {requirements.get('problem_type', 'regression')} problem that requires:
-1. Exploratory data analysis of housing market data
-2. Feature engineering and selection
-3. Model development and validation
-4. Business impact assessment
-"""
-                toolkit.write_file("business_issue.md", business_content)
+            if not (Path("workspace") / "business_issue.md").exists():
+                raise Exception("Failed to create business_issue.md")
             
             try:
                 TodoManager.mark_phase_complete("business_analyst", "Business Analyst")
@@ -267,31 +208,44 @@ This is a {requirements.get('problem_type', 'regression')} problem that requires
             data_analyst = self.crew_workflow.data_analyst()
             task = self.crew_workflow.data_task()
             
-            # Detect available datasets in workspace
-            available_datasets = []
-            workspace_dir = "workspace"
-            for ext in ['*.csv', '*.xlsx', '*.parquet']:
-                import glob
-                available_datasets.extend(glob.glob(os.path.join(workspace_dir, ext)))
-
-            if available_datasets:
-                print(f"## Available datasets: {[os.path.basename(d) for d in available_datasets]}")
-                # Update state with detected datasets
-                state['dataset_path'] = available_datasets[0]  # Use first available
-            else:
-                print("## No datasets found in workspace")
-
-            # Copy external dataset if provided
-            if state.get('dataset_path') and os.path.exists(state['dataset_path']):
-                import shutil
-                dataset_name = os.path.basename(state['dataset_path'])
-                workspace_dataset = os.path.join("workspace", dataset_name)
-                if not os.path.exists(workspace_dataset):
-                    shutil.copy2(state['dataset_path'], workspace_dataset)
-                    print(f"## Copied dataset to workspace: {workspace_dataset}")
+            state["dataset_path"] = toolkit.get_available_datasets()[0] if toolkit.get_available_datasets() else None
             
             result = data_analyst.execute_task(task)
             
+            # CRITICAL: Verify both files were created
+            data_report_path = Path("workspace") / "data_analysis_report.md"
+            cleaned_data_path = Path("workspace") / "cleaned_dataset.csv"
+            
+            missing_files = []
+            if not data_report_path.exists():
+                missing_files.append("data_analysis_report.md")
+            if not cleaned_data_path.exists():
+                missing_files.append("cleaned_dataset.csv")
+                
+            if missing_files:
+                print(f"❌ CRITICAL ERROR: Missing files: {', '.join(missing_files)}")
+                print(f"❌ Agent result was: {str(result)[:200]}...")
+                # Show what files were actually created
+                workspace_files = list(Path("workspace").glob("*"))
+                print(f"❌ Files in workspace: {[f.name for f in workspace_files]}")
+                raise Exception(f"Data Analyst failed to create required files: {missing_files}")
+            else:
+                print("✅ data_analysis_report.md successfully created")
+                print("✅ cleaned_dataset.csv successfully created")
+                
+                # Check file content sizes
+                report_content = data_report_path.read_text()
+                print(f"ℹ️ Report file size: {len(report_content)} characters")
+                
+                # Check cleaned dataset size
+                try:
+                    import pandas as pd
+                    cleaned_df = pd.read_csv(cleaned_data_path)
+                    print(f"ℹ️ Cleaned dataset shape: {cleaned_df.shape}")
+                    print("✅ Both deliverables created successfully")
+                except Exception as e:
+                    print(f"⚠️ Warning: Could not validate cleaned dataset: {e}")
+                    
             try:
                 TodoManager.mark_phase_complete("data_analyst", "Data Analyst")
                 summary = TodoManager.get_todo_summary()
@@ -341,6 +295,19 @@ This is a {requirements.get('problem_type', 'regression')} problem that requires
             task = self.crew_workflow.model_task()
             
             result = ml_engineer.execute_task(task)
+            
+            # CRITICAL: Verify that model_report.md was actually created
+            model_report_path = Path("workspace") / "model_report.md"
+            if not model_report_path.exists():
+                print("❌ CRITICAL ERROR: model_report.md was not created!")
+                print("❌ ML Engineer failed to execute Python code properly")
+                raise Exception("ML Engineer failed to create model_report.md - likely didn't execute Python code or build models")
+            else:
+                print("✅ model_report.md successfully created")
+                # Check if the file has actual content
+                report_content = model_report_path.read_text()
+                if len(report_content) < 500:  # Basic sanity check
+                    print("⚠️ Warning: model_report.md seems very short - may not contain real model results")
             
             try:
                 TodoManager.mark_phase_complete("ml_engineer", "ML Engineer")
@@ -483,3 +450,4 @@ All deliverables have been saved to the workspace directory.
         }
         
         return agent_flow.get(current_agent, "end")
+    

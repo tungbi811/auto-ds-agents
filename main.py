@@ -133,7 +133,7 @@ def main():
         # Check for uploaded datasets
         st.markdown("---")
         st.markdown("### 📊 Available Datasets")
-        
+
         workspace_dir = Path("workspace")
         if workspace_dir.exists():
             dataset_files = []
@@ -201,7 +201,18 @@ def main():
         
         Execute your data science project using our specialized AI agents.
         """)
-        
+    
+        # Add workflow mode selector that actually works
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            workflow_mode = st.selectbox(
+                "Execution Mode",
+                ["🚀 Full Pipeline", "📊 Data Analysis Only", "🤖 ML Modeling Only", "💼 Business Insights Only"],
+                help="Choose which agents to activate"
+            )
+        with col2:
+            show_code = st.checkbox("Show executed code", value=True)
+
         saved_reqs = load_saved_requirements()
         if not saved_reqs:
             st.warning("⚠️ No saved requirements found. Please complete information gathering first.")
@@ -221,7 +232,7 @@ def main():
             selected_req = saved_reqs[selected_idx]
             
             # Display selected requirements
-            st.markdown("### 📊 Selected Requirements")
+            st.markdown("### 📊 Requirements Details")
             with st.expander("View Details", expanded=True):
                 req_data = selected_req.get('requirements', {})
                 col1, col2 = st.columns(2)
@@ -244,7 +255,14 @@ def main():
             
             if launch_execution:
                 st.success("🎉 Launching multi-agent workflow with selected requirements!")
-                
+                agent_config = {
+                "Full Pipeline": ["project_manager", "data_analyst", "ml_engineer", "business_translator"],
+                "Data Analysis Only": ["project_manager", "data_analyst"],
+                "ML Modeling Only": ["project_manager", "ml_engineer"],
+                "Business Insights Only": ["project_manager", "business_translator"]
+            }
+                selected_agents = agent_config.get(workflow_mode.split(" ")[1], [])
+
                 # Create progress placeholder
                 progress_placeholder = st.empty()
                 
@@ -348,7 +366,7 @@ def main():
                         
                         if st.button(f"🗑️ Delete", key=f"del_{i}"):
                             try:
-                                os.remove(f"workspace/{req.get('filename', '')}")
+                                os.remove(f"/workspace/{req.get('filename', '')}")
                                 st.success("Deleted successfully")
                                 st.rerun()
                             except Exception as e:

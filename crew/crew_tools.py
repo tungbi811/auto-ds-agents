@@ -33,6 +33,11 @@ class DataScienceToolkit:
     def set_session(self, session_id: str):
         """Set session ID and initialize sandbox if available"""
         self.session_id = session_id
+
+        script_path = self.workspace_dir / "default_code.py"
+        if script_path.exists():
+            script_path.unlink()
+            print(f"🔄 Reset persistent workspace for session: {session_id}")
         
         if DOCKER_AVAILABLE and SandboxManager:
             try:
@@ -99,6 +104,9 @@ class DataScienceToolkit:
     def write_file(self, filename: str, content: str) -> str:
         """Write content to workspace file"""
         try:
+            # Strip /workspace/ prefix if present
+            if filename.startswith('/workspace/'):
+                filename = filename.replace('/workspace/', '')
             file_path = self.workspace_dir / Path(filename).name
             file_path.write_text(content, encoding='utf-8')
             return f"✅ Wrote {len(content)} characters to {filename}"
@@ -108,6 +116,9 @@ class DataScienceToolkit:
     def read_file(self, filename: str) -> str:
         """Read content from workspace file"""
         try:
+            # Strip /workspace/ prefix if present
+            if filename.startswith('/workspace/'):
+                filename = filename.replace('/workspace/', '')
             file_path = self.workspace_dir / Path(filename).name
             if not file_path.exists():
                 return f"❌ File '{filename}' not found"
@@ -149,7 +160,7 @@ class DataScienceToolkit:
     
     def execute_python_code(self, code: str) -> Dict[str, Any]:
         """Execute Python code with sandbox fallback"""
-        # Try sandbox first
+        #Try sandbox first
         if self.session_id and self.sandbox_manager:
             try:
                 sandbox = self.sandbox_manager.get_sandbox(self.session_id)
@@ -164,21 +175,29 @@ class DataScienceToolkit:
         return self._execute_local_python(code)
 
     def _execute_local_python(self, code: str) -> Dict[str, Any]:
-        """Execute Python code locally with workspace setup"""
+        """Execute Python code locally with persistent state"""
         if not self._is_safe_code(code):
             return {
                 'success': False,
                 'output': '',
                 'error': 'Code blocked for security reasons'
             }
+
+        script_name = f"default_code_{self.session_id}.py" if self.session_id else "default_code.py"
+        script_path = self.workspace_dir / script_name
+
+        # Check if this is a fresh start or continuation
+        needs_init = not script_path.exists() 
         
-        # Workspace setup with dynamic dataset loading
-        workspace_setup = f'''
+        if needs_init:
+            # Complete initialization with dataset discovery
+            workspace_setup = f'''
 import os
 import sys
 import warnings
 warnings.filterwarnings('ignore')
 import json
+import glob
 
 # Data science imports
 import pandas as pd
@@ -187,33 +206,60 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler  
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-WORKSPACE_DIR = "{str(self.workspace_dir.absolute())}"
-os.makedirs(WORKSPACE_DIR, exist_ok=True)
-os.chdir(WORKSPACE_DIR)
-print(f"Working directory: {{os.getcwd()}}")
-print(f"Available files: {{os.listdir('.')}}")
+# Set working directory to workspace
+os.chdir("{str(self.workspace_dir.absolute())}")
+print(f"Working directory: {os.getcwd()}")
 
+# Auto-discover and load dataset
+dataset_files = glob.glob('*.csv') + glob.glob('*.xlsx') + glob.glob('*.parquet')
+print(f"Found datasets: {{dataset_files}}")
+
+# Load the first available dataset
+if dataset_files:
+    dataset_path = dataset_files[0]
+    print(f"Loading dataset: {{dataset_path}}")
+
+    if dataset_path.endswith('.csv'):
+        df = pd.read_csv(dataset_path)
+    elif dataset_path.endswith('.xlsx'):
+        df = pd.read_excel(dataset_path)
+    elif dataset_path.endswith('.parquet'):
+        df = pd.read_parquet(dataset_path)
+
+    print(f"Dataset shape: {{df.shape}}")
+    print(f"Columns: {{list(df.columns)}}")
+else:
+    print("WARNING: No dataset found in workspace")
+    df = None
+
+# ========== AGENT CODE STARTS HERE ==========
 '''
-        
-        full_code = workspace_setup + code
+            # Write the initialization
+            script_path.write_text(workspace_setup + '\n' + code + '\n', encoding='utf-8')
+        else:
+            # Append to existing script (preserving state)
+            current_script = script_path.read_text(encoding='utf-8')
+            
+            # Only append if not duplicate code
+            if code not in current_script:
+                timestamp = datetime.now().strftime('%H:%M:%S')
+                marker = f"\n# === Execution at {timestamp} ===\n"
+                script_path.write_text(current_script + marker + code + '\n', encoding='utf-8')
         
         try:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False, encoding='utf-8') as f:
-                f.write(full_code)
-                temp_file = f.name
-            
+            # Execute the complete script
             result = subprocess.run(
-                [sys.executable, temp_file],
+                [sys.executable, str(script_path.absolute())],
                 capture_output=True,
                 text=True,
                 timeout=300,
-                cwd=str(self.workspace_dir.absolute())
+                cwd=str(self.workspace_dir)
             )
             
             execution_result = {
@@ -238,11 +284,6 @@ print(f"Available files: {{os.listdir('.')}}")
                 'output': '',
                 'error': f'Execution error: {str(e)}'
             }
-        finally:
-            try:
-                os.unlink(temp_file)
-            except:
-                pass
     
     def execute_shell_command(self, command: str) -> Dict[str, Any]:
         """Execute shell command with security checks"""
@@ -286,8 +327,7 @@ print(f"Available files: {{os.listdir('.')}}")
     def _is_safe_code(self, code: str) -> bool:
         """Check if Python code is safe to execute"""
         dangerous_patterns = [
-            'import subprocess', 'os.system', 'eval(', 'exec(',
-            '__import__', 'open(', 'file(', 'input(', 'raw_input(',
+            'import subprocess', 'os.system', '__import__', 
             'sys.exit', 'quit()', 'exit()'
         ]
         code_lower = code.lower()
@@ -344,6 +384,9 @@ class ReadFileTool(BaseTool):
     description: str = "Read content from a file in the workspace"
     
     def _run(self, filename: str) -> str:
+        # Ensure we're reading from the correct path
+        if not filename.startswith('/workspace/'):
+            filename = f"/workspace/{filename}"
         return toolkit.read_file(filename)
 
 class ListFilesTool(BaseTool):
@@ -362,7 +405,7 @@ class SearchWebTool(BaseTool):
 
 class ExecutePythonCodeTool(BaseTool):
     name: str = "Execute Python Code"
-    description: str = "Execute Python code in a sandboxed environment"
+    description: str = "Execute Python code in a sandboxed environment. Use this tool to run actual Python code for data analysis, modeling, and visualization."
 
     def _run(self, code: str) -> str:
         try:
@@ -397,10 +440,13 @@ class ExecuteShellCommandTool(BaseTool):
 
 class LoadDatasetInfoTool(BaseTool):
     name: str = "Load Dataset Info"
-    description: str = "Load and analyze dataset structure and information"
+    description: str = "Load and analyze dataset structure and information. Use this to understand the dataset before analysis."
     
     def _run(self, dataset_name: str = None) -> str:
         try:
+            if dataset_name and dataset_name.startswith('/workspace/'):
+                dataset_name = dataset_name.replace('/workspace/', '')
+            
             # If no specific dataset provided, find uploaded datasets
             if not dataset_name:
                 available = toolkit.get_available_datasets()
@@ -417,7 +463,7 @@ class LoadDatasetInfoTool(BaseTool):
 
 class GetAvailableDatasetsTool(BaseTool):
     name: str = "Get Available Datasets"
-    description: str = "Get list of available datasets in the workspace"
+    description: str = "Get list of available datasets in the workspace. Use this to discover what data files are available."
 
     def _run(self) -> str:
         datasets = toolkit.get_available_datasets()

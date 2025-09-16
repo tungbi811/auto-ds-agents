@@ -8,7 +8,7 @@ business_context_analysis:
     2. Read the most recent requirements JSON file
     3. Extract the structured requirements data
     4. Transform into the standardized business_issue.md format
-    5. Save EXACTLY to /workspace/business_issue.md
+    5. Save EXACTLY to //workspace/business_issue.md
     
     DO NOT ask questions. DO NOT create any other files. ONLY create business_issue.md.
     Use the requirements from the JSON file to populate all sections.
@@ -158,54 +158,24 @@ planning:
 
 analysis:
   description: >
-    As a Data Analyst, you MUST complete ALL steps and create both cleaned_dataset.csv and data_analysis_report.md.
-    
-    MANDATORY STEPS (You must complete ALL of these):
-    
-    1. Use "List Files" tool
-    2. Use "Get Available Datasets" tool  
-    3. Use "Load Dataset Info" tool
-    4. Use "Execute Python Code" tool multiple times for:
-       - Load dataset and basic exploration
-       - Handle categorical variables with robust encoding
-       - Generate descriptive statistics and correlation analysis
-       - Create and save visualizations as PNG files
-       - Clean data and prepare final dataset
-    5. Use "Execute Python Code" tool to save cleaned dataset:
-       df.to_csv('cleaned_dataset.csv', index=False)
-    6. MANDATORY: Use "Write File" tool to create data_analysis_report.md
-    
-    CRITICAL: You MUST execute Python code for categorical encoding like this:
-    
-    ```python
-    # Robust categorical encoding - handles errors gracefully
-    from sklearn.preprocessing import LabelEncoder
-    import pandas as pd
-    
-    # Load data
-    df = pd.read_csv('Housing.csv')
-    
-    # Identify categorical columns
-    categorical_cols = df.select_dtypes(include=['object']).columns
-    print(f"Categorical columns: {list(categorical_cols)}")
-    
-    # Encode each categorical column safely
-    df_encoded = df.copy()
-    for col in categorical_cols:
-        try:
-            le = LabelEncoder()
-            df_encoded[col + '_encoded'] = le.fit_transform(df_encoded[col])
-            df_encoded = df_encoded.drop(col, axis=1)
-            print(f"Successfully encoded {col}")
-        except Exception as e:
-            print(f"Error encoding {col}: {e}")
-    
-    # Save cleaned dataset
-    df_encoded.to_csv('cleaned_dataset.csv', index=False)
-    print("Cleaned dataset saved as cleaned_dataset.csv")
-    ```
-    
-    FINAL REQUIREMENT: You MUST create data_analysis_report.md with Write File tool.
+    You MUST read /workspace/business_issue.md and /workspace/todo.md then 
+    execute Python code to perform comprehensive EDA and create /workspace/data_analysis_report.md.
+
+    MANDATORY EXECUTION STEPS:
+    1. Use GetAvailableDatasetsTool to discover available datasets in workspace
+    2. Use LoadDatasetInfoTool to load the discovered dataset dynamically
+       - Handle CSV, Excel, and Parquet formats
+    3. Execute Python code to perform comprehensive EDA code including:
+       - df.describe(), df.info(), correlation analysis
+       - Missing value analysis and visualization  
+       - Distribution plots for all numeric variables
+       - Correlation heatmap
+       - Feature importance analysis
+    4. Create and save visualizations
+    5. Write detailed data_analysis_report.md with REAL findings
+
+    DO NOT stop after loading data. EXECUTE FULL EDA CODE.
+    MUST create data_analysis_report.md file.
   
   expected_output: >
     A comprehensive data_analysis_report.md containing:
@@ -218,6 +188,8 @@ analysis:
     6. **Business Insights** - Key findings and their business implications
     7. **Preprocessing Recommendations** - Data cleaning and transformation strategies
     8. **Model Development Guidance** - Recommendations for ML approach
+
+    A csv file (cleaned_dataset.csv) containing the cleaned/preprocessed dataset used for modeling.
   
   technical_requirements: >
     MANDATORY TECHNICAL DELIVERABLES:
@@ -274,74 +246,28 @@ analysis:
 
 modeling:
   description: >
-    As an ML Engineer, you MUST use the cleaned_dataset.csv from the Data Analyst and create model_report.md.
+    You MUST read /workspace/business_issue.md, /workspace/todo.md, /workspace/data_analysis_report.md and code files 
+    from the data analysis phase then execute Python code to build and evaluate ML models 
+    using the cleaned_dataset.csv and create model_report.md.
+
+    Step 1: Discover the dataset
+    - The cleaned_dataset.csv file is available in the workspace folder.
     
-    MANDATORY STEPS (You must complete ALL of these):
+    Step 2: Load the discovered dataset dynamically
+    - Execute code to load whatever dataset is found
+    - Handle CSV formats
     
-    1. Use "List Files" to see workspace contents
-    2. Use "Read File" to read business_issue.md, todo.md, and data_analysis_report.md
-    3. Use "Get Available Datasets" to find datasets (should include cleaned_dataset.csv)
-    4. Use "Execute Python Code" tool multiple times to:
-       - Load cleaned_dataset.csv (or fall back to original if not available)
-       - Split data into train/test sets
-       - Train LinearRegression and RandomForestRegressor models
-       - Evaluate models with RMSE, R2, and MAE metrics
-       - Compare model performance and select best model
-       - Generate feature importance analysis
-       - Save model performance plots as PNG files
-    5. MANDATORY: Use "Write File" to create model_report.md with results
+    Step 3: Preprocess and train models
+    - Execute code to preprocess data as needed (encoding, scaling, etc) and encode categorical variables
+    - Train multiple models aligning with the problem type in business_issue.md
+    - Evaluate models using appropriate metrics
+    - Compare performance and select the best model
+    - Identify feature importance if needed
+
+    DO NOT hardcode dataset names. Always discover dynamically.
     
-    CRITICAL: Use this code structure for robust model training:
-    
-    ```python
-    import pandas as pd
-    from sklearn.model_selection import train_test_split
-    from sklearn.linear_model import LinearRegression
-    from sklearn.ensemble import RandomForestRegressor
-    from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
-    import matplotlib.pyplot as plt
-    import numpy as np
-    
-    # Try to load cleaned dataset first, fall back to original
-    try:
-        df = pd.read_csv('cleaned_dataset.csv')
-        print("Loaded cleaned_dataset.csv successfully")
-    except FileNotFoundError:
-        print("cleaned_dataset.csv not found, loading original dataset")
-        df = pd.read_csv('Housing.csv')
-        # Basic encoding if needed
-        categorical_cols = df.select_dtypes(include=['object']).columns
-        for col in categorical_cols:
-            df[col + '_encoded'] = pd.factorize(df[col])[0]
-            df = df.drop(col, axis=1)
-    
-    # Prepare features and target
-    X = df.drop('price', axis=1)
-    y = df['price']
-    
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Train models
-    models = {
-        'LinearRegression': LinearRegression(),
-        'RandomForest': RandomForestRegressor(random_state=42)
-    }
-    
-    results = {}
-    for name, model in models.items():
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        
-        results[name] = {
-            'RMSE': np.sqrt(mean_squared_error(y_test, y_pred)),
-            'R2': r2_score(y_test, y_pred),
-            'MAE': mean_absolute_error(y_test, y_pred)
-        }
-        print(f"{name} - RMSE: {results[name]['RMSE']:.2f}, R2: {results[name]['R2']:.3f}")
-    ```
-    
-    FINAL REQUIREMENT: You MUST create model_report.md with Write File tool.
+    DO NOT stop after loading data. BUILD AND EVALUATE REAL MODELS.
+    MUST create model_report.md file.
   
   expected_output: >
     A comprehensive model_report.md containing:

@@ -48,9 +48,9 @@ class DockerSandbox:
                 'image': 'python:3.10-slim',
                 'detach': True,
                 'tty': True,
-                'working_dir': '/workspace',
+                'working_dir': '/app',
                 'volumes': {
-                    workspace_path: {'bind': '/workspace', 'mode': 'rw'}  # Direct mount
+                    workspace_path: {'bind': '/app/workspace', 'mode': 'rw'}  # Direct mount
                 },
                 'mem_limit': '512m',
                 'cpu_period': 100000,
@@ -113,7 +113,7 @@ class DockerSandbox:
     def _verify_workspace_mount(self):
         """Verify workspace is properly mounted"""
         try:
-            result = self.container.exec_run('ls -la /workspace', workdir='/workspace')
+            result = self.container.exec_run('ls -la /workspace', workdir='/app/workspace')
             if result.exit_code == 0:
                 print("✅ Workspace mounted successfully")
                 print(result.output.decode('utf-8', errors='ignore'))
