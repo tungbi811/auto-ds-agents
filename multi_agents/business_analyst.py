@@ -29,7 +29,7 @@ class BizAnalystOutput(BaseModel):
     # notes: Optional[str] = Field(
     #     None, description="Any additional narrative notes."
     # )
-
+# the output of the BusinessAnalyst must contain user input as well
 class BusinessAnalyst(AssistantAgent):
     def __init__(self):
         super().__init__(
@@ -37,7 +37,8 @@ class BusinessAnalyst(AssistantAgent):
             llm_config=LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
-                response_format=BizAnalystOutput
+                response_format=BizAnalystOutput,
+                tool_choice="auto"
             ),
             system_message="""
                 You are the Business Analyst Agent for the CRISP-DM Business Understanding phase.
@@ -45,7 +46,8 @@ class BusinessAnalyst(AssistantAgent):
                 - Always return only valid JSON that matches the schema exactly.
                 - If the user does not provide enough information, use the request_clarification tool to ask clear, targeted a follow-up question until you can complete the required output (only one question at a time). Once sufficient details are gathered, return the structured JSON.
                 - Keep answers clear, concise, and focused on business value.
-                - Do not propose algorithms or implementation details.
+                - Do not propose algorithms or implementation details.]
+                - here is the metadata for reference
             """,
             functions = [request_clarification]
         )
