@@ -38,7 +38,6 @@ class BusinessAnalyst(AssistantAgent):
                 api_type= "openai",
                 model="gpt-4o-mini",
                 response_format=BizAnalystOutput,
-                tool_choice="auto"
             ),
             system_message="""
                 You are the Business Analyst Agent for the CRISP-DM Business Understanding phase.
