@@ -2,45 +2,68 @@ from autogen import AssistantAgent, LLMConfig
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-class DataQualityIssue(BaseModel):
-    column: str = Field(..., description="Column name where the issue occurs")
-    issue_type: str = Field(..., description="Type of issue (missing, outlier, skew, leakage risk, etc.)")
-    severity: str = Field(..., description="Severity rating: low, medium, high")
-    details: Optional[str] = Field(None, description="Additional explanation of the issue")
+class TargetVariableInfo(BaseModel):
+    name: str = Field(..., description="Name of the target variable")
+    dtype: str = Field(..., description="Data type of target variable (Binary, Categorical, Continuous, etc.)")
 
-class ColumnSummary(BaseModel):
-    name: str = Field(..., description="Column name")
-    dtype: str = Field(..., description="Data type (int, float, string, timestamp, etc.)")
-    missing_pct: float = Field(..., description="Percentage of missing values (0-100)")
-    unique_values: Optional[int] = Field(None, description="Number of unique values, if categorical")
-    example_values: Optional[List[str]] = Field(None, description="Sample values for quick inspection")
 
-class DataUnderstandingOutput(BaseModel):
-    dataset_name: str = Field(..., description="Name or ID of the dataset being profiled")
-    num_rows: int = Field(..., description="Total number of rows")
-    num_columns: int = Field(..., description="Total number of columns")
-    
-    columns: List[ColumnSummary] = Field(
-        ..., description="Summary information for each column"
-    )
-    quality_issues: List[DataQualityIssue] = Field(
-        default_factory=list,
-        description="List of data quality issues detected"
-    )
-    
-    anomalies: Optional[List[str]] = Field(
-        None, description="Notable anomalies, such as extreme values or unusual patterns"
-    )
-    potential_leakage: Optional[List[str]] = Field(
-        None, description="Columns that might leak target information"
-    )
-    
-    overall_notes: Optional[str] = Field(
-        None, description="General notes or impressions from data exploration"
-    )
-    next_steps: Optional[List[str]] = Field(
-        None, description="Recommended actions to deepen data understanding"
-    )
+class DistinctVariableInfo(BaseModel):
+    name: str = Field(..., description="Variable that contains only distinct values (e.g., ID, Customer_ID)")
+    notes: Optional[str] = Field(None, description="Additional notes about why this variable is distinct")
+
+
+class UnidentifiedValueIssue(BaseModel):
+    column: str = Field(..., description="Variable that contains unidentified values")
+    details: Optional[str] = Field(None, description="Details about the unidentified values issue")
+    proposed_solution: Optional[str] = Field(None, description="Proposed solution to handle unidentified values")
+
+
+class OutlierInfo(BaseModel):
+    column: str = Field(..., description="Variable name where outliers occur")
+    outlier_type: str = Field(..., description="Type of outliers: bad (harmful) or good (meaningful)")
+    count: int = Field(..., description="Number of outliers detected")
+    insights: Optional[str] = Field(None, description="Insights about the outliers and their impact")
+    proposed_solution: Optional[str] = Field(None, description="Suggested solution for outliers")
+
+
+class DuplicateInfo(BaseModel):
+    count: int = Field(..., description="Number of duplicated rows/records")
+    insights: Optional[str] = Field(None, description="Explanation of problems caused by duplicates")
+    proposed_solution: Optional[str] = Field(None, description="Suggested approaches to handle duplicates")
+
+
+class MissingValueInfo(BaseModel):
+    column: str = Field(..., description="Variable that contains missing values")
+    count: int = Field(..., description="Number of missing values")
+    insights: Optional[str] = Field(None, description="Explanation of missing value issues and their potential impact")
+    proposed_solution: Optional[str] = Field(None, description="Suggested solution for missing values")
+
+
+class DistributionInsight(BaseModel):
+    column: str = Field(..., description="Variable analyzed")
+    description: str = Field(..., description="Summary of distribution and key insights")
+
+
+class CorrelationInsight(BaseModel):
+    variable_x: str = Field(..., description="First variable in the correlation relationship")
+    variable_y: str = Field(..., description="Second variable in the correlation relationship")
+    strength: Optional[str] = Field(None, description="Strength of correlation (weak, moderate, strong)")
+    insights: Optional[str] = Field(None, description="Key insights about the correlation")
+    problem: Optional[str] = Field(None, description="Problem identified, if any (e.g., multicollinearity, redundancy)")
+
+
+class DataAnalystReport(BaseModel):
+    target: TargetVariableInfo
+    distinct_variables: List[DistinctVariableInfo] = []
+    unidentified_values: List[UnidentifiedValueIssue] = []
+    outliers: List[OutlierInfo] = []
+    duplicates: Optional[DuplicateInfo] = None
+    missing_values: List[MissingValueInfo] = []
+    distributions: List[DistributionInsight] = []
+    correlations: List[CorrelationInsight] = []
+
+    overall_insights: Optional[str] = Field(None, description="Main findings from the EDA relevant to the business problem")
+    proposed_next_steps: Optional[List[str]] = Field(None, description="Recommended actions for downstream agents")
 
 class DataExplorer(AssistantAgent):
     def __init__(self, llm_config):
