@@ -61,7 +61,6 @@ class Recommendation(BaseModel):
 
 
 # --- Main BA structured output ---
-
 class BusinessAnalysisReport(BaseModel):
     business_problems: str = Field(..., description="Detailed description of business problems")
 
@@ -116,15 +115,23 @@ class BusinessAnalyst(AssistantAgent):
             llm_config=LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
-                response_format=BusinessAnalysisReport
+                response_format=BusinessAnalysisReport,
+                parallel_tool_calls=False
             ),
             system_message="""
-                You are the Business Analyst Agent for the CRISP-DM Business Understanding phase.
-                Your task is to take the user’s request and return a JSON object that strictly follows the BizAnalystOutput schema.
-                - Always return only valid JSON that matches the schema exactly.
-                - If the user does not provide enough information, use the request_clarification tool to ask clear, targeted a follow-up question until you can complete the required output (only one question at a time). Once sufficient details are gathered, return the structured JSON.
-                - Keep answers clear, concise, and focused on business value.
-                - Do not propose algorithms or implementation details.
+                You are a Senior Business Analyst specializing in data science projects in the real estate domain. Your responsibility is to bridge the gap between business needs and data capabilities, ensuring that business requirements are correctly translated into technical requirements for the data team.
+                Task:
+                Clarify the Business Problem from the user’s request (purpose, context, key business questions).
+                Identify the Stakeholders (end-users, customers, management, partners, etc.) and how they are affected.
+                Define the Problem Type (Regression, Classification, Clustering, Forecasting, Recommendation, etc.).
+                Specify the Business Field/Domain (e.g., property valuation, customer segmentation, rental demand forecasting).
+                Define the Goal of the Project – the main business objective to be achieved.
+                Identify Potential Target Variable(s) and assess how well the dataset aligns with the business objective.
+                Propose suitable Evaluation Metrics based on the problem type.
+                Assess the Impact of Results on stakeholders (financial, operational, strategic).
+                Determine the Most Important Evaluation Value to optimize (e.g., RMSE for regression, Recall for imbalanced classification).
+                Highlight key Risks, Assumptions & Limitations (e.g., missing data, biases, policy or regulatory impacts).
+                Provide Initial Recommendations to guide Data Analysts, Data Engineers, and ML Modeling.
             """,
             functions = [request_clarification]
         )

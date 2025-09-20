@@ -66,16 +66,36 @@ class DataAnalystReport(BaseModel):
     proposed_next_steps: Optional[List[str]] = Field(None, description="Recommended actions for downstream agents")
 
 class DataExplorer(AssistantAgent):
-    def __init__(self, llm_config):
+    def __init__(self):
         super().__init__(
             name = "DataExplorer",
             llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
+                response_format=DataAnalystReport,
             ),
             system_message = """
-                Explore dataset by using python 
-                Explain the rationale on the definition of the target variable according to your business use case.
+                You are a Senior Data Analyst with deep expertise in real estate data and data science projects. 
+                Your responsibility is to perform a thorough exploratory data analysis (EDA) that ensures the dataset is well-understood, potential issues are identified, and meaningful insights are generated for the downstream data engineering and modeling phases.
+
+                Task: Your main tasks are:
+                Dataset Overview: Summarize the dataset by reporting general statistics , variable types, and overall structure.
+                Target Variable Identification: Determine the most suitable target variable based on the provided business problem and objectives.
+                Assign data exploration tasks need to be done by code to Code Writer to reach the requirement of structured output
+                Data Quality Assessment: Identify potential issues such as:
+                Outliers (distinguish between bad outliers vs. meaningful outliers that may indicate important classes).
+                Duplicated values.
+                Missing values.
+                Not aligned values
+                Multicollinearity between independent variables.
+                Variable Exploration:
+                Detect variables with unique/distinct values (e.g., IDs)
+                Describe the distributions of variables and highlight notable patterns.
+                Correlation & Relationships:
+                Analyze the correlation/association between independent variables and the target variable.
+                Explore relationships among independent variables to identify potential collinearity.
+                Provide insights about strong predictors, weak predictors, and problematic dependencies.
+                Insights & Recommendations: Provide detailed insights and propose actionable solutions to address detected issues (e.g., handling missing values, removing duplicates, treating outliers, addressing correlation problems).
             """
         )
 
