@@ -1,23 +1,48 @@
-from autogen import AssistantAgent
+from autogen import AssistantAgent, LLMConfig
+from pydantic import BaseModel, Field
+from typing import List, Literal, Optional
 
-class Evaluator(AssistantAgent):
-    def __init__(self, llm_config):
+class EvaluatorFeedback(BaseModel):
+    what: str = Field(..., description="What went wrong.")
+    where: str = Field(..., description="Where it occurred (step, code, data, etc.).")
+    why: str = Field(..., description="Why it failed.")
+
+class EvaluatorResults(BaseModel):
+    artifacts: List[str] = Field(
+        default_factory=list,
+        description="Links/paths/identifiers of final outputs for the user."
+    )
+
+class EvaluatorOutput(BaseModel):
+    evaluation: Literal["pass", "fail"] = Field(..., description="Did it meet success criteria?")
+    justification: str = Field(..., description="Reasoning for the outcome.")
+    actionable_feedback: Optional[EvaluatorFeedback] = Field(
+        None,
+        description="Present only when evaluation == 'fail'."
+    )
+    final_results: Optional[EvaluatorResults] = Field(
+        None,
+        description="Present only when evaluation == 'pass'."
+    )
+
+class Summariser(AssistantAgent):
+    def __init__(self):
+        llm_config = LLMConfig(
+            api_type = "openai",
+            model = "gpt-4o-mini",
+            timeout = 120,
+            stream = False,
+            response_format=EvaluatorOutput,
+            parallel_tool_calls=False
+        )
         super().__init__(
-            name="Evaluator",
-            llm_config=llm_config,
-            system_message="""
-                You are the Evaluator Agent (CRISP-DM: Evaluation).
-                Your job is to validate whether the chosen model meets acceptance criteria.
-
-                Tasks:
-                - Recompute metrics on the test set.
-                - Run error analysis and segment analysis.
-                - Check robustness, fairness, and operational constraints.
-                - Decide if the model is acceptable or if iteration is needed.
-                - Provide handoff notes for the Business Translation Agent.
-
-                Rules:
-                - Tie evaluation back to business objectives.
-                - If you include code, provide it in a fenced Python block and end with <RUN_THIS>.
+            name="Summariser",
+            llm_config = llm_config,
+            human_input_mode="NEVER",
+            system_message = """
+                You are the Evaluator. Compare the Summariser’s output against the defined success criteria. 
+                If the task passes, return the final results and artifacts to the user. If the task fails, 
+                provide actionable feedback: explain what went wrong, where it occurred, and why it failed. 
+                Feedback should guide the Planner and Code Writer in revising their steps and code.
             """
         )
