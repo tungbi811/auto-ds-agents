@@ -19,7 +19,6 @@ class Planner(AssistantAgent):
             timeout = 120,
             stream = False,
             response_format=PlannerOutput,
-            parallel_tool_calls=False
         )
         super().__init__(
             name="Planner",

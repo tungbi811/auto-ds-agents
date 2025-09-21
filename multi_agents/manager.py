@@ -3,7 +3,7 @@ from utils.utils import request_clarification
 from pydantic import BaseModel, Field
 from typing import List, Literal
 
-class ProjectManagerOutput(BaseModel):
+class ManagerOutput(BaseModel):
     normalized_spec: str = Field(..., description="Rewritten, clarified problem statement.")
     success_criteria: List[str] = Field(
         ..., description="List of measurable, objective checks for success."
@@ -12,18 +12,19 @@ class ProjectManagerOutput(BaseModel):
         ..., description="Whether a clarifying question was needed or not."
     )
 
-class ProjectManager(AssistantAgent):
+class Manager(AssistantAgent):
     def __init__(self):
         llm_config = LLMConfig(
             api_type = "openai",
             model = "gpt-4o-mini",
             timeout = 120,
             stream = False,
-            response_format=ProjectManagerOutput,
-            parallel_tool_calls=False
+            response_format=ManagerOutput,
+            parallel_tool_calls=False,
+            temperature=0.1
         )
         super().__init__(
-            name="ProjectManager",
+            name="Manager",
             llm_config = llm_config,
             human_input_mode="NEVER",
             system_message = """

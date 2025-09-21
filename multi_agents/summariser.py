@@ -2,14 +2,14 @@ from autogen import AssistantAgent, LLMConfig
 from pydantic import BaseModel, Field
 from typing import List
 
-class SummariserOutput(BaseModel):
-    summary: str = Field(..., description="Concise narrative of what happened.")
-    key_findings: List[str] = Field(
-        default_factory=list, description="Notable results, metrics, or observations."
-    )
-    issues: List[str] = Field(
-        default_factory=list, description="Problems or anomalies detected (if any)."
-    )
+# class SummariserOutput(BaseModel):
+#     summary: str = Field(..., description="Concise narrative of what happened.")
+#     key_findings: List[str] = Field(
+#         default_factory=list, description="Notable results, metrics, or observations."
+#     )
+#     issues: List[str] = Field(
+#         default_factory=list, description="Problems or anomalies detected (if any)."
+#     )
 
 class Summariser(AssistantAgent):
     def __init__(self):
@@ -18,7 +18,7 @@ class Summariser(AssistantAgent):
             model = "gpt-4o-mini",
             timeout = 120,
             stream = False,
-            response_format=SummariserOutput,
+            # response_format=SummariserOutput,
             parallel_tool_calls=False
         )
         super().__init__(

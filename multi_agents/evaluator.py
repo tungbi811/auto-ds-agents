@@ -25,18 +25,17 @@ class EvaluatorOutput(BaseModel):
         description="Present only when evaluation == 'pass'."
     )
 
-class Summariser(AssistantAgent):
+class Evaluator(AssistantAgent):
     def __init__(self):
         llm_config = LLMConfig(
             api_type = "openai",
             model = "gpt-4o-mini",
             timeout = 120,
             stream = False,
-            response_format=EvaluatorOutput,
-            parallel_tool_calls=False
+            response_format=EvaluatorOutput
         )
         super().__init__(
-            name="Summariser",
+            name="Evaluator",
             llm_config = llm_config,
             human_input_mode="NEVER",
             system_message = """
