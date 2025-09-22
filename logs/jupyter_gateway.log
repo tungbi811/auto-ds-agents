@@ -1048,3 +1048,17 @@ Connecting to kernel 69f13681-19a1-4bfa-84b5-8ac41cede181.
 interrupted
 Shutting down...
 Kernel shutdown: 69f13681-19a1-4bfa-84b5-8ac41cede181
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: baf79298-3712-42c9-89de-d64e824664ca
+No session ID specified
+Connecting to kernel baf79298-3712-42c9-89de-d64e824664ca.
+interrupted
+Shutting down...
+Kernel shutdown: baf79298-3712-42c9-89de-d64e824664ca
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: f2e5f3ac-bd7b-405e-ae56-fc0601ebe299
+No session ID specified
+Connecting to kernel f2e5f3ac-bd7b-405e-ae56-fc0601ebe299.
+interrupted
+Shutting down...
+Kernel shutdown: f2e5f3ac-bd7b-405e-ae56-fc0601ebe299

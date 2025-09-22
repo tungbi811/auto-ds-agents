@@ -1,10 +1,13 @@
-from autogen import AssistantAgent
+from autogen import AssistantAgent, LLMConfig
 
 class Evaluator(AssistantAgent):
-    def __init__(self, llm_config):
+    def __init__(self):
         super().__init__(
             name="Evaluator",
-            llm_config=llm_config,
+            llm_config=LLMConfig(
+                api_type= "openai",
+                model="gpt-4o-mini",
+            ),
             system_message="""
                 You are the Evaluator Agent
                 Your job is to validate whether the chosen model meets acceptance criteria.

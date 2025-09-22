@@ -189,7 +189,7 @@ class DataScientistReport(BaseModel):
 
 
 class ModelBuilder(AssistantAgent):
-    def __init__(self, llm_config):
+    def __init__(self):
         super().__init__(
             name="ModelBuilder",
             llm_config=LLMConfig(
