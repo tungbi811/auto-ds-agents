@@ -90,13 +90,11 @@ class TestCase(BaseModel):
 
 class InputSpec(BaseModel):
     sources: List[str] = Field(..., description="Data sources (paths, table names, DataFrame names)")
-    schema: Optional[Dict[str, str]] = Field(None, description="Expected columns and dtypes")
     parameters: Optional[Dict[str, Any]] = Field(None, description="Task parameters (thresholds, seeds, folds)")
 
 
 class OutputSpec(BaseModel):
     artifacts: List[str] = Field(..., description="Produced outputs (DataFrames, files, fitted objects)")
-    schema: Optional[Dict[str, str]] = Field(None, description="Resulting columns/dtypes if relevant")
 
 
 class CodingTask(BaseModel):

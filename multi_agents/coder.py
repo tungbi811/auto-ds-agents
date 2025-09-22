@@ -17,9 +17,9 @@ def run_code(code: Annotated[str, "Python code to run in Jupyter"]) -> ReplyResu
     )
 
     if result.exit_code == 0:
-        target = AgentNameTarget("Summariser")
+        target = AgentNameTarget("DataExplorer")
     else:
-        target = AgentNameTarget("Summariser")
+        target = AgentNameTarget("DataExplorer")
     msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
     return ReplyResult(message=msg, target=target)
 

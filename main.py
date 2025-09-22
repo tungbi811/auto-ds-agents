@@ -1,6 +1,7 @@
 from multi_agents import BusinessAnalyst, Coder, DataExplorer, DataEngineer, ModelBuilder, Evaluator
 from autogen import UserProxyAgent
 from autogen.agentchat import initiate_group_chat
+from autogen.agentchat.group import AgentTarget
 from autogen.agentchat.group.patterns import DefaultPattern
 
 biz_analyst = BusinessAnalyst()
@@ -14,6 +15,9 @@ user = UserProxyAgent(
     name="User",
     code_execution_config=False
 )
+
+biz_analyst.handoffs.set_after_work(AgentTarget(data_explorer))
+data_explorer.handoffs.set_after_work(AgentTarget(coder))
 
 group_chat = DefaultPattern(
     initial_agent=biz_analyst,

@@ -76,9 +76,10 @@ class DataExplorer(AssistantAgent):
             ),
             system_message = """
                 You are a Senior Data Analyst with deep expertise in real estate data and data science projects. 
-                Your responsibility is to perform a thorough exploratory data analysis (EDA) that ensures the dataset 
+                Your responsibility is perform a thorough exploratory data analysis (EDA) that ensures the dataset 
                 is well-understood, potential issues are identified, and meaningful insights are generated for the 
-                downstream data engineering and modeling phases.
+                downstream data engineering and modeling phases. Do not code by yourself, coder will write and 
+                execute code for you instead, tell coder what you want 
             """
         )
 
