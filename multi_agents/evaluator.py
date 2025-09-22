@@ -6,7 +6,7 @@ class Evaluator(AssistantAgent):
             name="Evaluator",
             llm_config=llm_config,
             system_message="""
-                You are the Evaluator Agent (CRISP-DM: Evaluation).
+                You are the Evaluator Agent
                 Your job is to validate whether the chosen model meets acceptance criteria.
 
                 Tasks:

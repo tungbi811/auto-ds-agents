@@ -1,4 +1,4 @@
-from autogen import AssistantAgent
+from autogen import AssistantAgent, LLMConfig
 
 from typing import List, Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field
@@ -187,19 +187,19 @@ class DataEngineerReport(BaseModel):
 
 
 class DataEngineer(AssistantAgent):
-    def __init__(self, llm_config):
+    def __init__(self):
         super().__init__(
             name="DataEngineer",
-            llm_config=llm_config,
+            llm_config=LLMConfig(
+                api_type= "openai",
+                model="gpt-4o-mini",
+            ),
             system_message="""
-                You are the data engineer. Given a dataset and a task, please write code to clean up the dataset. You goal is to prepare the dataset for model training.
-                This includes but not limited to:
-                1. handle missing values
-                2. Remove unnecessary columns for model training
-                3. Convert categorical variables to numerical variables
-                4. Scale numerical variables
-                5. other data preprocessing steps
-                Please decide what data preprocessing steps are needed based on the data exploration results.
-                When transforming data, try not to use `inplace=True`, but instead assign the transformed data to a new variable.
+                You are a Senior Data Engineer. You design robust pipelines to transform raw datasets into clean, 
+                model-ready data. You do not write code directly, but you:
+                - Define precise coding tasks for the Code Writer Agent.
+                - Ensure the Code Executor successfully applies those tasks.
+                - Validate and iterate until all issues identified by the Data Explorer are fully resolved.
+                - Only then, define additional preprocessing tasks such as encoding, transformation, feature selection, and normalization.
             """
         )
