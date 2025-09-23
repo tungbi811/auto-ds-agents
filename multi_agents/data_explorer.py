@@ -1,6 +1,7 @@
 from autogen import AssistantAgent, LLMConfig
+from autogen.agentchat.group import ContextVariables, ReplyResult, AgentNameTarget
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Annotated
 
 class TargetVariableInfo(BaseModel):
     name: str = Field(..., description="Name of the target variable")
@@ -65,6 +66,22 @@ class DataExplorerReport(BaseModel):
     overall_insights: Optional[str] = Field(None, description="Main findings from the EDA relevant to the business problem")
     proposed_next_steps: Optional[List[str]] = Field(None, description="Recommended actions for downstream agents")
 
+def execute_code(
+    plan: Annotated[str, "What do you want coder write code for you just one small step don't plan too much"],
+    context_variables: ContextVariables) -> ReplyResult:
+    context_variables["current_agent"] = "DataExplorer"
+    return ReplyResult(
+        message=f"Can you write code for me to execute this plan {plan}",
+        target=AgentNameTarget("Coder"),
+        context_variables=context_variables
+    )
+
+def complete_task(results: DataExplorerReport, context_variables: ContextVariables) -> ReplyResult:
+    return ReplyResult(
+        message=f"Issue: {results['missing_values']}",
+        target=AgentNameTarget("DataEngneer")
+    )
+
 class DataExplorer(AssistantAgent):
     def __init__(self):
         super().__init__(
@@ -73,13 +90,15 @@ class DataExplorer(AssistantAgent):
                 api_type= "openai",
                 model="gpt-4o-mini",
                 response_format=DataExplorerReport,
+                parallel_tool_calls=False
             ),
             system_message = """
                 You are a Senior Data Analyst with deep expertise in real estate data and data science projects. 
-                Your responsibility is perform a thorough exploratory data analysis (EDA) that ensures the dataset 
-                is well-understood, potential issues are identified, and meaningful insights are generated for the 
-                downstream data engineering and modeling phases. Do not code by yourself, coder will write and 
+                Your responsibility is perform a thorough exploratory data analysis (EDA) using run code tool that 
+                ensures the dataset is well-understood, potential issues are identified, and meaningful insights are 
+                generated for the downstream data engineering and modeling phases. Do not code by yourself, coder will write and 
                 execute code for you instead, tell coder what you want 
-            """
+            """,
+            functions=[execute_code]
         )
 

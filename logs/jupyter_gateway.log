@@ -1124,3 +1124,206 @@ Shutting down...
 Kernel shutdown: fd2fcc0e-9520-49a0-97a1-6b873bced3dc
 received signal 2, stopping
 Kernel shutdown: fd2fcc0e-9520-49a0-97a1-6b873bced3dc
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 500fcc4e-1ebf-4695-982a-14f2f9cfa635
+No session ID specified
+Connecting to kernel 500fcc4e-1ebf-4695-982a-14f2f9cfa635.
+interrupted
+Shutting down...
+Kernel shutdown: 500fcc4e-1ebf-4695-982a-14f2f9cfa635
+received signal 2, stopping
+Kernel shutdown: 500fcc4e-1ebf-4695-982a-14f2f9cfa635
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 7bef0934-f0a4-4a35-bef1-439da0016f6c
+No session ID specified
+Connecting to kernel 7bef0934-f0a4-4a35-bef1-439da0016f6c.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: f767ccc2-78d6-416b-a4a2-920e057c0965
+No session ID specified
+Connecting to kernel f767ccc2-78d6-416b-a4a2-920e057c0965.
+interrupted
+Shutting down...
+Kernel shutdown: f767ccc2-78d6-416b-a4a2-920e057c0965
+interrupted
+Shutting down...
+Kernel shutdown: 7bef0934-f0a4-4a35-bef1-439da0016f6c
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: d79b99aa-9cc8-432c-9ab6-87ef0c3b803a
+No session ID specified
+Connecting to kernel d79b99aa-9cc8-432c-9ab6-87ef0c3b803a.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: 811e3fc8-5395-4c4f-89a4-a747bc9b7250
+No session ID specified
+Connecting to kernel 811e3fc8-5395-4c4f-89a4-a747bc9b7250.
+interrupted
+Shutting down...
+Kernel shutdown: 811e3fc8-5395-4c4f-89a4-a747bc9b7250
+interrupted
+Shutting down...
+Kernel shutdown: d79b99aa-9cc8-432c-9ab6-87ef0c3b803a
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 20eb0f0b-38a9-4e2b-aacf-685b206cee21
+No session ID specified
+Connecting to kernel 20eb0f0b-38a9-4e2b-aacf-685b206cee21.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: db99cbdb-b249-4aee-a2dd-86577df49efa
+No session ID specified
+Connecting to kernel db99cbdb-b249-4aee-a2dd-86577df49efa.
+WebSocket ping timeout after 90000 ms.
+WebSocket ping timeout after 90000 ms.
+Starting buffering for 20eb0f0b-38a9-4e2b-aacf-685b206cee21:1be62855-f00402af8ca3b318d72afcc9
+Starting buffering for db99cbdb-b249-4aee-a2dd-86577df49efa:a3c8396e-e243315371dea6352f6a4109
+interrupted
+Shutting down...
+Kernel shutdown: db99cbdb-b249-4aee-a2dd-86577df49efa
+interrupted
+Shutting down...
+Kernel shutdown: 20eb0f0b-38a9-4e2b-aacf-685b206cee21
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 9cfc64fd-4128-41b1-a191-2f78db57f9c0
+No session ID specified
+Connecting to kernel 9cfc64fd-4128-41b1-a191-2f78db57f9c0.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: 1116f088-c07f-4062-a3a4-48548fd0de03
+No session ID specified
+Connecting to kernel 1116f088-c07f-4062-a3a4-48548fd0de03.
+interrupted
+interrupted
+Shutting down...
+Shutting down...
+Kernel shutdown: 9cfc64fd-4128-41b1-a191-2f78db57f9c0
+Kernel shutdown: 1116f088-c07f-4062-a3a4-48548fd0de03
+received signal 2, stopping
+Kernel shutdown: 1116f088-c07f-4062-a3a4-48548fd0de03
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 90bc7ae1-a3a3-43fa-9508-88375d7dd76f
+No session ID specified
+Connecting to kernel 90bc7ae1-a3a3-43fa-9508-88375d7dd76f.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: 3cfcf759-941b-4b9d-bcfa-de0139a1c533
+No session ID specified
+Connecting to kernel 3cfcf759-941b-4b9d-bcfa-de0139a1c533.
+interrupted
+Shutting down...
+Kernel shutdown: 3cfcf759-941b-4b9d-bcfa-de0139a1c533
+interrupted
+Shutting down...
+Kernel shutdown: 90bc7ae1-a3a3-43fa-9508-88375d7dd76f
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: a4272232-583c-4d0a-99b5-c7927e1e9d43
+No session ID specified
+Connecting to kernel a4272232-583c-4d0a-99b5-c7927e1e9d43.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: 28039f2a-9da8-4f0c-b8f8-26dfb5223350
+No session ID specified
+Connecting to kernel 28039f2a-9da8-4f0c-b8f8-26dfb5223350.
+interrupted
+Shutting down...
+interrupted
+Shutting down...
+Kernel shutdown: 28039f2a-9da8-4f0c-b8f8-26dfb5223350
+Kernel shutdown: a4272232-583c-4d0a-99b5-c7927e1e9d43
+received signal 2, stopping
+Kernel shutdown: 28039f2a-9da8-4f0c-b8f8-26dfb5223350
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 148e7983-4362-48b1-b723-7df60e6a8c7b
+No session ID specified
+Connecting to kernel 148e7983-4362-48b1-b723-7df60e6a8c7b.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: b1a7d849-2502-4217-ae8c-0718a7279434
+No session ID specified
+Connecting to kernel b1a7d849-2502-4217-ae8c-0718a7279434.
+interrupted
+Shutting down...
+Kernel shutdown: b1a7d849-2502-4217-ae8c-0718a7279434
+interrupted
+Shutting down...
+Kernel shutdown: 148e7983-4362-48b1-b723-7df60e6a8c7b
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 13d78a81-44a3-4a61-b141-bf1eae8de39e
+No session ID specified
+Connecting to kernel 13d78a81-44a3-4a61-b141-bf1eae8de39e.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: da58807e-36c3-4197-b3fa-af8c68c75aba
+No session ID specified
+Connecting to kernel da58807e-36c3-4197-b3fa-af8c68c75aba.
+interrupted
+interrupted
+Shutting down...
+Shutting down...
+Kernel shutdown: da58807e-36c3-4197-b3fa-af8c68c75aba
+Kernel shutdown: 13d78a81-44a3-4a61-b141-bf1eae8de39e
+received signal 2, stopping
+Kernel shutdown: da58807e-36c3-4197-b3fa-af8c68c75aba
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 94611197-eac1-4942-8acf-128b3826d605
+No session ID specified
+Connecting to kernel 94611197-eac1-4942-8acf-128b3826d605.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: c991b1b7-dea8-4c11-8aa4-ed52f5d1548c
+No session ID specified
+Connecting to kernel c991b1b7-dea8-4c11-8aa4-ed52f5d1548c.
+interrupted
+interrupted
+Shutting down...
+Shutting down...
+Kernel shutdown: c991b1b7-dea8-4c11-8aa4-ed52f5d1548c
+Kernel shutdown: 94611197-eac1-4942-8acf-128b3826d605
+received signal 2, stopping
+Kernel shutdown: c991b1b7-dea8-4c11-8aa4-ed52f5d1548c
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 60eaaace-bba3-4366-b4d5-0744d6b83c51
+No session ID specified
+Connecting to kernel 60eaaace-bba3-4366-b4d5-0744d6b83c51.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: b8df193d-567d-4d76-8a49-f6a0240f5917
+No session ID specified
+Connecting to kernel b8df193d-567d-4d76-8a49-f6a0240f5917.
+interrupted
+Shutting down...
+Kernel shutdown: b8df193d-567d-4d76-8a49-f6a0240f5917
+interrupted
+Shutting down...
+Kernel shutdown: 60eaaace-bba3-4366-b4d5-0744d6b83c51
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 6074d06b-672f-4511-adcf-ded066378eee
+No session ID specified
+Connecting to kernel 6074d06b-672f-4511-adcf-ded066378eee.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: 88a0534d-e42f-42e3-bd49-7db5fb6ad501
+No session ID specified
+Connecting to kernel 88a0534d-e42f-42e3-bd49-7db5fb6ad501.
+interrupted
+Shutting down...
+Kernel shutdown: 88a0534d-e42f-42e3-bd49-7db5fb6ad501
+interrupted
+Shutting down...
+Kernel shutdown: 6074d06b-672f-4511-adcf-ded066378eee
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: e207d05a-1b64-4b05-8c3a-4b0f8c0b7336
+No session ID specified
+Connecting to kernel e207d05a-1b64-4b05-8c3a-4b0f8c0b7336.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: cfa67af4-46a2-4c4b-9aad-28f5db4feb43
+No session ID specified
+Connecting to kernel cfa67af4-46a2-4c4b-9aad-28f5db4feb43.
+interrupted
+interrupted
+Shutting down...
+Shutting down...
+Kernel shutdown: cfa67af4-46a2-4c4b-9aad-28f5db4feb43
+Kernel shutdown: e207d05a-1b64-4b05-8c3a-4b0f8c0b7336
+received signal 2, stopping
+Kernel shutdown: cfa67af4-46a2-4c4b-9aad-28f5db4feb43

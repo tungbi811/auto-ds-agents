@@ -1,6 +1,23 @@
+from pathlib import Path
 from autogen import OpenAIWrapper
 from typing import Annotated
-from autogen.agentchat.group import ContextVariables, ReplyResult, RevertToUserTarget
+from autogen.agentchat.group import ContextVariables, ReplyResult, RevertToUserTarget, StayTarget
+from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
+from autogen.coding import CodeBlock
+
+output_dir = Path("./artifacts")
+output_dir.mkdir(parents=True, exist_ok=True)
+
+server = LocalJupyterServer(log_file='./logs/jupyter_gateway.log')
+executor = JupyterCodeExecutor(server, output_dir=output_dir)
+
+def run_code(code: Annotated[str, "Python code to run in Jupyter"]) -> ReplyResult:
+    result = executor.execute_code_blocks(
+        [CodeBlock(language="python", code=code)]
+    )
+
+    msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
+    return ReplyResult(message=msg, target=StayTarget())
 
 def request_clarification(
     clarification_question: Annotated[str, "Question to ask user for clarification"],

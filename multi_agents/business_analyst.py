@@ -116,12 +116,12 @@ class BusinessAnalyst(AssistantAgent):
                 api_type= "openai",
                 model="gpt-4o-mini",
                 response_format=BusinessAnalysisReport,
-                parallel_tool_calls=False
+                # parallel_tool_calls=False
             ),
             system_message="""
                 You are a Senior Business Analyst specializing in data science projects in the real estate domain. 
                 Your responsibility is to bridge the gap between business needs and data capabilities, ensuring that 
                 business requirements are correctly translated into technical requirements for the data team.
             """,
-            functions = [request_clarification]
+            # functions = [request_clarification]
         )
