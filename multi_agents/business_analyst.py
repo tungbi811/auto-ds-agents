@@ -115,7 +115,7 @@ class BusinessAnalyst(AssistantAgent):
             llm_config=LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
-                # response_format=BusinessAnalysisReport,
+                response_format=BusinessAnalysisReport,
                 parallel_tool_calls=False
             ),
             system_message="""

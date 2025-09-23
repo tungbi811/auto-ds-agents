@@ -52,7 +52,7 @@ class CorrelationInsight(BaseModel):
     problem: Optional[str] = Field(None, description="Problem identified, if any (e.g., multicollinearity, redundancy)")
 
 
-class DataAnalystReport(BaseModel):
+class DataExplorerReport(BaseModel):
     target: TargetVariableInfo
     distinct_variables: List[DistinctVariableInfo] = []
     unidentified_values: List[UnidentifiedValueIssue] = []
@@ -72,7 +72,7 @@ class DataExplorer(AssistantAgent):
             llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
-                # response_format=DataAnalystReport,
+                response_format=DataExplorerReport,
             ),
             system_message = """
                 You are a Senior Data Analyst with deep expertise in real estate data and data science projects. 
