@@ -5,20 +5,17 @@ from typing import Annotated, Literal, List
 import pandas as pd
 
 class BizAnalystOutput(BaseModel):
-    """
-    A schema for describing a machine learning problem setup.
-    """
-    user_question: str = Field(
-        ...,
-        description="The main keywords or short description of the user's question/problem."
+    intent_summary: str = Field(
+        ..., description="1–2 sentences capturing the core business goal/question."
     )
-    problem_type: Literal["Regression", "Classification", "Clustering", "Other"] = Field(
-        ...,
-        description="The specific ML problem type needed to solve the problem."
+    problem_type: Literal[
+        "Regression", "Classification", "Clustering",
+        "Forecasting", "Recommendation", "Segmentation", "Other"
+    ] = Field(
+        ..., description="ML task framing that best matches the goal."
     )
-    target_variables: List[str] = Field(
-        ...,
-        description="List of potential target variables for the ML task."
+    key_metrics: List[str] = Field(
+        ..., description="Business KPIs and/or ML metrics used to judge success."
     )
 
 def request_clarification(

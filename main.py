@@ -7,6 +7,7 @@ from autogen.agentchat.group.patterns import DefaultPattern
 context_variables = ContextVariables(
     data={
         "user_question": None,
+        ""
         "current_agent": None
     }
 )
