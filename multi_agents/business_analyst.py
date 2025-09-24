@@ -1,11 +1,11 @@
 from autogen import LLMConfig, AssistantAgent
 from pydantic import BaseModel, Field
-from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTarget
+from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTarget, ContextVariables
 from typing import Annotated, Literal, List
 import pandas as pd
 
 class BizAnalystOutput(BaseModel):
-    intent_summary: str = Field(
+    goal: str = Field(
         ..., description="1–2 sentences capturing the core business goal/question."
     )
     problem_type: Literal[
@@ -37,6 +37,19 @@ def get_data_info(
     df = pd.read_csv(data_path)
     return ReplyResult(message=f"Here is the information of columns in dataset: {df}", target=AgentNameTarget("BusinessAnalyst"))
 
+def complete_business_analyst(
+    output: BizAnalystOutput,
+    context_variables: ContextVariables
+) -> ReplyResult:
+    context_variables["goal"] = output.goal
+    context_variables["problem_type"] = output.problem_type
+    context_variables["key_metrics"] = output.key_metrics
+
+    return ReplyResult(
+        message="I have finished business understanding",
+        target=AgentNameTarget("DataExplorer")
+    )
+
 class BusinessAnalyst(AssistantAgent):
     def __init__(self):
         super().__init__(
@@ -57,5 +70,5 @@ class BusinessAnalyst(AssistantAgent):
                 call `request_clarification` with a concise list of targeted questions. Do not ask broad or generic questions.
                 - Using the tool result + user message, produce a structured answer that conforms to `BizAnalystOutput`.
             """,
-            functions = [get_data_info]
+            functions = [get_data_info, request_clarification, complete_business_analyst]
         )

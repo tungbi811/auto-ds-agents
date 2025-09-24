@@ -1,70 +1,22 @@
 from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import ContextVariables, ReplyResult, AgentNameTarget
 from pydantic import BaseModel, Field
-from typing import List, Optional, Annotated
-
-class TargetVariableInfo(BaseModel):
-    name: str = Field(..., description="Name of the target variable")
-    dtype: str = Field(..., description="Data type of target variable (Binary, Categorical, Continuous, etc.)")
+from typing import List, Annotated, Literal
 
 
-class DistinctVariableInfo(BaseModel):
-    name: str = Field(..., description="Variable that contains only distinct values (e.g., ID, Customer_ID)")
-    notes: Optional[str] = Field(None, description="Additional notes about why this variable is distinct")
+class VariableReport(BaseModel):
+    variable: str = Field(..., description="Name of the variable (column).")
+    insight: str = Field(..., description="Detailed insight about this variable from EDA.")
+    issue: str = Field(
+        ..., 
+        description="Main issue for this variable (e.g., missing values, outliers, all unique values, low correlation with target, high correlation with other variables)."
+    )
 
+class DataExplorerOutput(BaseModel):
+    variables: List[VariableReport] = Field(
+        ..., description="List of variables with their insights and issues."
+    )
 
-class UnidentifiedValueIssue(BaseModel):
-    column: str = Field(..., description="Variable that contains unidentified values")
-    details: Optional[str] = Field(None, description="Details about the unidentified values issue")
-    proposed_solution: Optional[str] = Field(None, description="Proposed solution to handle unidentified values")
-
-
-class OutlierInfo(BaseModel):
-    column: str = Field(..., description="Variable name where outliers occur")
-    outlier_type: str = Field(..., description="Type of outliers: bad (harmful) or good (meaningful)")
-    count: int = Field(..., description="Number of outliers detected")
-    insights: Optional[str] = Field(None, description="Insights about the outliers and their impact")
-    proposed_solution: Optional[str] = Field(None, description="Suggested solution for outliers")
-
-
-class DuplicateInfo(BaseModel):
-    count: int = Field(..., description="Number of duplicated rows/records")
-    insights: Optional[str] = Field(None, description="Explanation of problems caused by duplicates")
-    proposed_solution: Optional[str] = Field(None, description="Suggested approaches to handle duplicates")
-
-
-class MissingValueInfo(BaseModel):
-    column: str = Field(..., description="Variable that contains missing values")
-    count: int = Field(..., description="Number of missing values")
-    insights: Optional[str] = Field(None, description="Explanation of missing value issues and their potential impact")
-    proposed_solution: Optional[str] = Field(None, description="Suggested solution for missing values")
-
-
-class DistributionInsight(BaseModel):
-    column: str = Field(..., description="Variable analyzed")
-    description: str = Field(..., description="Summary of distribution and key insights")
-
-
-class CorrelationInsight(BaseModel):
-    variable_x: str = Field(..., description="First variable in the correlation relationship")
-    variable_y: str = Field(..., description="Second variable in the correlation relationship")
-    strength: Optional[str] = Field(None, description="Strength of correlation (weak, moderate, strong)")
-    insights: Optional[str] = Field(None, description="Key insights about the correlation")
-    problem: Optional[str] = Field(None, description="Problem identified, if any (e.g., multicollinearity, redundancy)")
-
-
-class DataExplorerReport(BaseModel):
-    target: TargetVariableInfo
-    distinct_variables: List[DistinctVariableInfo] = []
-    unidentified_values: List[UnidentifiedValueIssue] = []
-    outliers: List[OutlierInfo] = []
-    duplicates: Optional[DuplicateInfo] = None
-    missing_values: List[MissingValueInfo] = []
-    distributions: List[DistributionInsight] = []
-    correlations: List[CorrelationInsight] = []
-
-    overall_insights: Optional[str] = Field(None, description="Main findings from the EDA relevant to the business problem")
-    proposed_next_steps: Optional[List[str]] = Field(None, description="Recommended actions for downstream agents")
 
 def execute_code(
     plan: Annotated[str, "What do you want coder write code for you just one small step don't plan too much"],
@@ -76,11 +28,11 @@ def execute_code(
         context_variables=context_variables
     )
 
-def complete_task(results: DataExplorerReport, context_variables: ContextVariables) -> ReplyResult:
-    return ReplyResult(
-        message=f"Issue: {results['missing_values']}",
-        target=AgentNameTarget("DataEngneer")
-    )
+# def complete_data_explore_task(results: DataExplorerOutput, context_variables: ContextVariables) -> ReplyResult:
+#     return ReplyResult(
+#         message=f"Issue: {results.missing_values}",
+#         target=AgentNameTarget("DataEngneer")
+#     )
 
 class DataExplorer(AssistantAgent):
     def __init__(self):
@@ -89,15 +41,43 @@ class DataExplorer(AssistantAgent):
             llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
-                response_format=DataExplorerReport,
+                response_format=DataExplorerOutput,
                 parallel_tool_calls=False
             ),
             system_message = """
-                You are a Senior Data Analyst with deep expertise in real estate data and data science projects. 
-                Your responsibility is perform a thorough exploratory data analysis (EDA) using run code tool that 
-                ensures the dataset is well-understood, potential issues are identified, and meaningful insights are 
-                generated for the downstream data engineering and modeling phases. Do not code by yourself, coder will write and 
-                execute code for you instead, tell coder what you want 
+                You are a Senior Data Analyst with deep expertise in real estate data and data science projects.  
+                Your responsibility is to perform a structured exploratory data analysis (EDA) to ensure the dataset is well-understood, potential issues are identified, and meaningful insights are generated for downstream data engineering and modeling phases.  
+
+                Follow this process step by step:
+
+                1. **Dataset Understanding**  
+                - Identify the target variable and its type (binary, categorical, continuous).  
+                - Summarize the dataset structure (rows, columns, variable types).  
+                - Detect identifier variables (e.g., IDs, unique keys) that are not suitable for modeling.  
+
+                2. **Data Quality Diagnostics**  
+                - Missing Values: detect variables with missing data, count missing values, calculate missing rate.  
+                - Duplicates: identify number of duplicate records and columns where duplication occurs.  
+                - Unidentified Values: detect variables containing values that cannot be properly typed (e.g., mixed formats, ambiguous data).  
+
+                3. **Outlier Analysis**  
+                - Detect and quantify extreme values.  
+                - Classify them into harmful outliers (errors, noise) vs meaningful outliers (rare but important business cases).  
+                - Summarize their potential impact on analysis and modeling.  
+
+                4. **Correlation & Relationships**  
+                - Measure correlation of independent variables with the target variable.  
+                - Detect strong correlations between independent variables (multicollinearity).  
+                - Highlight weak or redundant predictors.  
+
+                5. **Distribution & Patterns**  
+                - Provide summary of variable distributions (categorical frequencies, numerical histograms, etc.).  
+                - Highlight skewness, imbalance, or unusual trends relevant to real estate data.  
+
+                6. **Problem Identification**  
+                - Clearly list variables and issues under each category (missing values, outliers, duplicates, correlations, etc.).  
+                - Do not propose solutions, only describe the problems and their potential impact.  
+
             """,
             functions=[execute_code]
         )
