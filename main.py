@@ -6,6 +6,7 @@ from autogen.agentchat.group.patterns import DefaultPattern
 
 context_variables = ContextVariables(
     data={
+        "user_question": None,
         "current_agent": None
     }
 )
@@ -26,7 +27,7 @@ biz_analyst.handoffs.set_after_work(AgentTarget(data_explorer))
 data_explorer.handoffs.set_after_work(AgentTarget(data_engineer))
 
 group_chat = DefaultPattern(
-    initial_agent=biz_analyst,
+    initial_agent=data_explorer,
     agents=[biz_analyst, coder, data_explorer, data_engineer, model_builder, evaluator],
     user_agent=user,
     context_variables=context_variables

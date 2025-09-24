@@ -19,19 +19,6 @@ def run_code(code: Annotated[str, "Python code to run in Jupyter"]) -> ReplyResu
     msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
     return ReplyResult(message=msg, target=StayTarget())
 
-def request_clarification(
-    clarification_question: Annotated[str, "Question to ask user for clarification"],
-    # context_variables: ContextVariables,
-) -> ReplyResult:
-    """
-    Request clarification from the user when the query is ambiguous
-    """
-    return ReplyResult(
-        message=f"Further clarification is required to determine the correct domain: {clarification_question}",
-        # context_variables=context_variables,
-        target=RevertToUserTarget(),
-    )
-
 def custom_speaker_selection_func(last_speaker, group_chat):
     messages = group_chat.messages
     
