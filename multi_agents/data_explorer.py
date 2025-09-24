@@ -3,22 +3,19 @@ from autogen.agentchat.group import ContextVariables, ReplyResult, AgentNameTarg
 from pydantic import BaseModel, Field
 from typing import List, Annotated, Literal
 
-
-class VariableReport(BaseModel):
-    variable: str = Field(..., description="Name of the variable (column).")
-    insight: str = Field(..., description="Detailed insight about this variable from EDA.")
-    issue: str = Field(
-        ..., 
-        description="Main issue for this variable (e.g., missing values, outliers, all unique values, low correlation with target, high correlation with other variables)."
-    )
+class IssueItem(BaseModel):
+    column: str = Field(..., description="Name of the column with an issue.")
+    issue: str = Field(..., description="Description of the issue with this column (e.g., missing values, outliers, all unique, low/high correlation with other column).")
 
 class DataExplorerOutput(BaseModel):
-    variables: List[VariableReport] = Field(
-        ..., description="List of variables with their insights and issues."
+    insights: List[str] = Field(
+        ..., description="Key dataset-level insights as concise bullets."
+    )
+    issues: List[IssueItem] = Field(
+        ..., description="Column-level issues found during data exploration."
     )
 
-
-def execute_code(
+def execute_data_exploring_plan(
     plan: Annotated[str, "What do you want coder write code for you just one small step don't plan too much"],
     context_variables: ContextVariables) -> ReplyResult:
     context_variables["current_agent"] = "DataExplorer"
@@ -28,11 +25,11 @@ def execute_code(
         context_variables=context_variables
     )
 
-# def complete_data_explore_task(results: DataExplorerOutput, context_variables: ContextVariables) -> ReplyResult:
-#     return ReplyResult(
-#         message=f"Issue: {results.missing_values}",
-#         target=AgentNameTarget("DataEngneer")
-#     )
+def complete_data_explore_task(results: DataExplorerOutput, context_variables: ContextVariables) -> ReplyResult:
+    return ReplyResult(
+        message=f"Issue: {results.issues}",
+        target=AgentNameTarget("DataEngineer")
+    )
 
 class DataExplorer(AssistantAgent):
     def __init__(self):
@@ -45,40 +42,34 @@ class DataExplorer(AssistantAgent):
                 parallel_tool_calls=False
             ),
             system_message = """
-                You are a Senior Data Analyst with deep expertise in real estate data and data science projects.  
-                Your responsibility is to perform a structured exploratory data analysis (EDA) to ensure the dataset is well-understood, potential issues are identified, and meaningful insights are generated for downstream data engineering and modeling phases.  
-
-                Follow this process step by step:
-
-                1. **Dataset Understanding**  
-                - Identify the target variable and its type (binary, categorical, continuous).  
-                - Summarize the dataset structure (rows, columns, variable types).  
-                - Detect identifier variables (e.g., IDs, unique keys) that are not suitable for modeling.  
-
-                2. **Data Quality Diagnostics**  
-                - Missing Values: detect variables with missing data, count missing values, calculate missing rate.  
-                - Duplicates: identify number of duplicate records and columns where duplication occurs.  
-                - Unidentified Values: detect variables containing values that cannot be properly typed (e.g., mixed formats, ambiguous data).  
-
-                3. **Outlier Analysis**  
-                - Detect and quantify extreme values.  
-                - Classify them into harmful outliers (errors, noise) vs meaningful outliers (rare but important business cases).  
-                - Summarize their potential impact on analysis and modeling.  
-
-                4. **Correlation & Relationships**  
-                - Measure correlation of independent variables with the target variable.  
-                - Detect strong correlations between independent variables (multicollinearity).  
-                - Highlight weak or redundant predictors.  
-
-                5. **Distribution & Patterns**  
-                - Provide summary of variable distributions (categorical frequencies, numerical histograms, etc.).  
-                - Highlight skewness, imbalance, or unusual trends relevant to real estate data.  
-
-                6. **Problem Identification**  
-                - Clearly list variables and issues under each category (missing values, outliers, duplicates, correlations, etc.).  
-                - Do not propose solutions, only describe the problems and their potential impact.  
-
+                    You are a Senior Data Analyst with deep expertise in real estate data and data science projects.  
+                    Your responsibility is to perform a structured exploratory data analysis (EDA) focused on identifying DATA PROBLEMS across ALL variables in the dataset, not just the target.  
+                    Follow this process strictly:
+                    1. Dataset Understanding
+                    - Summarize dataset: number of rows, number of columns, variable types (numeric, categorical, datetime, text).
+                    - Identify columns that are distinct identifiers (e.g., ID, Customer_ID).
+                    2. Missing Values
+                    - For each column: report missing_count and missing_rate.
+                    - Only list columns that actually contain missing values.
+                    3. Unidentified Values
+                    - Detect variables with ambiguous or mixed types.
+                    - Provide variable name and sample problematic values.
+                    4. Duplicates
+                    - Report total duplicate row count.
+                    - Optionally list key columns most frequently duplicated.
+                    5. Outliers (ALL numeric variables)
+                    - For each numeric column: detect outliers using IQR rule (Q1 - 1.5*IQR, Q3 + 1.5*IQR).
+                    - Report variable name, number_of_outliers, detection_method.
+                    - Explicitly show that all numeric variables were checked, even if zero outliers.
+                    6. Correlation Analysis
+                    - Correlation with Target (if provided): report correlation values between independent variables and the target.
+                    - Correlation between independent variables: compute pairwise correlations for ALL numeric variables.
+                    - List pairs with |correlation| ≥ 0.8 as high correlation pairs.
+                    - Also report variables that are near-constant or redundant.
+                    Use the function execute_data_exploring_plan(plan, context_variables) for every small computation step with the Coder agent, 
+                    and when the analysis is complete, return the consolidated issues to the Data Engineer 
+                    by calling complete_data_explore_task(results, context_variables).
             """,
-            functions=[execute_code]
+            functions=[execute_data_exploring_plan, complete_data_explore_task]
         )
 
