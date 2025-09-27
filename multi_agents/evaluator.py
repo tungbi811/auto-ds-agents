@@ -4,9 +4,11 @@ class Evaluator(AssistantAgent):
     def __init__(self):
         super().__init__(
             name="Evaluator",
-            llm_config=LLMConfig(
+            llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
+                temperature=0,
+                cache_seed=None
             ),
             system_message="""
                 You are the Evaluator Agent

@@ -2,8 +2,6 @@ from autogen import AssistantAgent, LLMConfig
 from typing import List, Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field
 
-
-
 class ModelBuilder(AssistantAgent):
     def __init__(self):
         super().__init__(

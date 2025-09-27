@@ -3,44 +3,16 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
 
-def execute_data_engineering_plan(
-    plan: Annotated[str, "What do you want coder write code for you just one small step don't plan too much"],
-    context_variables: ContextVariables
-) -> ReplyResult:
-    """
-    Send a small, concrete data engineering plan to the Coder for implementation.
-
-    This function is used by the DataEngineer agent to request that the Coder 
-    writes and executes code for one specific step in the data engineering process 
-    (e.g., handling missing values, removing duplicates, encoding categorical variables).
-    
-    Args:
-        plan (str): A short description of the single step of data engineering 
-            to be performed. Keep the plan minimal and focused (do not include 
-            multiple steps at once).
-        context_variables (ContextVariables): Shared context across agents. 
-            This function will update the `current_agent` field to "DataEngineer" 
-            before sending the request.
-
-    Returns:
-        ReplyResult: A reply object containing the message (plan request), 
-        the target agent (Coder), and the updated context variables.
-    """
-    context_variables["current_agent"] = "DataEngineer"
-    return ReplyResult(
-        message=f"Can you write code for me to execute this plan {plan}",
-        target=AgentNameTarget("Coder"),
-        context_variables=context_variables
-    )
 
 class DataEngineer(AssistantAgent):
     def __init__(self):
         super().__init__(
             name="DataEngineer",
-            llm_config=LLMConfig(
+            llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
-                parallel_tool_calls=False
+                temperature=0,
+                cache_seed=None
             ),
             system_message="""
                 You are a Senior Data Engineer with deep expertise in real estate data pipelines and preprocessing.  
@@ -85,7 +57,5 @@ class DataEngineer(AssistantAgent):
                 Use the function execute_data_engineering_plan for each preprocessing step with the Coder agent.  
                 Once preprocessing and saving are complete, return the final confirmation and summary 
                 to downstream agents.
-                """
-,
-            functions=[execute_data_engineering_plan]
+                """,
         )

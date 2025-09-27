@@ -4,71 +4,50 @@ from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTa
 from typing import Annotated, Literal, List
 import pandas as pd
 
-class BizAnalystOutput(BaseModel):
-    goal: str = Field(
-        ..., description="1–2 sentences capturing the core business goal/question."
-    )
-    problem_type: Literal[
-        "Regression", "Classification", "Clustering",
-        "Forecasting", "Recommendation", "Segmentation", "Other"
-    ] = Field(
-        ..., description="ML task framing that best matches the goal."
-    )
-    key_metrics: List[str] = Field(
-        ..., description="Business KPIs and/or ML metrics used to judge success."
-    )
-
-def request_clarification(
-    clarification_question: Annotated[str, "Question to ask user for clarification"],
-    # context_variables: ContextVariables,
-) -> ReplyResult:
-    """
-    Request clarification from the user when the query is ambiguous
-    """
-    return ReplyResult(
-        message=f"Further clarification is required to determine the correct domain: {clarification_question}",
-        # context_variables=context_variables,
-        target=RevertToUserTarget(),
-    )
-
-def get_data_info(
-    data_path: Annotated[str, "Dataset path provided by user"],
-) -> ReplyResult:
-    df = pd.read_csv(data_path)
-    return ReplyResult(message=f"Here is the information of columns in dataset: {df}", target=AgentNameTarget("BusinessAnalyst"))
-
-def complete_business_analyst(
-    output: BizAnalystOutput,
-    context_variables: ContextVariables
-) -> ReplyResult:
-    context_variables["goal"] = output.goal
-    context_variables["problem_type"] = output.problem_type
-    context_variables["key_metrics"] = output.key_metrics
-
-    return ReplyResult(
-        message="I have finished business understanding",
-        target=AgentNameTarget("DataExplorer")
-    )
 
 class BusinessAnalyst(AssistantAgent):
     def __init__(self):
         super().__init__(
             name="BusinessAnalyst",
-            llm_config=LLMConfig(
+            llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
-                response_format=BizAnalystOutput,
-                parallel_tool_calls=False
+                temperature=0,
+                cache_seed=None
             ),
             system_message="""
-                You are the BusinessAnalyst. 
-                - Act as a senior business analyst for data science projects.
-                - Bridge business needs with data capabilities.
-                - Translate business requirements into clear technical requirements for the data team.
-                - On every new user task, FIRST call `get_data_info` once to obtain column/data info relevant to the task.
-                - ONLY if you cannot confidently fill critical fields (e.g., user_question) after step 1,
-                call `request_clarification` with a concise list of targeted questions. Do not ask broad or generic questions.
-                - Using the tool result + user message, produce a structured answer that conforms to `BizAnalystOutput`.
+                # CONTEXT #
+                The user is engaged in machine learning and is trying to solve a specific type of problem. 
+                They require assistance in correctly identifying whether their task falls under classification, regression, time-series, or another category within machine learning.
+
+                # OBJECTIVE #
+                Clear define the problem the user is trying to solve:
+                - Identify how you should read the data to read it in a csv. Check needed delimiters argument, for a cleaning reading. This is a important step!
+                - Identify the type of task (regression, classification, clustering or time-series).
+                - Identify which variables are the features, and which are the target.
+                When tou have these 3 points. Write TERMINATE
+
+                # STYLE #
+                The response should be clear and concise, focusing solely on pinpointing the precise nature of the ML problem based on the details shared by the user.
+                Avoid technical jargon that pertains to preprocessing, built models and visualization since you are not providing instructions on those tasks.
+                Avoid visual representation.
+
+                # TONE #
+                The tone should be professional and informative, demonstrating expertise in machine learning concepts to foster trust and authority.
+
+                # AUDIENCE #
+                The primary audience is individuals or entities involved in a machine learning project who possess a technical background and need expert validation of their problem type.
+
+                # RESPONSE #
+                You have three types of responses:
+                RESPONSE 1:
+                If you need to see the data, write python code. 
+                Use the print function to see what you want.
+                You're script should be in one block.
+                You should just writte python code in this responses.
+                RESPONSE 2:
+                Analyse the output that the user gave you, and responde to the OBJETIVES
+                RESPONSE 3:
+                When the user replies with exitcode: 0 (execution succeeded) write TERMINATE
             """,
-            functions = [get_data_info, request_clarification, complete_business_analyst]
         )
