@@ -2,10 +2,11 @@ from autogen import AssistantAgent, LLMConfig
 from typing import List, Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field
 
-class Modeller(AssistantAgent):
+class Reporter(AssistantAgent):
     def __init__(self):
+        self.data_name = "house_prices"  
         super().__init__(
-            name="Modeller",
+            name="Reporter",
             llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4o-mini",
@@ -21,8 +22,8 @@ class Modeller(AssistantAgent):
                 Train the machine learning model with `X_train.csv` and `y_train.csv` files.
                 Make predictions with `X_test.csv`.  
                 Evaluate using `y_test.csv`. (with RMSE and MAE for regression and time-series and with Accuracy for classification), and save the necessary outputs
-                You should save the machine learnig model as ML_{self.data}.pkl file, in a directory named 'generated_files'.
-                You should save the predictions as pred_{self.data}.csv file, in a directory named 'generated_files'.
+                You should save the machine learnig model as ML_{self.data_name}.pkl file, in a directory named 'generated_files'.
+                You should save the predictions as pred_{self.data_name}.csv file, in a directory named 'generated_files'.
 
                 # STYLE #
                 The instructions should be communicated with technical accuracy, offering a step-by-step approach for training and evaluating the ML model. 

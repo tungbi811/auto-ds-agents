@@ -4,7 +4,6 @@ from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTa
 from typing import Annotated, Literal, List
 import pandas as pd
 
-
 class BusinessAnalyst(AssistantAgent):
     def __init__(self):
         super().__init__(
