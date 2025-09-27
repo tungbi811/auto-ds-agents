@@ -1,42 +1,37 @@
-from multi_agents import BusinessAnalyst, Coder, DataExplorer, DataEngineer, ModelBuilder, Evaluator
-from autogen import UserProxyAgent
+from multi_agents import User, BusinessAnalyst, DataExplorer, DataEngineer, ModelConsulter, Modeller, Reporter
+from utils.utils import get_summary_prompt
 from autogen.agentchat import initiate_group_chat
-from autogen.agentchat.group import AgentTarget, ContextVariables
-from autogen.agentchat.group.patterns import DefaultPattern
 
-context_variables = ContextVariables(
-    data={
-        "current_agent": None,
-        "goal": None,
-        "problem_type": None,
-        "key_metrics": None
-    }
-)
+dataset_path = "./data/house_prices/train.csv"
+user_requirement = "I want to predict house prices"
 
+user = User()
 biz_analyst = BusinessAnalyst()
-coder = Coder()
 data_explorer = DataExplorer()
 data_engineer = DataEngineer()
-model_builder = ModelBuilder()
-evaluator = Evaluator()
+model_consulter = ModelConsulter()
+modeller = Modeller()
+reporter  = Reporter()
 
-user = UserProxyAgent(
-    name="User",
-    code_execution_config=False
-)
+carryover_msg = f"The needed data is in {dataset_path}"
+chat_configurations = [
+    {
+        "summary_method": "reflection_with_llm",
+        **({"carryover": carryover_msg} if i < 4 else {})
+    }
+    for i in range(7)
+]
 
-biz_analyst.handoffs.set_after_work(AgentTarget(data_explorer))
-data_explorer.handoffs.set_after_work(AgentTarget(data_engineer))
+task_prompts = [
+    f"This is my requirement: {user_requirement}. What is the Machine learning problem?",
+    "I want to perform data analysis",
+    "Based on the relevant insights, identify the most relevant machine learning model to use.",
+    "Base on the relevant insights, make the necessary transformations to the data, separate the data by features and target based on the problem type and split the dataset.",
+    "Fit the training data, make predictions, and evaluate them.",
+    "Compile a detailed report with insights from other agents.",
+]
 
-group_chat = DefaultPattern(
-    initial_agent=data_explorer,
-    agents=[biz_analyst, coder, data_explorer, data_engineer, model_builder, evaluator],
-    user_agent=user,
-    context_variables=context_variables
-)
+user.initiate_chats(
+    agents=[biz_analyst, data_explorer, data_engineer, modeller, model_consulter, reporter],
 
-initiate_group_chat(
-    pattern=group_chat,
-    messages="Here is the dataset: data/house_prices/train.csv, build for me a predictive model for my house have 4 bed and 2 bath, how much is it?",
-    max_rounds=100
 )

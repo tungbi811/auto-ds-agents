@@ -1,4 +1,4 @@
-from autogen import AssistantAgent, LLMConfig
+from autogen import AssistantAgent, LLMConfig, ConversableAgent
 from typing import Annotated
 from pydantic import BaseModel, Field
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult

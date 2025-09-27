@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 class Modeller(AssistantAgent):
     def __init__(self):
+        self.data = "house_prices"
         super().__init__(
             name="Modeller",
             llm_config = LLMConfig(

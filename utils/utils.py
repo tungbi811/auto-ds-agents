@@ -1,63 +1,116 @@
-from pathlib import Path
-from autogen import OpenAIWrapper
-from typing import Annotated
-from autogen.agentchat.group import ContextVariables, ReplyResult, RevertToUserTarget, StayTarget
-from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
-from autogen.coding import CodeBlock
-
-output_dir = Path("./artifacts")
-output_dir.mkdir(parents=True, exist_ok=True)
-
-server = LocalJupyterServer(log_file='./logs/jupyter_gateway.log')
-executor = JupyterCodeExecutor(server, output_dir=output_dir)
-
-def run_code(code: Annotated[str, "Python code to run in Jupyter"]) -> ReplyResult:
-    result = executor.execute_code_blocks(
-        [CodeBlock(language="python", code=code)]
-    )
-
-    msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
-    return ReplyResult(message=msg, target=StayTarget())
-
-def custom_speaker_selection_func(last_speaker, group_chat):
-    messages = group_chat.messages
-    
-    if last_speaker.name == 'user':
-        return group_chat.agent_by_name('DataExplorer')
-
-    # these states contains two steps, we will always call code_executor after the first step
-    elif last_speaker.name in ['DataExplorer', 'DataEngineer', 'ModelBuilder']:
-        return group_chat.agent_by_name('CodeExecutor')
-
-    elif last_speaker.name == 'CodeExecutor':
-        last_second_speaker_name = group_chat.messages[-2]["name"]
-
-        if "exitcode: 1" in messages[-1]["content"]:
-            return group_chat.agent_by_name(last_second_speaker_name)
-
-        elif last_second_speaker_name == "DataExplorer":
-            return group_chat.agent_by_name('DataEngineer')
-
-        elif last_second_speaker_name == "DataEngineer":
-            return group_chat.agent_by_name("ModelBuilder")
-        
-        elif last_second_speaker_name == "ModelBuilder":
-            return None
-
-def speaker_selection_method(last_speaker, group_chat):
-    # last_speaker is an Agent or None; get its name safely
-    last_name = getattr(last_speaker, "name", None)
-    last_msg = ""
-    if group_chat.messages and isinstance(group_chat.messages[-1], dict):
-        last_msg = group_chat.messages[-1].get("content", "") or ""
-
-    # manager is attached as group_chat.manager (created below)
-    return group_chat.manager.route_next(group_chat.agents, last_name, last_msg)
-    
-def save_agent_code(chat_result):
-
-    if "```python" in chat_result.chat_history[-1]["content"]:
-        content = chat_result.chat_history[-1]["content"]
-        content = content.split("```python")[1].split("```")[0].strip()
-        with open("./agent_code/house_price_prediction.py", "w") as f:
-            f.write(content)
+def get_summary_prompt():
+    try:
+        return {
+            1: """
+                Summarize the content and format summary EXACTLY as follows:
+                ---
+                *Data set name*:
+                `Acme Corp`
+                ---
+                *User problem*:
+                `Regression, Classification or Time-series`
+                ---
+                *Target variable*
+                `write here the target variable`
+                ---
+                *Indications on how to write the code to read data*
+                `Write the code that you read the data`
+                """,
+            2: """
+                Summarize the content and format summary EXACTLY as follows:
+                ---
+                *Problem*:
+                `Write the machine learning problem`
+                ---
+                *Correlations*:
+                `Relevant correlations`
+                ---
+                *Columns name*:
+                `Columns: column1, column2...`
+                ---               
+                *Relevant insights*:
+                `Useful insights found for the next agents`
+                ---
+                """,
+            3: """
+                Summarize the content and format summary EXACTLY as follows:
+                ---
+                *Problem*:
+                `problem written here`
+                ---
+                *Machine learning model to use*:
+                `ML model`
+                ---
+                *Explanation and alternatives*:
+                `Explanation of why that model was chosen`
+                ---
+                """,
+            4: """
+                Summarize the content and format summary EXACTLY as follows:
+                ---
+                *Transformations*:
+                `Transformations you've done to the data`
+                ---
+                *Splitting*:
+                `The split you've done and where you save the data`
+                ---
+                **Read the data**
+                `pd.read_csv('X_train.csv')`
+                `pd.read_csv('y_train.csv')`
+                `pd.read_csv('X_test.csv')`
+                `pd.read_csv('y_test.csv')`
+                """,
+            5: """
+                Summarize the content and format summary EXACTLY as follows:
+                ---
+                *ML model used*:
+                `ML model`
+                ---
+                *Place where you saved predictions*:
+                `acmecorp.com`
+                ---
+                *Results of the evaluations*:
+                `Metric: result`
+                ---
+                """,
+            6: """
+                Summarize the content and format summary EXACTLY as follows:
+                ---
+                *Data set name*:
+                `name of the dataset`
+                ---
+                *User problem*:
+                `problem of the user`
+                ---
+                *Target variable*
+                `the variable we're trying to predict`
+                ---    
+                **Correlations:**
+                'Correlations found'
+                ---
+                **Columns:**
+                'the columns'    
+                ---
+                **Relevant Insights:**
+                'The relevant insights'
+                ---
+                *Machine learning model to use*:
+                Random Forest Regressor
+                ---
+                *Explanation and alternatives*:
+                'Explanations of the machine learning model used'
+                ---
+                *Transformations*:
+                `the transformations made to the data`
+                ---
+                *Splitting*:
+                `The splitting done to the data`
+                ---
+                *Results of the evaluations*:
+                `results of the metrics`
+                ---
+                """
+        }
+    except Exception as e:
+        logging.error("Error in _get_summary_prompt", exc_info=True)
+        raise
