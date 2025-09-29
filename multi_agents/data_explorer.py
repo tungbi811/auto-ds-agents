@@ -4,37 +4,71 @@ from pydantic import BaseModel, Field
 from typing import List, Annotated, Literal, Dict, Optional, Tuple
 from pydantic import BaseModel, Field
 
+class DataExploringPlan(BaseModel):
+    """
+    Defines a structured plan for exploring a dataset, focusing on specific
+    data quality and statistical checks.
+    """
+
+    step_type: Literal["dtype", "duplicate_rows", "missing_values","unique_values","target_variable_analysis"] = Field(
+        ...,
+        description=(
+            "Type of exploration step to perform. "
+            
+        ),
+        example="missing_values"
+    )
+
+    rule: str = Field(
+        ...,
+        description=(
+            "Specific rule, threshold, or method to apply for this step. "
+            "This should clarify how the step will be executed."
+        ),
+        example="Report columns with missing values only"
+    )
+
+    columns: Optional[List[str]] = Field(
+        None,
+        description=(
+            "List of specific columns to apply the step to. "
+            "If None, apply the step to all relevant columns automatically."
+        ),
+        example=["age", "income", "gender"]
+    )
+
 class MissingValueInfo(BaseModel):
     column: str = Field(..., description="Column name with missing values.")
     missing_count: int = Field(..., description="Count of missing values in the column.")
 
-class HighCorrelationPair(BaseModel):
-    column_1: str = Field(..., description="First column in the correlated pair.")
-    column_2: str = Field(..., description="Second column in the correlated pair.")
-    correlation: float = Field(..., description="Correlation coefficient between the two columns.")
-
 class DataExplorerOutput(BaseModel):
+    total_rows: int = Field(..., description="Total number of rows in the dataset.")
+    total_columns: int = Field(..., description="Total number of columns in the dataset.")
+    numerical_columns: List[str] = Field(
+        ..., description="List of numerical columns in the dataset."
+    )
+    categorical_columns: List[str] = Field(
+        ..., description="List of categorical columns in the dataset."
+    )
+    datetime_columns: List[str] = Field(
+        ..., description="List of datetime columns in the dataset."
+    )
     duplicate_rows: int = Field(
         ..., description="Total number of duplicate rows in the dataset."
     )
     missing_values: List[MissingValueInfo] = Field(
         ..., description="List of columns with missing values and their details."
     )
-    # target_variable: Optional[str] = Field(
-    #     default=None, description="The target variable."
-    # )
-    # high_cardinality_cols: List[str] = Field(
-    #     ..., description="List of categorical columns with unusually high unique values."
-    # )
-    # high_correlation_pairs: List[HighCorrelationPair] = Field(
-    #     ..., description="List of feature pairs with high correlation (above 0.8 or below -0.8)."
-    # )
-    # constant_cols: List[str] = Field(
-    #     ..., description="List of columns with only a single unique value (uninformative)."
-    # )
+    target_column: Optional[str] = Field(
+        default=None, description="Base on the problem statement, create or identify the target variable if needed."
+    )
+    target_variable_insight: Optional[Dict[str, int]] = Field(
+        default=None,
+        description="provide a detailed analysis on the target variable, its distribution, limitations, issues, ..."
+    )
 
 def execute_data_exploring_plan(
-    plan: Annotated[str, "One specific exploration step to implement in code (small and focused)."],
+    plan: DataExploringPlan,
     context_variables: ContextVariables
 ) -> ReplyResult:
     """
@@ -49,15 +83,13 @@ def execute_data_exploring_plan(
 
 def complete_data_explore_task(
     results: DataExplorerOutput,
-    context_variables: ContextVariables
 ) -> ReplyResult:
     """
     Complete the DataExplorer stage and hand off results to the DataEngineer.
     """
     return ReplyResult(
-        message=f"Data exploration is complete. Here is the findings: {results.model_dump_json()}",
-        target=AgentNameTarget("DataEngineer"),
-        # context_variables=context_variables,
+        message=f"Data exploration is complete. Here is the findings: {results}",
+        target=AgentNameTarget("DataCleaner"),
     )
 
 class DataExplorer(AssistantAgent):

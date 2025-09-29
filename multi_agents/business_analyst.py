@@ -5,14 +5,46 @@ from typing import Annotated, Literal, List, Optional
 import pandas as pd
 
 class BizAnalystOutput(BaseModel):
-    goal: str = Field(
-        ..., description="1–2 sentences capturing the core business goal/question."
+    business_use_case_description: str = Field(
+        ...,
+        description=(
+            "A clear explanation of the goal of this project for the business. "
+            "It should describe the problem being solved, why it matters, and "
+            "how it aligns with business strategy."
+        ),
+        example=(
+            "The goal of this project is to implement a predictive model to "
+            "forecast customer churn, enabling proactive retention strategies "
+            "and reducing revenue loss."
+        )
     )
-    problem_type: Literal[
-        "Regression", "Classification", "Clustering",
-        "Forecasting", "Recommendation", "Anomaly Detection"
-    ] = Field(
-        ..., description="ML task framing that best matches the goal."
+    business_objectives: str = Field(
+        ...,
+        description=(
+            "Describe the impact of accurate or incorrect results on the business. "
+            "Explain the benefits of high accuracy and the risks of errors."
+        ),
+        example=(
+            "Accurate churn predictions will allow targeted retention campaigns, "
+            "potentially reducing churn by 15% and saving $2M annually. "
+            "Incorrect results may waste marketing spend or harm customer trust."
+        )
+    )
+    stakeholders_expectations_explanations: str = Field(
+        ...,
+        description=(
+            "Explain how the results will be used, who will use them, and who will "
+            "be impacted by them. Identify both direct users and downstream stakeholders."
+        ),
+        example=(
+            "The marketing team will use the predictions to design retention campaigns. "
+            "Customer success managers will use them to prioritize outreach. "
+            "Customers may experience more relevant engagement, improving satisfaction."
+        )
+    )
+    problem_type: Literal["classification", "regression", "clustering"] = Field(
+        ...,
+        description="The type of machine learning problem to be solved.",
     )
 
 def request_clarification(
@@ -30,19 +62,25 @@ def get_data_info(
     data_path: Annotated[str, "Dataset path"],
 ) -> ReplyResult:
     df = pd.read_csv(data_path)
-    print(df.head())
-    return ReplyResult(message=f"Here is the information of columns in dataset", target=AgentNameTarget("BusinessAnalyst"))
+    print(df.head(5))
+    return ReplyResult(
+        message="Performed a quick peek of the dataset.", 
+        target=AgentNameTarget("BusinessAnalyst")
+    )
 
 def complete_business_analyst(
     output: BizAnalystOutput,
     context_variables: ContextVariables
 ) -> ReplyResult:
-    context_variables["goal"] = output.goal
+    context_variables["business_use_case_description"] = output.business_use_case_description
+    context_variables["business_objectives"] = output.business_objectives
+    context_variables["stakeholders_expectations_explanations"] = output.stakeholders_expectations_explanations
     context_variables["problem_type"] = output.problem_type
-
+    context_variables["current_agent"] = "DataExplorer"
     return ReplyResult(
         message="I have finished business understanding",
-        target=AgentNameTarget("DataExplorer")
+        target=AgentNameTarget("DataExplorer"),
+        context_variables=context_variables,
     )
 
 class BusinessAnalyst(AssistantAgent):

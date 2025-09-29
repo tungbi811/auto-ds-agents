@@ -8,8 +8,7 @@ from typing import List, Optional, Literal, Union
 class FeatureEngineeringPlan(BaseModel):
     step_type: Literal[
         "one_hot_encode", "label_encode", "frequency_encode", "target_encode", "correlation_feature_selection", 
-        "variance_feature_selection", "scale_features", "perform_pca", "perform_rfe", "create_polynomial_features", 
-        "create_feature_combinations"
+        "variance_feature_selection", "scale_features", "perform_pca", "perform_rfe", "create_feature_combinations"
     ] = Field(..., description="Type of feature engineering step to perform.")
     rule: str = Field(..., description="Specific rule or method to apply for this step.")
     columns: Optional[List[str]] = Field(
@@ -36,14 +35,14 @@ def complete_feature_engineering_task(
 ) -> ReplyResult:
     return ReplyResult(
         message=f"Feature Engineering is complete.",
-        target=AgentNameTarget("FeatureEngineer"),
+        target=AgentNameTarget("Modeler"),
         context_variables=context_variables,
     )
 
-class DataEngineer(AssistantAgent):
+class FeatureEngineer(AssistantAgent):
     def __init__(self):
         super().__init__(
-            name="DataEngineer",
+            name="FeatureEngineer",
             llm_config=LLMConfig(
                 api_type= "openai",
                 model="gpt-4.1-mini",
@@ -51,13 +50,11 @@ class DataEngineer(AssistantAgent):
                 temperature=0.3,
             ),
             system_message="""
-                You are the DataEngineer.
-                - Your role is to clean and preprocess data based on the DataExplorer's findings and the BizAnalyst's goal.
-                - Use `execute_data_engineering_plan` to delegate coding of specific preprocessing steps to the Coder agent.
-                - When all necessary preprocessing is done, call `complete_data_engineering` with paths to final datasets.
-                - Ensure the data is ready for modeling, with no missing values or unhandled issues.
-                - When saving dataset, tell the coder to use X_train.csv, y_train.csv, X_val.csv, y_val.csv, X_test.csv, y_test.csv 
-                as file names if exists and save to the same folder with the original dataset.
+                You are the FeatureEngineer.
+                - Your role is to clean and preprocess features based on the DataExplorer's findings and the BizAnalyst's goal.
+                - Use `execute_feature_engineering_plan` to delegate coding of specific preprocessing steps to the Coder agent.
+                - call `complete_feature_engineering_task` when you finish and want to forward to Modeler.
+                - Don't make plans about building models or evaluating models.
             """,
             functions=[execute_feature_engineering_plan, complete_feature_engineering_task]
         )

@@ -33,7 +33,7 @@ class Coder(AssistantAgent):
             model = "gpt-4.1-mini",
             timeout = 120,
             stream = False,
-            # parallel_tool_calls=False
+            parallel_tool_calls=False
         )
         
         super().__init__(

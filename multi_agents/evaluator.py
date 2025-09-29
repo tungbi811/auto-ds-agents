@@ -1,4 +1,26 @@
 from autogen import AssistantAgent, LLMConfig
+from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
+
+def execute_evaluation_plan(
+    context_variables: ContextVariables,
+) -> ReplyResult:
+    """
+    Delegate evaluation tasks to the Evaluator agent.
+    """
+    return ReplyResult(
+        message=f"Please write Python code to evaluate the machine learning models based on the BizAnalyst's goals.",
+        target=AgentNameTarget("Evaluator"),
+        context_variables=context_variables,
+    )
+
+def complete_evaluation_task(
+    context_variables: ContextVariables,
+) -> ReplyResult:
+    return ReplyResult(
+        message=f"Evaluation is complete.",
+        target=AgentNameTarget("BusinessAnalyst"),
+        context_variables=context_variables,
+    )
 
 class Evaluator(AssistantAgent):
     def __init__(self):
@@ -9,18 +31,10 @@ class Evaluator(AssistantAgent):
                 model="gpt-4o-mini",
             ),
             system_message="""
-                You are the Evaluator Agent
-                Your job is to validate whether the chosen model meets acceptance criteria.
-
-                Tasks:
-                - Recompute metrics on the test set.
-                - Run error analysis and segment analysis.
-                - Check robustness, fairness, and operational constraints.
-                - Decide if the model is acceptable or if iteration is needed.
-                - Provide handoff notes for the Business Translation Agent.
-
-                Rules:
-                - Tie evaluation back to business objectives.
-                - If you include code, provide it in a fenced Python block and end with <RUN_THIS>.
-            """
+                You are the Evaluator.
+                - Your role is to evaluate machine learning models based on the Modeller's results and the BizAnalyst's goals.
+                - Ensure that the evaluation is thorough, with clear explanations of metrics used and interpretations of results.
+                - Use `execute_evaluation_plan` to delegate coding of specific evaluation tasks to yourself.
+                - When all evaluation tasks are complete, call `complete_evaluation_task` to hand off results to the BusinessAnalyst.
+            """,
         )
