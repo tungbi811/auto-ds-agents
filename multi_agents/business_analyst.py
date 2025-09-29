@@ -1,7 +1,7 @@
 from autogen import LLMConfig, AssistantAgent
 from pydantic import BaseModel, Field
 from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTarget, ContextVariables
-from typing import Annotated, Literal, List
+from typing import Annotated, Literal, List, Optional
 import pandas as pd
 
 class BizAnalystOutput(BaseModel):
@@ -10,32 +10,28 @@ class BizAnalystOutput(BaseModel):
     )
     problem_type: Literal[
         "Regression", "Classification", "Clustering",
-        "Forecasting", "Recommendation", "Segmentation", "Other"
+        "Forecasting", "Recommendation", "Anomaly Detection"
     ] = Field(
         ..., description="ML task framing that best matches the goal."
     )
-    key_metrics: List[str] = Field(
-        ..., description="Business KPIs and/or ML metrics used to judge success."
-    )
 
 def request_clarification(
-    clarification_question: Annotated[str, "Question to ask user for clarification"],
-    # context_variables: ContextVariables,
+    clarification_question: Annotated[str, "One targeted question to clarify user intent"],
 ) -> ReplyResult:
     """
     Request clarification from the user when the query is ambiguous
     """
     return ReplyResult(
         message=f"Further clarification is required to determine the correct domain: {clarification_question}",
-        # context_variables=context_variables,
         target=RevertToUserTarget(),
     )
 
 def get_data_info(
-    data_path: Annotated[str, "Dataset path provided by user"],
+    data_path: Annotated[str, "Dataset path"],
 ) -> ReplyResult:
     df = pd.read_csv(data_path)
-    return ReplyResult(message=f"Here is the information of columns in dataset: {df}", target=AgentNameTarget("BusinessAnalyst"))
+    print(df.head())
+    return ReplyResult(message=f"Here is the information of columns in dataset", target=AgentNameTarget("BusinessAnalyst"))
 
 def complete_business_analyst(
     output: BizAnalystOutput,
@@ -43,7 +39,6 @@ def complete_business_analyst(
 ) -> ReplyResult:
     context_variables["goal"] = output.goal
     context_variables["problem_type"] = output.problem_type
-    context_variables["key_metrics"] = output.key_metrics
 
     return ReplyResult(
         message="I have finished business understanding",
@@ -56,19 +51,21 @@ class BusinessAnalyst(AssistantAgent):
             name="BusinessAnalyst",
             llm_config=LLMConfig(
                 api_type= "openai",
-                model="gpt-4o-mini",
+                model="gpt-4.1-mini",
                 response_format=BizAnalystOutput,
+                temperature=0.3,
                 parallel_tool_calls=False
             ),
             system_message="""
-                You are the BusinessAnalyst. 
-                - Act as a senior business analyst for data science projects.
-                - Bridge business needs with data capabilities.
-                - Translate business requirements into clear technical requirements for the data team.
-                - On every new user task, FIRST call `get_data_info` once to obtain column/data info relevant to the task.
-                - ONLY if you cannot confidently fill critical fields (e.g., user_question) after step 1,
-                call `request_clarification` with a concise list of targeted questions. Do not ask broad or generic questions.
-                - Using the tool result + user message, produce a structured answer that conforms to `BizAnalystOutput`.
+                You are the BizAnalyst.
+                - Translate the user’s request into a concrete DS task.
+                Workflow:
+                1) If the task depends on a dataset and no path is given, call `request_clarification` with ONE targeted question.
+                2) If a path is given, call `get_data_info` ONCE to peek (tiny head/sample) to ground your framing.
+                3) Produce BizAnalystOutput (goal, problem_type, key_metrics).
+                4) When you finish call function `complete_business_analyst` and route to DataExplorer.
+                Rules:
+                - Be concise, avoid jargon. No full table dumps or full-file reads.
             """,
             functions = [get_data_info, request_clarification, complete_business_analyst]
         )

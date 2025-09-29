@@ -30,7 +30,7 @@ class Coder(AssistantAgent):
 
         llm_config = LLMConfig(
             api_type = "openai",
-            model = "gpt-4o-mini",
+            model = "gpt-4.1-mini",
             timeout = 120,
             stream = False,
             # parallel_tool_calls=False

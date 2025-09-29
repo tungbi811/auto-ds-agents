@@ -2,58 +2,41 @@ from autogen import AssistantAgent, LLMConfig
 from typing import Annotated, Optional
 from pydantic import BaseModel, Field
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
-
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal, Union
 
-class DataEngineeringPlan(BaseModel):
+class FeatureEngineeringPlan(BaseModel):
     step_type: Literal[
-        "FillMissing", "RemoveColumnsWithMissing", "DetectOutliersZScore",
-        "DetectOutliersIQR", "ConvertDataTypes", "RemoveDuplicates", "FormatDatetime", "TrainTestSplit"
-    ] = Field(..., description="Type of data engineering step to perform.")
-    description: str = Field(..., description="Detail description of the data engineering step for coder write code.")
+        "one_hot_encode", "label_encode", "frequency_encode", "target_encode", "correlation_feature_selection", 
+        "variance_feature_selection", "scale_features", "perform_pca", "perform_rfe", "create_polynomial_features", 
+        "create_feature_combinations"
+    ] = Field(..., description="Type of feature engineering step to perform.")
+    rule: str = Field(..., description="Specific rule or method to apply for this step.")
     columns: Optional[List[str]] = Field(
         None, description="List of columns to apply the step to. If None, apply to all relevant columns."
     )
 
-class DataEngineerOutput(BaseModel):
-    X_train_path: str = Field(..., description="Path to training features CSV.")
-    y_train_path: Optional[str] = Field(
-        None, description="Path to training target CSV if supervised; None for unsupervised tasks."
-    )
-    X_val_path: Optional[str] = Field(
-        None, description="Path to validation features CSV if available; None otherwise."
-    )
-    y_val_path: Optional[str] = Field(
-        None, description="Path to validation target CSV if available and supervised; None otherwise."
-    )
-    X_test_path: str = Field(..., description="Path to test features CSV if available.")
-    y_test_path: Optional[str] = Field(
-        None, description="Path to test target CSV if available and supervised; None otherwise."
-    )
-
-def execute_data_engineering_plan(
-    plan: DataEngineeringPlan,
+def execute_feature_engineering_plan(
+    plan: FeatureEngineeringPlan,
     context_variables: ContextVariables,
 ) -> ReplyResult:
     """
         Delegate a single preprocessing step to the Coder agent.
         Example plan: 'Impute numeric columns with median and categorical with most frequent.'
     """
-    context_variables["current_agent"] = "DataEngineer"
+    context_variables["current_agent"] = "FeatureEngineer"
     return ReplyResult(
-        message=f"Please write Python code to execute this data engineering step:\n{plan}",
+        message=f"Please write Python code to execute this feature engineering step:\n{plan}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
-def complete_data_engineering(
-    output: DataEngineerOutput,
+def complete_feature_engineering_task(
     context_variables: ContextVariables,
 ) -> ReplyResult:
     return ReplyResult(
-        message=f"Data engineering is complete. Here are the dataset paths: {output.json()}",
-        target=AgentNameTarget("Modeler"),
+        message=f"Feature Engineering is complete.",
+        target=AgentNameTarget("FeatureEngineer"),
         context_variables=context_variables,
     )
 
@@ -65,7 +48,6 @@ class DataEngineer(AssistantAgent):
                 api_type= "openai",
                 model="gpt-4.1-mini",
                 parallel_tool_calls=False,
-                response_format=DataEngineerOutput,
                 temperature=0.3,
             ),
             system_message="""
@@ -77,5 +59,5 @@ class DataEngineer(AssistantAgent):
                 - When saving dataset, tell the coder to use X_train.csv, y_train.csv, X_val.csv, y_val.csv, X_test.csv, y_test.csv 
                 as file names if exists and save to the same folder with the original dataset.
             """,
-            functions=[execute_data_engineering_plan, complete_data_engineering]
+            functions=[execute_feature_engineering_plan, complete_feature_engineering_task]
         )
