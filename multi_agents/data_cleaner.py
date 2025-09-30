@@ -30,6 +30,7 @@ def execute_data_cleaning_plan(
         context_variables=context_variables,
     )
 
+
 def complete_data_cleaning_task(
     context_variables: ContextVariables,
 ) -> ReplyResult:
