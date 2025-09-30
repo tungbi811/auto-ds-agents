@@ -103,6 +103,7 @@ class BusinessAnalyst(AssistantAgent):
                 3) Produce BizAnalystOutput (business use case, objectives, stakeholders, problem type).
                 4) When you finish call function `complete_business_analyst` and route to DataExplorer.
                 Rules:
+                - You must call functions provided: `request_clarification`, `get_data_info`, and `complete_business_analyst`.
                 - Be concise, avoid jargon. No full table dumps or full-file reads.
             """,
             functions = [get_data_info, request_clarification, complete_business_analyst]

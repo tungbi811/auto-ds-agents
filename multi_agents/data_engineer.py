@@ -6,15 +6,12 @@ from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResu
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal, Union
 
-class DataEngineeringPlan(BaseModel):
-    step_type: Literal[
-        "FillMissing", "RemoveColumnsWithMissing", "DetectOutliersZScore",
-        "DetectOutliersIQR", "ConvertDataTypes", "RemoveDuplicates", "FormatDatetime", "TrainTestSplit"
-    ] = Field(..., description="Type of data engineering step to perform.")
-    description: str = Field(..., description="Detail description of the data engineering step for coder write code.")
+
+class DataCleaningPlan(BaseModel):
+    plan_type: Literal[
+        "Remove column that has more than 50% missing values",
+    ]
     columns: Optional[List[str]] = Field(
-        None, description="List of columns to apply the step to. If None, apply to all relevant columns."
-    )
 
 class DataEngineerOutput(BaseModel):
     X_train_path: str = Field(..., description="Path to training features CSV.")
@@ -31,6 +28,27 @@ class DataEngineerOutput(BaseModel):
     y_test_path: Optional[str] = Field(
         None, description="Path to test target CSV if available and supervised; None otherwise."
     )
+
+class DataCleaningPlan(BaseModel):
+    plan_type: Literal[
+        "handle_missing_values", "remove_duplicates", "handle_outliers", "standardize_formats", "validate_data"
+    ]
+    plan_description: str = Field(
+        ...,
+        description="Detailed explanation of the specific step in the data cleaning process.",
+        example="Impute missing values in 'age' column with median."
+    )
+
+def execute_data_cleaning_plan(
+    plan: DataCleaningPlan
+):
+    pass
+
+def execute_feature_engineering_plan():
+    pass
+
+def execute_data_preparation_plan():
+    pass
 
 def execute_data_engineering_plan(
     plan: DataEngineeringPlan,
@@ -71,6 +89,10 @@ class DataEngineer(AssistantAgent):
             system_message="""
                 You are the DataEngineer.
                 - Your role is to clean and preprocess data based on the DataExplorer's findings and the BizAnalyst's goal.
+                Workflow:
+                1) Use `execute_data_cleaning_plan` to clean data based on identified issues base on DataExplorer's finding issue.
+                2) Use `execute_feature_engineering_plan` to create or transform features as needed
+
                 - Use `execute_data_engineering_plan` to delegate coding of specific preprocessing steps to the Coder agent.
                 - When all necessary preprocessing is done, call `complete_data_engineering` with paths to final datasets.
                 - Ensure the data is ready for modeling, with no missing values or unhandled issues.
