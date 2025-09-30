@@ -5,27 +5,14 @@ from typing import List, Annotated, Literal, Dict, Optional, Tuple
 from pydantic import BaseModel, Field
 
 class DataExploringPlan(BaseModel):
-    """
-    Defines a structured plan for exploring a dataset, focusing on specific
-    data quality and statistical checks.
-    """
-
-    step_type: Literal["dtype", "duplicate_rows", "missing_values","unique_values","target_variable_analysis"] = Field(
+    plan_description: str = Field(
         ...,
         description=(
-            "Type of exploration step to perform. "
-            
+            "A concise description of the overall exploration plan. It should outline the key steps to take in order to understand the dataset."
         ),
-        example="missing_values"
-    )
-
-    rule: str = Field(
-        ...,
-        description=(
-            "Specific rule, threshold, or method to apply for this step. "
-            "This should clarify how the step will be executed."
-        ),
-        example="Report columns with missing values only"
+        example=(
+            "Explore the relationship between age, income, and spending habits in the dataset."
+        )
     )
 
     columns: Optional[List[str]] = Field(
@@ -37,34 +24,65 @@ class DataExploringPlan(BaseModel):
         example=["age", "income", "gender"]
     )
 
-class MissingValueInfo(BaseModel):
-    column: str = Field(..., description="Column name with missing values.")
-    missing_count: int = Field(..., description="Count of missing values in the column.")
+class Insight(BaseModel):
+    column: str = Field(
+        ...,
+        description="The name of the column where the insight was found.",
+        example="age"
+    )
+    insight: str = Field(
+        ...,
+        description="A concise description of the insight discovered.",
+        example="The age distribution is right-skewed with a median of 35."
+    )
+
+class Issue(BaseModel):
+    column: str = Field(
+        ...,
+        description="The name of the column where the issue was found.",
+        example="income"
+    )
+    issue: str = Field(
+        ...,
+        description="A concise description of the data quality issue discovered.",
+        example="There are 15% missing values in this column."
+    )
+    recommendation: str = Field(
+        ...,
+        description="A recommended action to address the identified issue.",
+        example=(
+            "Consider imputing missing values with the median or removing rows with missing data.",
+            "Remove outliers using the IQR method."
+            ""
+        )
+    )
+
+class NexxtStep(BaseModel):
+    columns: List[str] = Field(
+        ...,
+        description="List of columns to apply the next step to.",
+        example=["age", "income"]
+    )
+    action: Literal[
+        "impute_missing_values", "remove_outliers", "convert_data_types", "remove_duplicates", "format_datetime"
+    ] = Field(
+        ...,
+        description="The type of data cleaning or feature engineering action to take.",
+        example="impute_missing_values" 
+    )
 
 class DataExplorerOutput(BaseModel):
-    total_rows: int = Field(..., description="Total number of rows in the dataset.")
-    total_columns: int = Field(..., description="Total number of columns in the dataset.")
-    numerical_columns: List[str] = Field(
-        ..., description="List of numerical columns in the dataset."
+    insights: List[Insight] = Field(
+        ...,
+        description="A list of key insights discovered during data exploration."
     )
-    categorical_columns: List[str] = Field(
-        ..., description="List of categorical columns in the dataset."
+    issues: List[Issue] = Field(
+        ...,
+        description="A list of data quality issues identified during data exploration."
     )
-    datetime_columns: List[str] = Field(
-        ..., description="List of datetime columns in the dataset."
-    )
-    duplicate_rows: int = Field(
-        ..., description="Total number of duplicate rows in the dataset."
-    )
-    missing_values: List[MissingValueInfo] = Field(
-        ..., description="List of columns with missing values and their details."
-    )
-    target_column: Optional[str] = Field(
-        default=None, description="Base on the problem statement, create or identify the target variable if needed."
-    )
-    target_variable_insight: Optional[Dict[str, int]] = Field(
-        default=None,
-        description="provide a detailed analysis on the target variable, its distribution, limitations, issues, ..."
+    recommended_next_steps: List[str] = Field(
+        ...,
+        description="A list of recommended next steps for data cleaning or feature engineering based on the findings."
     )
 
 def execute_data_exploring_plan(
@@ -83,12 +101,16 @@ def execute_data_exploring_plan(
 
 def complete_data_explore_task(
     results: DataExplorerOutput,
+    context_variables: ContextVariables
 ) -> ReplyResult:
     """
     Complete the DataExplorer stage and hand off results to the DataEngineer.
     """
+    context_variables["data_insights"] = results.insights
+    context_variables["data_issues"] = results.issues
+    context_variables["current_agent"] = "DataCleaner"
     return ReplyResult(
-        message=f"Data exploration is complete. Here is the findings: {results}",
+        message=f"Here are the recommended next steps: {results.recommended_next_steps}",
         target=AgentNameTarget("DataCleaner"),
     )
 
@@ -105,10 +127,15 @@ class DataExplorer(AssistantAgent):
             system_message = """
                 You are the DataExplorer.
                 - Your job is to inspect the dataset and summarize key issues.
-                - Always keep exploration steps small and focused.
-                - Use `execute_data_exploring_plan` to delegate coding to the Coder agent.
-                - When exploration is finished, call `complete_data_explore_task` with your findings.
-                - Do not build models or perform heavy transformations. Just identify problems and opportunities.
+                Workflow:
+                1) Based on the business understanding from the BusinessAnalyst, create a structured DataExploringPlan.
+                2) For each step in the plan, call `execute_data_exploring_plan` to delegate coding to the Coder agent.
+                3) Collect results from each step and summarize in DataExplorerOutput.
+                4) When exploration is finished, call `complete_data_explore_task` with your findings and route to Data Cleaner.
+                Rules:
+                - You must call two functions provided: `execute_data_exploring_plan` and `complete_data_explore_task`.
+                - Don't perform coding yourself. Always delegate coding to the Coder agent.
+                - Don't make plan for data cleaning, feature engineering or modeling. Focus only on exploration and summarization.
             """,
             functions=[execute_data_exploring_plan, complete_data_explore_task]
         )

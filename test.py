@@ -18,6 +18,8 @@ modeler = Modeler()
 evaluator = Evaluator()
 business_translator = BusinessTranslator()
 
+data_explorer.handoffs.set_after_work(AgentTarget(data_cleaner))
+
 pattern = DefaultPattern(
     initial_agent=ba,
     agents=[ba, data_explorer, data_cleaner, feature_engineer, coder, data_engineer, modeler, evaluator, business_translator],
@@ -28,6 +30,9 @@ pattern = DefaultPattern(
 # Run the chat
 result, final_context, last_agent = initiate_group_chat(
     pattern=pattern,
-    messages="Here is the dataset path: ./data/house_prices/train.csv. Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)",
+    messages="""
+        Here is the dataset path: ./data/house_prices/train.csv. 
+        Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)
+    """,
     max_rounds=100
 )

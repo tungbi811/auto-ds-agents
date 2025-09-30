@@ -64,7 +64,7 @@ def get_data_info(
     df = pd.read_csv(data_path)
     print(df.head(5))
     return ReplyResult(
-        message="Performed a quick peek of the dataset.", 
+        message=f"Here is the preview:\n {df.head(5)}", 
         target=AgentNameTarget("BusinessAnalyst")
     )
 
@@ -100,7 +100,7 @@ class BusinessAnalyst(AssistantAgent):
                 Workflow:
                 1) If the task depends on a dataset and no path is given, call `request_clarification` with ONE targeted question.
                 2) If a path is given, call `get_data_info` ONCE to peek (tiny head/sample) to ground your framing.
-                3) Produce BizAnalystOutput (goal, problem_type, key_metrics).
+                3) Produce BizAnalystOutput (business use case, objectives, stakeholders, problem type).
                 4) When you finish call function `complete_business_analyst` and route to DataExplorer.
                 Rules:
                 - Be concise, avoid jargon. No full table dumps or full-file reads.
