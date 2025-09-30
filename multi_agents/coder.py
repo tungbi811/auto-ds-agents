@@ -19,6 +19,7 @@ def run_code(code: Annotated[str, "Python code to run in Jupyter"], context_vari
     if result.exit_code == 0:
         target = AgentNameTarget(context_variables["current_agent"])
     else:
+        result.output = result.output[:1000]  # truncate long output
         target = AgentNameTarget("Coder")
 
     msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"

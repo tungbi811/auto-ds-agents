@@ -7,6 +7,7 @@ def execute_modeling_plan(
     """
     Delegate modeling tasks to the Coder agent.
     """
+    context_variables["current_agent"] = "Modeler"
     return ReplyResult(
         message=f"Please write Python code to build, evaluate, and select machine learning models based on the processed data and the BizAnalyst's goals.",
         target=AgentNameTarget("Coder"),
@@ -16,9 +17,10 @@ def execute_modeling_plan(
 def complete_modeling_task(
     context_variables: ContextVariables,
 ) -> ReplyResult:
+    context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
         message=f"Modeling is complete.",
-        target=AgentNameTarget("Evaluator"),
+        target=AgentNameTarget("BusinessTranslator"),
         context_variables=context_variables,
     )
 
@@ -37,7 +39,10 @@ class Modeler(AssistantAgent):
                 - Your role is to build, evaluate, and select machine learning models based on the FeatureEngineer's processed data and the BizAnalyst's goals.
                 - Ensure that the models are well-documented, with clear explanations of choices made during the modeling process.
                 - Use `execute_modeling_plan` to delegate coding of specific modeling tasks to the Coder agent.
-                - When all modeling tasks are complete, call `complete_modeling_task` to hand off results to the Evaluator.
+                - When all modeling tasks are complete, call `complete_modeling_task` to hand off results to the Business Translator.
+
+                Rules:
+                - You must use 2 provided functions: `execute_modeling_plan`, `complete_modeling_task`.
             """,
             functions=[complete_modeling_task, execute_modeling_plan]
         )

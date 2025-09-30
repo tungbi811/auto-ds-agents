@@ -13,15 +13,16 @@ def execute_business_translation_task(
     context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
         message=f"Please translate this business task into specific data science objectives:\n{task}",
-        target=AgentNameTarget("BusinessAnalyst"),
+        target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
 def complete_business_translation_task(
+    answer: Annotated[str, "The final answer or summary of user requirements."],
     context_variables: ContextVariables,
 ) -> ReplyResult:
     return ReplyResult(
-        message=f"Business translation is complete.",
+        message=answer,
         target=RevertToUserTarget(),
         context_variables=context_variables,
     )
@@ -34,12 +35,14 @@ class BusinessTranslator(AssistantAgent):
                 api_type= "openai",
                 model="gpt-5-mini",
                 parallel_tool_calls=False,
-                temperature=0.3,
             ),
             system_message="""
                 You are the BusinessTranslator.
-                - Your role is to translate high-level business tasks into specific data science objectives.
-                - Use `execute_business_translation_task` to delegate the translation task to the BusinessAnalyst agent.
+                - Your role is to translate already developed models and technical results into business insights that non-technical stakeholders can understand.
+                - Communicate findings in clear, non-technical language.
+                - Highlight the business implications of the results.
+                - Ensure that the insights are actionable and aligned with business goals.
+                - Use `execute_business_translation_task` to delegate the translation task to the Coder agent.
                 - When the translation is complete, call `complete_business_translation_task` to answer user questions.
             """,
             functions=[execute_business_translation_task, complete_business_translation_task]

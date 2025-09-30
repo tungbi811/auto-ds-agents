@@ -7,8 +7,7 @@ from typing import List, Optional, Literal, Union
 
 class FeatureEngineeringPlan(BaseModel):
     step_type: Literal[
-        "one_hot_encode", "label_encode", "frequency_encode", "target_encode", "correlation_feature_selection", 
-        "variance_feature_selection", "scale_features", "perform_pca", "perform_rfe", "create_feature_combinations"
+        "one_hot_encode", "label_encode", "frequency_encode", "target_encode"
     ] = Field(..., description="Type of feature engineering step to perform.")
     rule: str = Field(..., description="Specific rule or method to apply for this step.")
     columns: Optional[List[str]] = Field(
