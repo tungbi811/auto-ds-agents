@@ -665,3 +665,28 @@ Connecting to kernel 38d29e9d-3afc-4a6a-8e8a-3f230c2cfb5f.
 interrupted
 Shutting down...
 Kernel shutdown: 38d29e9d-3afc-4a6a-8e8a-3f230c2cfb5f
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 302a749a-f11c-49e4-8db5-9fc26d6c3a6f
+No session ID specified
+Connecting to kernel 302a749a-f11c-49e4-8db5-9fc26d6c3a6f.
+interrupted
+Shutting down...
+Kernel shutdown: 302a749a-f11c-49e4-8db5-9fc26d6c3a6f
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 0b9f61be-463e-43b6-b27e-a139f58b81ed
+No session ID specified
+Connecting to kernel 0b9f61be-463e-43b6-b27e-a139f58b81ed.
+interrupted
+Shutting down...
+Kernel shutdown: 0b9f61be-463e-43b6-b27e-a139f58b81ed
+received signal 2, stopping
+Kernel shutdown: 0b9f61be-463e-43b6-b27e-a139f58b81ed
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 108cbf78-20fd-40ee-92a2-d0ed41940302
+No session ID specified
+Connecting to kernel 108cbf78-20fd-40ee-92a2-d0ed41940302.
+WebSocket ping timeout after 118861 ms.
+Starting buffering for 108cbf78-20fd-40ee-92a2-d0ed41940302:435b39c6-e367225e06cfc326ce60ebea
+interrupted
+Shutting down...
+Kernel shutdown: 108cbf78-20fd-40ee-92a2-d0ed41940302

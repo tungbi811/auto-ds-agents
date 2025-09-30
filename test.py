@@ -1,7 +1,7 @@
 from autogen import UserProxyAgent
 from multi_agents import BusinessAnalyst, DataExplorer, DataCleaner, FeatureEngineer, Coder, DataEngineer, Modeler, Evaluator, BusinessTranslator
 from autogen.agentchat import initiate_group_chat
-from autogen.agentchat.group import AgentTarget
+from autogen.agentchat.group import AgentTarget, RevertToUserTarget
 from autogen.agentchat.group.patterns import DefaultPattern
 
 ba = BusinessAnalyst()
@@ -23,6 +23,7 @@ data_explorer.handoffs.set_after_work(AgentTarget(data_cleaner))
 data_cleaner.handoffs.set_after_work(AgentTarget(feature_engineer))
 feature_engineer.handoffs.set_after_work(AgentTarget(modeler))
 modeler.handoffs.set_after_work(AgentTarget(business_translator))
+business_translator.handoffs.set_after_work(RevertToUserTarget())
 
 pattern = DefaultPattern(
     initial_agent=ba,
@@ -34,6 +35,8 @@ pattern = DefaultPattern(
 # Run the chat
 result, final_context, last_agent = initiate_group_chat(
     pattern=pattern,
-    messages="Here is the dataset path: ./data/house_prices/train.csv. Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)",
+    messages="Here is the dataset path: ./data/house_prices/train.csv. Investors want to know which properties deliver the best returns.",
     max_rounds=100
 )
+
+# Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.
