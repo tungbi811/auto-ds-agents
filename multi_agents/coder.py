@@ -19,6 +19,7 @@ def run_code(code: Annotated[str, "Python code to run in Jupyter"], context_vari
     if result.exit_code == 0:
         target = AgentNameTarget(context_variables["current_agent"])
     else:
+        result.output = result.output[:1000]  # truncate long output
         target = AgentNameTarget("Coder")
 
     msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
@@ -41,13 +42,19 @@ class Coder(AssistantAgent):
             llm_config = llm_config,
             human_input_mode="NEVER",
             system_message = """
-                You are the Coder. 
-                Your role is to take the Planner’s structured step-by-step instructions and write complete, runnable code. 
-                Ensure the code is correct, minimal, and follows best practices. 
-                Always call the `run_code` tool when you want to write Python code
-                If the result indicates there is an error, fix the error and output the code again. 
-                Use clear print statements so outputs are readable in logs.
-                Do NOT create plots, charts, or images.
+                You are the Coder.
+                Your role is to take the structured step instructions and write complete, runnable Python code.
+
+                Rules:
+                1. Always ensure the code is minimal, correct, and runnable.
+                2. Use clear print() statements so that outputs are easy to understand in logs.
+                3. Do not create plots, charts, or images.
+                4. When working with pandas:
+                - Never use inplace=True. Instead, reassign the result (e.g., df = df.fillna(0) or df['col'] = df['col'].fillna(0)).
+                - Prefer .loc for assignments to avoid chained assignment warnings.
+                - Use .copy() explicitly when a new DataFrame is intended.
+                5. Always call the run_code tool when writing Python code.
+                6. If the result indicates an error, fix it and output the corrected code again.
             """,
             functions=[run_code]
         )

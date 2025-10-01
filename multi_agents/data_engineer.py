@@ -11,7 +11,7 @@ class DataCleaningPlan(BaseModel):
     plan_type: Literal[
         "Remove column that has more than 50% missing values",
     ]
-    columns: Optional[List[str]] = Field(
+    # columns: Optional[List[str]] = Field(
 
 class DataEngineerOutput(BaseModel):
     X_train_path: str = Field(..., description="Path to training features CSV.")
@@ -51,7 +51,7 @@ def execute_data_preparation_plan():
     pass
 
 def execute_data_engineering_plan(
-    plan: DataEngineeringPlan,
+    plan: DataEngineerOutput,
     context_variables: ContextVariables,
 ) -> ReplyResult:
     """

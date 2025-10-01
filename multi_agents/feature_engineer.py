@@ -5,27 +5,48 @@ from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResu
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal, Union
 
-class FeatureEngineeringPlan(BaseModel):
-    step_type: Literal[
-        "one_hot_encode", "label_encode", "frequency_encode", "target_encode", "correlation_feature_selection", 
-        "variance_feature_selection", "scale_features", "perform_pca", "perform_rfe", "create_feature_combinations"
-    ] = Field(..., description="Type of feature engineering step to perform.")
-    rule: str = Field(..., description="Specific rule or method to apply for this step.")
-    columns: Optional[List[str]] = Field(
-        None, description="List of columns to apply the step to. If None, apply to all relevant columns."
+class FeatureEngineeringStep(BaseModel):
+    step_description: str = Field(
+        ...,
+        description="Feature engineering step to perform.",
+        examples=[
+            "Create ratio features",
+            "Temporal features",
+            "Interaction features",
+            "Encode categorical variables"
+        ]
     )
-
-def execute_feature_engineering_plan(
-    plan: FeatureEngineeringPlan,
+    action: str = Field(
+        ...,
+        description="Action to take for this step.",
+        examples=[
+            "Add debt_to_income_ratio = debt / income.",
+            "Extract month and day_of_week from 'transaction_date'.",
+            "Create interaction term between 'age' and 'income'.",
+            "One-hot encode 'city' column."
+        ]
+    )
+    reason: str = Field(
+        ...,
+        description="Reason for this step.",
+        examples=[
+            "Important financial indicator for risk modeling.",
+            "apture seasonal or weekly spending patterns.",
+            "Younger high-income vs older high-income may have different behaviors.",
+            "Converts categories to numeric features usable by models."
+        ]
+    )
+def execute_feature_engineering_step(
+    step: FeatureEngineeringStep,
     context_variables: ContextVariables,
 ) -> ReplyResult:
     """
         Delegate a single preprocessing step to the Coder agent.
-        Example plan: 'Impute numeric columns with median and categorical with most frequent.'
+        Example step: 'Impute numeric columns with median and categorical with most frequent.'
     """
     context_variables["current_agent"] = "FeatureEngineer"
     return ReplyResult(
-        message=f"Please write Python code to execute this feature engineering step:\n{plan}",
+        message=f"Please write Python code to execute this feature engineering step:\n{step}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
@@ -51,10 +72,28 @@ class FeatureEngineer(AssistantAgent):
             ),
             system_message="""
                 You are the FeatureEngineer.
-                - Your role is to clean and preprocess features based on the DataExplorer's findings and the BizAnalyst's goal.
-                - Use `execute_feature_engineering_plan` to delegate coding of specific preprocessing steps to the Coder agent.
-                - call `complete_feature_engineering_task` when you finish and want to forward to Modeler.
-                - Don't make plans about building models or evaluating models.
+                Your role is to design, create, and transform features from the cleaned datasets to maximize their utility for analysis and modeling. 
+                You enhance the data by generating meaningful representations that capture underlying patterns and relationships.
+
+                Key Responsibilities:
+                - Feature creation: Derive new features from existing variables (e.g., ratios, interactions, aggregations, time-based features).
+                - Feature transformation: Apply transformations such as normalization, scaling, binning, or encoding to make features more suitable for modeling.
+                - Feature selection: Identify and retain features that add predictive or explanatory value, while reducing redundancy and noise.
+                - Dimensionality reduction: Apply techniques like PCA, embeddings, or clustering-based reductions when appropriate to simplify feature space.
+                - Encoding categorical data: Convert categorical variables into numerical representations (e.g., one-hot, target encoding, embeddings).
+                - Temporal and sequential features: Engineer lag variables, rolling statistics, or trend-based features from time-series data.
+                - Domain-driven enrichment: Incorporate domain knowledge to design features that align with business logic or problem context.
+                - Validation: Ensure that engineered features are consistent, non-leaky, and aligned with data quality standards.
+                - Split the data into training, validation, and test sets to prevent data leakage.
+
+                Workflow:
+                1. Review the cleaned datasets and the DataCleaner’s outputs.
+                2. For each feature engineering step, call execute_feature_engineering_step to delegate implementation to the Coder agent.
+                3. Once all required feature engineering is complete, call complete_feature_engineering_task with the paths to the final feature sets.
+
+                Rules:
+                Do not perform model training, evaluation, or selection. Your scope is limited to feature engineering.
+                Ensure reproducibility and clear documentation of all engineered features.
             """,
-            functions=[execute_feature_engineering_plan, complete_feature_engineering_task]
+            functions=[execute_feature_engineering_step, complete_feature_engineering_task]
         )

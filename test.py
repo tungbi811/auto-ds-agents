@@ -18,11 +18,11 @@ modeler = Modeler()
 evaluator = Evaluator()
 business_translator = BusinessTranslator()
 
-data_explorer.handoffs.set_after_work(AgentTarget(data_cleaner))
+# data_explorer.handoffs.set_after_work(AgentTarget(data_cleaner))
 
 pattern = DefaultPattern(
     initial_agent=ba,
-    agents=[ba, data_explorer, data_cleaner, feature_engineer, coder, data_engineer, modeler, evaluator, business_translator],
+    agents=[ba, data_explorer, coder, data_cleaner, feature_engineer],
     user_agent=user,
     group_manager_args = None,
 )
