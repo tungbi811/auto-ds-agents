@@ -1,77 +1,66 @@
-from autogen import AssistantAgent, LLMConfig
-from typing import Annotated, Optional
 from pydantic import BaseModel, Field
+from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
 
-from pydantic import BaseModel, Field
-from typing import List, Optional, Literal, Union
-
-
-class DataCleaningPlan(BaseModel):
-    plan_type: Literal[
-        "Remove column that has more than 50% missing values",
-    ]
-    # columns: Optional[List[str]] = Field(
-
-class DataEngineerOutput(BaseModel):
-    X_train_path: str = Field(..., description="Path to training features CSV.")
-    y_train_path: Optional[str] = Field(
-        None, description="Path to training target CSV if supervised; None for unsupervised tasks."
-    )
-    X_val_path: Optional[str] = Field(
-        None, description="Path to validation features CSV if available; None otherwise."
-    )
-    y_val_path: Optional[str] = Field(
-        None, description="Path to validation target CSV if available and supervised; None otherwise."
-    )
-    X_test_path: str = Field(..., description="Path to test features CSV if available.")
-    y_test_path: Optional[str] = Field(
-        None, description="Path to test target CSV if available and supervised; None otherwise."
-    )
-
-class DataCleaningPlan(BaseModel):
-    plan_type: Literal[
-        "handle_missing_values", "remove_duplicates", "handle_outliers", "standardize_formats", "validate_data"
-    ]
-    plan_description: str = Field(
+class DataEngineerStep(BaseModel):
+    step_description: str = Field(
         ...,
-        description="Detailed explanation of the specific step in the data cleaning process.",
-        example="Impute missing values in 'age' column with median."
+        description=(
+            "Type of data engineering step to perform. "
+        ),
+        examples=[
+            "Data cleaning",
+            "Feature engineering",
+            "Data transformation",
+            "Data normalization",
+            "Handling missing values",
+            "Encoding categorical variables"
+        ]
+    )
+    instruction: str = Field(
+        ...,
+        description="Description of what and how to do for this step.",
+        examples=[
+            "Use statistical IQR methods to identify extreme values that are higher than max+3*IQR or lower than min-3*IQR in numeric columns.",
+            "Use pandas get_dummies() method to one-hot encode categorical columns.",
+            "Use sklearn StandardScaler to standardize numeric features to have mean=0 and std=1.",
+            "Use pandas fillna() method with median values for numeric columns and mode for categorical columns.",
+            "Create new features like 'TotalSpent' by multiplying 'Quantity' and 'Price' columns and then drop the original columns."
+        ]
+    )
+    reason: str = Field(
+        ...,
+        description="Reason for this step.",
+        examples=[
+            "Cleaning data ensures accuracy and reliability for modeling.",
+            "Engineering relevant features can improve model performance.",
+            "Transforming data into suitable formats is essential for algorithms.",
+            "Normalizing data helps models converge faster and perform better.",
+            "Handling missing values prevents biases and errors in analysis.",
+            "Encoding categorical variables allows models to interpret them correctly."
+        ]
     )
 
-def execute_data_cleaning_plan(
-    plan: DataCleaningPlan
-):
-    pass
-
-def execute_feature_engineering_plan():
-    pass
-
-def execute_data_preparation_plan():
-    pass
-
-def execute_data_engineering_plan(
-    plan: DataEngineerOutput,
-    context_variables: ContextVariables,
+def execute_data_engineer_step(
+    step: DataEngineerStep,
+    context_variables: ContextVariables
 ) -> ReplyResult:
     """
-        Delegate a single preprocessing step to the Coder agent.
-        Example plan: 'Impute numeric columns with median and categorical with most frequent.'
+        Delegate coding of a specific data engineering step to the Coder agent.
     """
     context_variables["current_agent"] = "DataEngineer"
     return ReplyResult(
-        message=f"Please write Python code to execute this data engineering step:\n{plan}",
+        message=f"Can you write Python code for me to execute this data engineering step: \n{step.step_description}\nInstruction: {step.instruction}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
-def complete_data_engineering(
-    output: DataEngineerOutput,
+def complete_data_engineer_task(
     context_variables: ContextVariables,
 ) -> ReplyResult:
     return ReplyResult(
-        message=f"Data engineering is complete. Here are the dataset paths: {output.json()}",
-        target=AgentNameTarget("Modeler"),
+        message=f"Data engineering is complete.",
+        target=AgentNameTarget("DataScientist"),
         context_variables=context_variables,
     )
 
@@ -83,21 +72,50 @@ class DataEngineer(AssistantAgent):
                 api_type= "openai",
                 model="gpt-4.1-mini",
                 parallel_tool_calls=False,
-                response_format=DataEngineerOutput,
                 temperature=0.3,
             ),
-            system_message="""
+            data_engineer_system_message = """
                 You are the DataEngineer.
-                - Your role is to clean and preprocess data based on the DataExplorer's findings and the BizAnalyst's goal.
-                Workflow:
-                1) Use `execute_data_cleaning_plan` to clean data based on identified issues base on DataExplorer's finding issue.
-                2) Use `execute_feature_engineering_plan` to create or transform features as needed
+                Your role is to clean, preprocess, and engineer features from raw datasets to ensure they are accurate, consistent, and optimized for analysis or modeling.
+                You combine the responsibilities of both the DataCleaner and FeatureEngineer, bridging data quality assurance and feature transformation.
 
-                - Use `execute_data_engineering_plan` to delegate coding of specific preprocessing steps to the Coder agent.
-                - When all necessary preprocessing is done, call `complete_data_engineering` with paths to final datasets.
-                - Ensure the data is ready for modeling, with no missing values or unhandled issues.
-                - When saving dataset, tell the coder to use X_train.csv, y_train.csv, X_val.csv, y_val.csv, X_test.csv, y_test.csv 
-                as file names if exists and save to the same folder with the original dataset.
-            """,
-            functions=[execute_data_engineering_plan, complete_data_engineering]
+                Key Responsibilities:
+
+                Data Cleaning & Preprocessing:
+                - Handle missing values: Impute, drop, or flag missing data as appropriate to context.
+                - Correct errors: Fix typos, misentries, or obvious inaccuracies.
+                - Remove duplicates: Identify and eliminate redundant records.
+                - Resolve inconsistencies: Standardize mismatched formats, values, and categories.
+                - Ensure standardization: Apply consistent units, naming conventions, and date or categorical formats.
+                - Filter noise: Remove irrelevant or erroneous records that compromise integrity.
+                - Validate outputs: Confirm cleaned data aligns with business rules (e.g., no negative ages, totals reconcile).
+
+                Feature Engineering & Transformation:
+                - Feature creation: Derive new features from existing variables (e.g., ratios, time-based aggregations, interactions).
+                - Feature transformation: Normalize, scale, bin, or encode features to enhance model compatibility.
+                - Feature selection: Retain informative and non-redundant features to improve data efficiency.
+                - Encoding categorical data: Convert categories using one-hot, label, target encoding, or embeddings.
+                - Temporal & sequential features: Generate lag variables, rolling statistics, or trend-based indicators.
+                - Domain-driven enrichment: Incorporate domain insights to create features with business relevance.
+                - Data splitting: Partition data into training, validation, and test sets to prevent data leakage.
+                - Validation: Ensure engineered features are consistent, non-leaky, and meet quality standards.
+
+                Workflow:
+                1. Ingest Data & Review Findings:
+                Begin with the raw or explored dataset, using insights from the DataExplorer or data quality reports.
+                2. Execute Data Engineering Steps:
+                For each cleaning or feature engineering step, call execute_data_engineer_step to delegate implementation to the Coder agent.
+                3. Validation & Completion:
+                - Verify that all cleaned and engineered data meets consistency and reproducibility standards.
+                - Once all preprocessing and feature engineering are complete, call complete_data_engineering_task to hand off to the Modeler.
+
+                Rules:
+                - Scope Limitations:
+                Do not perform model training, evaluation, or selection. Your focus ends with high-quality, feature-rich datasets.
+                - Data Integrity:
+                Ensure all outputs are reproducible, traceable, and adhere to data governance and business logic.
+                - Documentation:
+                Maintain clear records of every cleaning and feature engineering transformation for auditability.
+                """,
+            functions=[execute_data_engineer_step, complete_data_engineer_task]
         )

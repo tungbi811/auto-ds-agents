@@ -17,20 +17,14 @@ class DataAnalystStep(BaseModel):
             "Inconsistency check",
         ]
     )
-    action: str = Field(
+    instruction: str = Field(
         ...,
-        description="Action to take for this step.",
+        description="Description of what and how to do for this step.",
         examples=[
-            " Summarize dataset shape, column names, data types, and number of unique values per column.",
-            "Calculate the percentage of missing values per column and detect patterns (e.g., missing at random vs systematic).",
-            "Use statistical methods (e.g., z-score, IQR) to identify extreme values in numeric columns.",
-            "Identify duplicate rows (exclude id columns) and duplicate keys (e.g., user_id).",
-            "Detect inconsistent formats (e.g., date formats, category labels like 'Male' vs 'M')."
+            "Use statistical IQR methods to identify extreme values that are higher than max+3*IQR or lower than min-3*IQR in numeric columns.",
+            "Use pandas duplicated() method on dataset excluding 'Id' column.",
+            "Use pandas isnull() and sum() methods to report count and percentage of missing values per column.",
         ]
-    )
-    suggestion: str = Field(
-        ...,
-        description="How to perform this step.",
     )
     reason: str = Field(
         ...,
@@ -43,7 +37,6 @@ class DataAnalystStep(BaseModel):
             "Inconsistencies can cause errors in processing and analysis."
         ]
     )
-
 
 class DataAnalystOutput(BaseModel):
     issues: List[str] = Field(
@@ -65,7 +58,7 @@ def execute_data_analyst_step(
     """
     context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
-        message=f"Can you write Python code for me to execute this exploration step: \n{step}",
+        message=f"Can you write Python code for me to execute this exploration step: \n{step.step_description}\nInstruction: {step.instruction}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
