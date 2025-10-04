@@ -3,6 +3,9 @@ from multi_agents import BusinessAnalyst, DataExplorer, DataCleaner, FeatureEngi
 from autogen.agentchat import initiate_group_chat
 from autogen.agentchat.group import AgentTarget, RevertToUserTarget
 from autogen.agentchat.group.patterns import DefaultPattern
+from dotenv import load_dotenv
+
+load_dotenv()
 
 ba = BusinessAnalyst()
 user = UserProxyAgent(
@@ -35,7 +38,7 @@ pattern = DefaultPattern(
 # Run the chat
 result, final_context, last_agent = initiate_group_chat(
     pattern=pattern,
-    messages="Here is the dataset path: ./data/house_prices/train.csv. Investors want to know which properties deliver the best returns.",
+    messages="With the dataset uploaded (*.csv), investors want to know which properties deliver the best returns.",
     max_rounds=100
 )
 
