@@ -57,7 +57,6 @@ def run_workflow_background(data_paths, user_query, max_rounds, msg_queue):
             self.buffer = ""
             self.current_agent = None
             self.current_content = []
-            self.in_clarification_call = False
             
         def write(self, text):
             # Write to original for debugging
@@ -88,30 +87,8 @@ def run_workflow_background(data_paths, user_query, max_rounds, msg_queue):
                         "role": "system",
                         "content": f"Next speaker: {speaker}",
                         "is_next_speaker": True,
-                        "speaker": speaker,  # Add speaker field for detection
                         "timestamp": datetime.now().strftime("%H:%M:%S")
                     })
-            
-            # Detect request_clarification function calls
-            elif "***** Suggested tool call" in line and "request_clarification" in line:
-                # Mark that we're starting to capture a clarification request
-                self.in_clarification_call = True
-                
-            # Capture the clarification question from Arguments section
-            elif hasattr(self, 'in_clarification_call') and self.in_clarification_call and "clarification_question" in line:
-                # Extract the question from the arguments
-                question_match = re.search(r'"clarification_question":\s*"([^"]+)"', line)
-                if question_match:
-                    question = question_match.group(1)
-                    self.queue.put({
-                        "role": "assistant",
-                        "sender": "BusinessAnalyst",
-                        "recipient": "User", 
-                        "content": f"🤔 **Question:** {question}",
-                        "is_clarification": True,
-                        "timestamp": datetime.now().strftime("%H:%M:%S")
-                    })
-                    self.in_clarification_call = False
                     
             # Detect agent conversation
             elif " (to " in line and "):" in line and not line.startswith("*****"):
@@ -161,21 +138,6 @@ def run_workflow_background(data_paths, user_query, max_rounds, msg_queue):
                 if not any(line.startswith(x) for x in ["*****", ">>>>", "Call ID:", "Arguments:", "Input arguments:", "Output:"]):
                     self.current_content.append(line)
                     
-            # Detect workflow termination and flush remaining content
-            elif "TERMINATING RUN" in line:
-                # Save current conversation before termination
-                if self.current_agent and self.current_content:
-                    content = '\n'.join(self.current_content)
-                    self.queue.put({
-                        "role": "assistant",
-                        "sender": self.current_agent,
-                        "recipient": "chat_manager",
-                        "content": content,
-                        "timestamp": datetime.now().strftime("%H:%M:%S")
-                    })
-                    self.current_agent = None
-                    self.current_content = []
-                    
         def flush(self):
             if self.original:
                 self.original.flush()
@@ -196,26 +158,12 @@ def run_workflow_background(data_paths, user_query, max_rounds, msg_queue):
         business_translator = BusinessTranslator()
         
         # Setup code execution config
-        work_dir = tempfile.mkdtemp()
         code_exec_config = {
-            "work_dir": work_dir,
+            "work_dir": tempfile.mkdtemp(),
             "use_docker": False,
             "timeout": 120,
             "last_n_messages": 3
         }
-        
-        # Copy dataset files to work directory so they're accessible to code execution
-        accessible_data_paths = []
-        for i, data_path in enumerate(data_paths):
-            # Copy file to work directory
-            filename = f"dataset_{i+1}.csv"
-            accessible_path = os.path.join(work_dir, filename)
-            import shutil
-            shutil.copy2(data_path, accessible_path)
-            accessible_data_paths.append(accessible_path)
-        
-        # Update data_paths to use accessible paths
-        data_paths = accessible_data_paths
         
         # Custom UserProxyAgent that can get input from queue
         class StreamlitUserProxy(UserProxyAgent):
@@ -242,7 +190,7 @@ def run_workflow_background(data_paths, user_query, max_rounds, msg_queue):
         user = StreamlitUserProxy(
             queue=msg_queue,
             name="User",
-            human_input_mode="ALWAYS",  # Changed to ALWAYS to allow interaction
+            human_input_mode="ALWAYS",  
             max_consecutive_auto_reply=0,
             code_execution_config=code_exec_config
         )
@@ -277,17 +225,6 @@ def run_workflow_background(data_paths, user_query, max_rounds, msg_queue):
             max_rounds=max_rounds
         )
         
-        # Flush any remaining conversation content after workflow completion
-        if hasattr(sys.stdout, 'current_agent') and sys.stdout.current_agent and sys.stdout.current_content:
-            content = '\n'.join(sys.stdout.current_content)
-            msg_queue.put({
-                "role": "assistant",
-                "sender": sys.stdout.current_agent,
-                "recipient": "chat_manager",
-                "content": content,
-                "timestamp": datetime.now().strftime("%H:%M:%S")
-            })
-        
     except Exception as e:
         msg_queue.put({
             "role": "system",
@@ -303,7 +240,7 @@ def run_workflow_background(data_paths, user_query, max_rounds, msg_queue):
 
 # UI Layout
 st.title("Minion Studio")
-st.caption("Multi-Agent Data Science Workflows with Live Interaction")
+st.caption("Multi-Agent Data Science Workflows")
 
 # Sidebar
 with st.sidebar:
@@ -363,9 +300,6 @@ with col1:
             elif message.get("is_next_speaker"):
                 st.markdown(f"**{message['content']}**")
                 st.markdown("")
-            elif message.get("is_clarification"):
-                # Special highlighting for clarification requests
-                st.warning(f"🤔 **Agent Question:** {message['content'].replace('🤔 **Question:** ', '')}")
             elif message["role"] == "separator":
                 st.markdown("---")
                 st.markdown("")
@@ -375,26 +309,13 @@ with col1:
             elif message["role"] == "assistant":
                 agent_name = message.get("sender", "Assistant")
                 recipient = message.get("recipient")
+                avatar = message.get("avatar", "🤖")
                 
-                with st.chat_message("assistant", avatar="🤖"):
+                with st.chat_message("assistant", avatar=avatar):
                     if agent_name != "Assistant" and recipient:
                         st.markdown(f"**{agent_name} (to {recipient}):**")
                     st.markdown("")
                     st.markdown(message["content"])
-
-# Check if workflow is expecting user input (define this early)
-workflow_waiting_for_user = False
-if st.session_state.messages:
-    # Check last few messages for "Next speaker: User" or BusinessTranslator asking for decisions
-    last_messages = st.session_state.messages[-5:]  # Check more messages
-    for msg in last_messages:
-        content = msg.get("content", "")
-        if (content.startswith("Next speaker: User") or 
-            msg.get("speaker") == "User" or
-            ("tell me which" in content.lower() and msg.get("sender") == "BusinessTranslator") or
-            ("pick any" in content.lower() and msg.get("sender") == "BusinessTranslator")):
-            workflow_waiting_for_user = True
-            break
 
 with col2:
     st.subheader("Workflow Status")
@@ -402,35 +323,27 @@ with col2:
     if st.session_state.processing:
         st.warning("Processing...")
         st.progress(0.5)
-        
-        # Debug: Show if waiting for user input
-        if workflow_waiting_for_user:
-            st.info("🔴 Waiting for user input")
-        else:
-            st.info("Agents are working")
-            
     elif st.session_state.workflow_complete:
         st.success("Workflow Complete!")
     else:
         st.info("Ready to start")
-        
-    # Debug: Show last few messages
-    if st.session_state.messages:
-        st.write("**Debug - Last Messages:**")
-        for msg in st.session_state.messages[-3:]:
-            if msg.get("is_next_speaker"):
-                st.write(f"- {msg.get('content')} (speaker: {msg.get('speaker')})")
-            elif msg.get("content"):
-                content_preview = msg.get("content", "")[:50] + "..." if len(msg.get("content", "")) > 50 else msg.get("content", "")
-                st.write(f"- {msg.get('role')}: {content_preview}")
 
 # Input area
 st.divider()
 
+# Check if workflow is expecting user input
+workflow_waiting_for_user = False
+if st.session_state.messages:
+    last_messages = st.session_state.messages[-5:]  
+    for msg in last_messages:
+        if msg.get("content", "").startswith("Next speaker: User"):
+            workflow_waiting_for_user = True
+            break
+
 # Show appropriate input field
 if workflow_waiting_for_user and st.session_state.processing:
     # Workflow is waiting for user input
-    st.info("🤔 The agents are waiting for your input to continue the workflow...")
+    st.info("The agents are waiting for your input to continue the workflow...")
     user_response = st.chat_input("Continue the conversation...", key="workflow_input")
     
     if user_response:
@@ -487,24 +400,8 @@ elif not st.session_state.processing:
             
             st.rerun()
 else:
-    # Workflow is processing - show active input for potential user interaction
-    user_input_during_workflow = st.chat_input("Type here if agents need your input...", key="workflow_active_input")
-    
-    if user_input_during_workflow:
-        # Add user response to messages
-        st.session_state.messages.append({
-            "role": "user",
-            "content": user_input_during_workflow,
-            "timestamp": datetime.now().strftime("%H:%M:%S")
-        })
-        
-        # Send response to workflow via queue
-        st.session_state.message_queue.put({
-            "type": "user_input",
-            "content": user_input_during_workflow
-        })
-        
-        st.rerun()
+    # Workflow is processing but not waiting for input
+    st.chat_input("Workflow is running...", disabled=True)
 
 # Auto-refresh while processing and check for new messages
 if st.session_state.processing:
