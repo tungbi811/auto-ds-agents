@@ -5,7 +5,7 @@ from typing import Annotated, Literal, List, Optional
 import pandas as pd
 
 class BizAnalystOutput(BaseModel):
-    business_use_case_description: str = Field(
+    objective: str = Field(
         ...,
         description=(
             "A clear explanation of the goal of this project for the business. "
@@ -18,37 +18,23 @@ class BizAnalystOutput(BaseModel):
             "and reducing revenue loss."
         )
     )
-    business_objectives: str = Field(
+    research_questions: List[str] = Field(
         ...,
-        description=(
-            "Describe the impact of accurate or incorrect results on the business. "
-            "Explain the benefits of high accuracy and the risks of errors."
-        ),
-        example=(
-            "Accurate churn predictions will allow targeted retention campaigns, "
-            "potentially reducing churn by 15% and saving $2M annually. "
-            "Incorrect results may waste marketing spend or harm customer trust."
-        )
+        description="A list of specific research questions that the analysis aims to answer.",
+        example=[
+            "What demographic or behavioral characteristics most strongly correlate with churn?",
+            "What role do service-related factors (delivery delays, complaints) play in customer attrition?",
+            "How does customer engagement correlate with retention rates?"
+        ]
     )
-    stakeholders_expectations_explanations: str = Field(
+    problem_type: Literal["classification", "regression", "clustering", "time_series", "anomaly_detection", "recommendation"] = Field(
         ...,
-        description=(
-            "Explain how the results will be used, who will use them, and who will "
-            "be impacted by them. Identify both direct users and downstream stakeholders."
-        ),
-        example=(
-            "The marketing team will use the predictions to design retention campaigns. "
-            "Customer success managers will use them to prioritize outreach. "
-            "Customers may experience more relevant engagement, improving satisfaction."
-        )
-    )
-    problem_type: Literal["classification", "regression", "clustering"] = Field(
-        ...,
-        description="The type of machine learning problem to be solved.",
+        description="The type of machine learning problem that best fits the business use case.",
+        example="classification"
     )
 
 def request_clarification(
-    clarification_question: Annotated[str, "One targeted question to clarify user intent"],
+    clarification_question: Annotated[str, "One targeted question to clarify user requirements"],
 ) -> ReplyResult:
     """
     Request clarification from the user when the query is ambiguous
@@ -72,9 +58,8 @@ def complete_business_analyst(
     output: BizAnalystOutput,
     context_variables: ContextVariables
 ) -> ReplyResult:
-    context_variables["business_use_case_description"] = output.business_use_case_description
-    context_variables["business_objectives"] = output.business_objectives
-    context_variables["stakeholders_expectations_explanations"] = output.stakeholders_expectations_explanations
+    context_variables["objective"] = output.objective
+    context_variables["research_questions"] = output.research_questions
     context_variables["problem_type"] = output.problem_type
     context_variables["current_agent"] = "DataExplorer"
     return ReplyResult(
@@ -95,16 +80,29 @@ class BusinessAnalyst(AssistantAgent):
                 parallel_tool_calls=False
             ),
             system_message="""
-                You are the BizAnalyst.
-                - Translate the user’s request into a concrete DS task.
+                Your role is to transform user requirements into structured, actionable business analysis outputs. 
+                You ensure clarity of the business context, goals, stakeholder expectations, and the research questions 
+                that guide exploration.
+
+                Key Responsibilities:
+                - Define objectives: List clear, measurable business goals that align with the use case.
+                - Formulate research questions: Define the analytical questions that need to be answered to achieve the objectives.
+                - Get data info: always call get_data_info first to discover what datasets, variables, and metadata are available for the project.
+                - Complete business analysis: When you have a clear understanding of the business context, objectives, and research questions, you must call complete_business_analyst to hand off to the DataExplorer.
+                
                 Workflow:
-                1) If the task depends on a dataset and no path is given, call `request_clarification` with ONE targeted question.
-                2) If a path is given, call `get_data_info` ONCE to peek (tiny head/sample) to ground your framing.
-                3) Produce BizAnalystOutput (business use case, objectives, stakeholders, problem type).
-                4) When you finish call function `complete_business_analyst` and route to DataExplorer.
+                1. Review initial user requirements.
+                2. call get_data_info first to discover what datasets, variables, and metadata are available for the project.
+                3. If requirements are vague, incomplete, or conflicting, call request_clarification to ask for more details.
+                4. Break requirements into structured outputs:
+                - objective
+                - research_questions
+                - problem_type
+                3. When complete, you must call complete_business_analysis_task to hand off to the DataExplorer.
+
                 Rules:
-                - You must call functions provided: `request_clarification`, `get_data_info`, and `complete_business_analyst`.
-                - Be concise, avoid jargon. No full table dumps or full-file reads.
+                - Do not propose data cleaning, feature engineering, or modeling directly.
+                - Keep analysis high-level, business-focused, and actionable.
             """,
             functions = [get_data_info, request_clarification, complete_business_analyst]
         )

@@ -26,6 +26,10 @@ class FeatureEngineeringStep(BaseModel):
             "One-hot encode 'city' column."
         ]
     )
+    suggestion: str = Field(
+        ...,
+        description="How to perform this step.",
+    )
     reason: str = Field(
         ...,
         description="Reason for this step.",
@@ -79,7 +83,6 @@ class FeatureEngineer(AssistantAgent):
                 - Feature creation: Derive new features from existing variables (e.g., ratios, interactions, aggregations, time-based features).
                 - Feature transformation: Apply transformations such as normalization, scaling, binning, or encoding to make features more suitable for modeling.
                 - Feature selection: Identify and retain features that add predictive or explanatory value, while reducing redundancy and noise.
-                - Dimensionality reduction: Apply techniques like PCA, embeddings, or clustering-based reductions when appropriate to simplify feature space.
                 - Encoding categorical data: Convert categorical variables into numerical representations (e.g., one-hot, target encoding, embeddings).
                 - Temporal and sequential features: Engineer lag variables, rolling statistics, or trend-based features from time-series data.
                 - Domain-driven enrichment: Incorporate domain knowledge to design features that align with business logic or problem context.
@@ -89,11 +92,11 @@ class FeatureEngineer(AssistantAgent):
                 Workflow:
                 1. Review the cleaned datasets and the DataCleaner’s outputs.
                 2. For each feature engineering step, call execute_feature_engineering_step to delegate implementation to the Coder agent.
-                3. Once all required feature engineering is complete, call complete_feature_engineering_task with the paths to the final feature sets.
+                3. Once all required feature engineering is complete, you must call complete_feature_engineering_task to hand off to the Modeler.
 
                 Rules:
-                Do not perform model training, evaluation, or selection. Your scope is limited to feature engineering.
-                Ensure reproducibility and clear documentation of all engineered features.
+                - Do not perform model training, evaluation, or selection. Your scope is limited to feature engineering.
+                - Ensure reproducibility and clear documentation of all engineered features.
             """,
             functions=[execute_feature_engineering_step, complete_feature_engineering_task]
         )

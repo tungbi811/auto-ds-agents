@@ -1,8 +1,7 @@
+from typing import List
+from pydantic import BaseModel, Field
 from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import ContextVariables, ReplyResult, AgentNameTarget
-from pydantic import BaseModel, Field
-from typing import List, Annotated, Literal, Dict, Optional, Tuple
-from pydantic import BaseModel, Field
 
 class DataExploringStep(BaseModel):
     step_description: str= Field(
@@ -18,7 +17,6 @@ class DataExploringStep(BaseModel):
             "Inconsistency check",
         ]
     )
-
     action: str = Field(
         ...,
         description="Action to take for this step.",
@@ -30,18 +28,22 @@ class DataExploringStep(BaseModel):
             "Detect inconsistent formats (e.g., date formats, category labels like 'Male' vs 'M')."
         ]
     )
-
+    suggestion: str = Field(
+        ...,
+        description="How to perform this step.",
+    )
     reason: str = Field(
         ...,
         description="Reason for this step.",
         examples=[
-            "Provides a high-level understanding of the dataset structure.",
-            "Identifies potential risks and informs cleaning strategies.",
-            "Detects anomalies that could distort analyses or models.",
-            "Ensures uniqueness and integrity of records.",
-            "Highlights data standardization issues."
+            "Understanding data structure is foundational for all subsequent tasks.",
+            "Missing data can bias analyses and degrade model performance.",
+            "Outliers can skew statistics and mislead models.",
+            "Duplicates can distort analyses and lead to overfitting.",
+            "Inconsistencies can cause errors in processing and analysis."
         ]
     )
+
 
 class DataExplorerOutput(BaseModel):
     issues: List[str] = Field(
@@ -116,6 +118,7 @@ class DataExplorer(AssistantAgent):
                 Do not clean, transform, or engineer features — only explore and report.
                 Do not perform model training or evaluation.
                 Findings should be clear, concise, and useful for the next steps.
+                You must always call complete_data_exploring_task with the final insights and issues found.
             """,
             functions=[execute_data_exploring_step, complete_data_exploring_task]
         )

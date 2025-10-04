@@ -22,7 +22,7 @@ business_translator = BusinessTranslator()
 
 pattern = DefaultPattern(
     initial_agent=ba,
-    agents=[ba, data_explorer, coder, data_cleaner, feature_engineer],
+    agents=[ba, coder, data_cleaner],
     user_agent=user,
     group_manager_args = None,
 )

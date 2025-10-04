@@ -39,6 +39,11 @@ class DataCleaningStep(BaseModel):
         ]
     )
 
+    suggestion: str = Field(
+        ...,
+        description="How to perform this step.",
+    )
+
 def execute_data_cleaning_step(
     step: DataCleaningStep,
     context_variables: ContextVariables,
@@ -49,7 +54,7 @@ def execute_data_cleaning_step(
     """
     context_variables["current_agent"] = "DataCleaner"
     return ReplyResult(
-        message=f"Please write Python code to execute this data cleaning step:\n{step}",
+        message=f"Please write Python code to execute this data cleaning step:\n{step.step_description} - {step.action} - {step.suggestion}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
