@@ -63,7 +63,7 @@ def execute_data_analyst_step(
     """
         Delegate coding of a specific exploration step to the Coder agent.
     """
-    context_variables["current_agent"] = "DataExplorer"
+    context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
         message=f"Can you write Python code for me to execute this exploration step: \n{step}",
         target=AgentNameTarget("Coder"),
@@ -79,10 +79,10 @@ def complete_data_analyst_task(
     """
     context_variables["data_insights"] = results.insights
     context_variables["data_issues"] = results.issues
-    context_variables["current_agent"] = "DataCleaner"
+    context_variables["current_agent"] = "DataEngineer"
     return ReplyResult(
         message=f"Here are the data quality insights {results.insights} and issues found: {results.issues}",
-        target=AgentNameTarget("DataCleaner"),
+        target=AgentNameTarget("DataEngineer"),
     )
 
 class DataAnalyst(AssistantAgent):
@@ -96,9 +96,9 @@ class DataAnalyst(AssistantAgent):
                 parallel_tool_calls=False
             ),
             system_message = """
-                You are the DataExplorer.
+                You are the DataAnalyst.
                 Your role is to explore datasets in order to discover insights, patterns, and issues. You provide a clear picture 
-                of the data’s structure, quality, and behavior, so that downstream agents (DataCleaner and FeatureEngineer) can act effectively.
+                of the data’s structure, quality, and behavior, so that downstream Data Engineer can act effectively.
 
                 Key Responsibilities:
                 - Profile the dataset: Summarize structure, column types, distributions, and ranges.
@@ -113,7 +113,7 @@ class DataAnalyst(AssistantAgent):
                 1. Review the dataset to identify areas for exploration.
                 2. For each exploration step, call execute_data_analyst_step to delegate implementation to the Coder agent.
                 3. When exploration is complete, summarise it into structured output and call complete_data_analyst_task.
-                
+
                 Rules:
                 Do not clean, transform, or engineer features — only explore and report.
                 Do not perform model training or evaluation.

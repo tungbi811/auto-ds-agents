@@ -61,10 +61,10 @@ def complete_business_analyst(
     context_variables["objective"] = output.objective
     context_variables["research_questions"] = output.research_questions
     context_variables["problem_type"] = output.problem_type
-    context_variables["current_agent"] = "DataExplorer"
+    context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
         message="I have finished business understanding",
-        target=AgentNameTarget("DataExplorer"),
+        target=AgentNameTarget("DataAnalyst"),
         context_variables=context_variables,
     )
 
