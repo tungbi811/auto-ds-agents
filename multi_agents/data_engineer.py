@@ -74,7 +74,7 @@ class DataEngineer(AssistantAgent):
                 parallel_tool_calls=False,
                 temperature=0.3,
             ),
-            data_engineer_system_message = """
+            system_message = """
                 You are the DataEngineer.
                 Your role is to clean, preprocess, and engineer features from raw datasets to ensure they are accurate, consistent, and optimized for analysis or modeling.
                 You combine the responsibilities of both the DataCleaner and FeatureEngineer, bridging data quality assurance and feature transformation.

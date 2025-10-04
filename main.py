@@ -1,4 +1,4 @@
-from multi_agents import BusinessAnalyst, Coder, DataExplorer, DataCleaner, Modeler, Evaluator, FeatureEngineer
+from multi_agents import BusinessAnalyst, DataAnalyst, DataEngineer, Coder
 from autogen import UserProxyAgent
 from autogen.agentchat import initiate_group_chat
 from autogen.agentchat.group import AgentTarget, ContextVariables
@@ -13,12 +13,10 @@ context_variables = ContextVariables(data={
     "data_insights": [],
 })
 
-biz_analyst = BusinessAnalyst()
 coder = Coder()
-data_explorer = DataExplorer()
-data_cleaner = DataCleaner()
-feature_engineer = FeatureEngineer()
-modeler = Modeler()
+business_analyst = BusinessAnalyst()
+data_anayst = DataAnalyst()
+data_engineer = DataEngineer()
 
 user = UserProxyAgent(
     name="User",
@@ -26,8 +24,8 @@ user = UserProxyAgent(
 )
 
 group_chat = DefaultPattern(
-    initial_agent=biz_analyst,
-    agents=[biz_analyst, coder, data_explorer, data_cleaner, feature_engineer, modeler],
+    initial_agent=business_analyst,
+    agents=[business_analyst, coder, data_anayst, data_engineer],
     user_agent=user,
     context_variables=context_variables
 )
