@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import ContextVariables, ReplyResult, AgentNameTarget
 
-class DataExploringStep(BaseModel):
+class DataAnalystStep(BaseModel):
     step_description: str= Field(
         ...,
         description=(
@@ -17,20 +17,14 @@ class DataExploringStep(BaseModel):
             "Inconsistency check",
         ]
     )
-    action: str = Field(
+    instruction: str = Field(
         ...,
-        description="Action to take for this step.",
+        description="Description of what and how to do for this step.",
         examples=[
-            " Summarize dataset shape, column names, data types, and number of unique values per column.",
-            "Calculate the percentage of missing values per column and detect patterns (e.g., missing at random vs systematic).",
-            "Use statistical methods (e.g., z-score, IQR) to identify extreme values in numeric columns.",
-            "Identify duplicate rows (exclude id columns) and duplicate keys (e.g., user_id).",
-            "Detect inconsistent formats (e.g., date formats, category labels like 'Male' vs 'M')."
+            "Use statistical IQR methods to identify extreme values that are higher than max+3*IQR or lower than min-3*IQR in numeric columns.",
+            "Use pandas duplicated() method on dataset excluding 'Id' column.",
+            "Use pandas isnull() and sum() methods to report count and percentage of missing values per column.",
         ]
-    )
-    suggestion: str = Field(
-        ...,
-        description="How to perform this step.",
     )
     reason: str = Field(
         ...,
@@ -44,8 +38,7 @@ class DataExploringStep(BaseModel):
         ]
     )
 
-
-class DataExplorerOutput(BaseModel):
+class DataAnalystOutput(BaseModel):
     issues: List[str] = Field(
         ...,
         description="A list of data quality issues identified during data exploration."
@@ -56,49 +49,49 @@ class DataExplorerOutput(BaseModel):
         description="A list of key insights discovered during data exploration."
     )
 
-def execute_data_exploring_step(
-    step: DataExploringStep,
+def execute_data_analyst_step(
+    step: DataAnalystStep,
     context_variables: ContextVariables
 ) -> ReplyResult:
     """
         Delegate coding of a specific exploration step to the Coder agent.
     """
-    context_variables["current_agent"] = "DataExplorer"
+    context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
-        message=f"Can you write Python code for me to execute this exploration step: \n{step}",
+        message=f"Can you write Python code for me to execute this exploration step: \n{step.step_description}\nInstruction: {step.instruction}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
-def complete_data_exploring_task(
-    results: DataExplorerOutput,
+def complete_data_analyst_task(
+    results: DataAnalystOutput,
     context_variables: ContextVariables
 ) -> ReplyResult:
     """
-    Complete the DataExplorer stage and hand off results to the DataEngineer.
+    Complete the DataAnalyst stage and hand off results to the DataEngineer.
     """
     context_variables["data_insights"] = results.insights
     context_variables["data_issues"] = results.issues
-    context_variables["current_agent"] = "DataCleaner"
+    context_variables["current_agent"] = "DataEngineer"
     return ReplyResult(
         message=f"Here are the data quality insights {results.insights} and issues found: {results.issues}",
-        target=AgentNameTarget("DataCleaner"),
+        target=AgentNameTarget("DataEngineer"),
     )
 
-class DataExplorer(AssistantAgent):
+class DataAnalyst(AssistantAgent):
     def __init__(self):
         super().__init__(
-            name = "DataExplorer",
+            name = "DataAnalyst",
             llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4.1-mini",
-                response_format=DataExplorerOutput,
+                response_format=DataAnalystOutput,
                 parallel_tool_calls=False
             ),
             system_message = """
-                You are the DataExplorer.
+                You are the DataAnalyst.
                 Your role is to explore datasets in order to discover insights, patterns, and issues. You provide a clear picture 
-                of the data’s structure, quality, and behavior, so that downstream agents (DataCleaner and FeatureEngineer) can act effectively.
+                of the data’s structure, quality, and behavior, so that downstream Data Engineer can act effectively.
 
                 Key Responsibilities:
                 - Profile the dataset: Summarize structure, column types, distributions, and ranges.
@@ -111,14 +104,14 @@ class DataExplorer(AssistantAgent):
 
                 Workflow:
                 1. Review the dataset to identify areas for exploration.
-                2. For each exploration step, call execute_data_exploring_step to delegate implementation to the Coder agent.
-                3. When exploration is complete, summarise it into structured output and call complete_data_exploring_task.
-                
+                2. For each exploration step, call execute_data_analyst_step to delegate implementation to the Coder agent.
+                3. When exploration is complete, summarise it into structured output and call complete_data_analyst_task.
+
                 Rules:
                 Do not clean, transform, or engineer features — only explore and report.
                 Do not perform model training or evaluation.
                 Findings should be clear, concise, and useful for the next steps.
-                You must always call complete_data_exploring_task with the final insights and issues found.
+                You must always call complete_data_analyst_task with the final insights and issues found.
             """,
-            functions=[execute_data_exploring_step, complete_data_exploring_task]
+            functions=[execute_data_analyst_step]
         )

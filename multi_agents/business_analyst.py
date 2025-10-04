@@ -18,6 +18,18 @@ class BizAnalystOutput(BaseModel):
             "and reducing revenue loss."
         )
     )
+    stakeholders_expectations_explanations: str = Field(
+        ...,
+        description=(
+            "Explain how the results will be used, who will use them, and who will "
+            "be impacted by them. Identify both direct users and downstream stakeholders."
+        ),
+        example=(
+            "The marketing team will use the predictions to design retention campaigns. "
+            "Customer success managers will use them to prioritize outreach. "
+            "Customers may experience more relevant engagement, improving satisfaction."
+        )
+    )
     research_questions: List[str] = Field(
         ...,
         description="A list of specific research questions that the analysis aims to answer.",
@@ -61,10 +73,10 @@ def complete_business_analyst(
     context_variables["objective"] = output.objective
     context_variables["research_questions"] = output.research_questions
     context_variables["problem_type"] = output.problem_type
-    context_variables["current_agent"] = "DataExplorer"
+    context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
         message="I have finished business understanding",
-        target=AgentNameTarget("DataExplorer"),
+        target=AgentNameTarget("DataAnalyst"),
         context_variables=context_variables,
     )
 

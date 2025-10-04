@@ -1,4 +1,4 @@
-from multi_agents import BusinessAnalyst, Coder, DataExplorer, DataCleaner, Modeler, Evaluator, FeatureEngineer
+from multi_agents import BusinessAnalyst, DataAnalyst, DataEngineer, DataScientist, BusinessTranslator, Coder
 from autogen import UserProxyAgent
 from autogen.agentchat import initiate_group_chat
 from autogen.agentchat.group import AgentTarget, ContextVariables
@@ -8,26 +8,30 @@ context_variables = ContextVariables(data={
     "current_agent": "",
     "objective": "",
     "problem_type": "",
+    "stakeholders_expectations": [],
     "research_questions": [],
-    "data_issues": [],
-    "data_insights": [],
 })
 
-biz_analyst = BusinessAnalyst()
 coder = Coder()
-data_explorer = DataExplorer()
-data_cleaner = DataCleaner()
-feature_engineer = FeatureEngineer()
-modeler = Modeler()
+business_analyst = BusinessAnalyst()
+data_analyst = DataAnalyst()
+data_engineer = DataEngineer()
+data_scientist = DataScientist()
+business_translator = BusinessTranslator()
 
 user = UserProxyAgent(
     name="User",
     code_execution_config=False
 )
 
+business_analyst.handoffs.set_after_work(AgentTarget(data_analyst))
+data_analyst.handoffs.set_after_work(AgentTarget(data_engineer))
+data_engineer.handoffs.set_after_work(AgentTarget(data_scientist))
+data_scientist.handoffs.set_after_work(AgentTarget(business_translator))
+
 group_chat = DefaultPattern(
-    initial_agent=biz_analyst,
-    agents=[biz_analyst, coder, data_explorer, data_cleaner, feature_engineer, modeler],
+    initial_agent=business_analyst,
+    agents=[business_analyst, coder, data_analyst, data_engineer, data_scientist, business_translator],
     user_agent=user,
     context_variables=context_variables
 )
@@ -38,5 +42,5 @@ initiate_group_chat(
         Here is the dataset path: ./data/house_prices/train.csv. 
         Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)
     """,
-    max_rounds=100
+    max_rounds=150
 )
