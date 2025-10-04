@@ -113,5 +113,5 @@ class DataAnalyst(AssistantAgent):
                 Findings should be clear, concise, and useful for the next steps.
                 You must always call complete_data_analyst_task with the final insights and issues found.
             """,
-            functions=[execute_data_analyst_step, complete_data_analyst_task]
+            functions=[execute_data_analyst_step]
         )

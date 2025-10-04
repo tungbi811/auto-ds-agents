@@ -2,7 +2,7 @@ from autogen import ConversableAgent, LLMConfig, UpdateSystemMessage
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
 from pydantic import BaseModel, Field
 
-class ModelingStep(BaseModel):
+class DataScientistStep(BaseModel):
     step_description: str = Field(
         ...,
         description="Modeling step to perform.",
@@ -13,19 +13,15 @@ class ModelingStep(BaseModel):
             "Evaluate models"
         ]
     )
-    action: str = Field(
+    instruction: str = Field(
         ...,
-        description="Action to take for this step.",
+        description="Description of what and how to do for this step.",
         examples=[
-            "Choose algorithms suitable for the problem type (e.g., regression, classification, clustering).",
-            "Train selected algorithms on the training dataset.",
-            "Use grid search or random search to find optimal hyperparameters.",
-            "Evaluate models using appropriate metrics (e.g., accuracy, RMSE, F1-score) on validation dataset."
+            "Choose algorithms suitable for classification tasks, such as logistic regression, decision trees, or random forests.",
+            "Train models using the training dataset, ensuring to validate with cross-validation techniques.",
+            "Use grid search or random search to find optimal hyperparameters for the selected models.",
+            "Evaluate models using metrics like accuracy, precision, recall, and F1-score to determine the best performer."
         ]
-    )
-    suggestion: str = Field(
-        ...,
-        description="How to perform this step.",
     )
     reason: str = Field(
         ...,
@@ -60,32 +56,33 @@ class ModelingOutput(BaseModel):
         description="Performance metrics of the best model."
     )
 
-def execute_modeling_plan(
-    step: ModelingStep,
+def execute_data_scientist_step(
+    step: DataScientistStep,
     context_variables: ContextVariables,
 ) -> ReplyResult:
     """
-    Delegate modeling tasks to the Coder agent.
+    Delegate data scientist tasks to the Coder agent.
     """
+    context_variables["current_agent"] = "DataScientist"
     return ReplyResult(
-        message=f"Please write Python code to execute this data cleaning step:\n{step.step_description} - {step.action} - {step.suggestion}",
+        message=f"Please write Python code to execute this data scientist step:\n{step.step_description} - {step.instruction}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
-def complete_modeling_task(
+def complete_data_scientist_task(
     context_variables: ContextVariables,
 ) -> ReplyResult:
     return ReplyResult(
-        message=f"Modeling is complete.",
-        target=AgentNameTarget("Evaluator"),
+        message=f"Data science tasks are complete.",
+        target=AgentNameTarget("BusinessTranslator"),
         context_variables=context_variables,
     )
 
-class Modeler(ConversableAgent):
+class DataScientist(ConversableAgent):
     def __init__(self):
         super().__init__(
-            name="Modeler",
+            name="DataScientist",
             llm_config=LLMConfig(
                 api_type= "openai",
                 model="gpt-4.1-mini",
@@ -97,7 +94,7 @@ class Modeler(ConversableAgent):
             update_agent_state_before_reply=[
                 UpdateSystemMessage(
                     """
-                    You are the Modeler.
+                    You are a Data Scientist.
                     Your role is to design, build, and evaluate machine learning models to achieve {objective} for a {problem_type} task. You translate business and 
                     analytical goals into concrete modeling strategies, ensuring results are accurate, explainable, and aligned with stakeholder expectations.
 
@@ -109,12 +106,12 @@ class Modeler(ConversableAgent):
 
                     Workflow:
                     1. Review the business objectives and problem type provided by the BusinessAnalyst.
-                    2. For each modeling or evaluation step, call execute_modeling_step to delegate implementation to the Coder agent.
+                    2. For each modeling or evaluation step, call execute_data_scientist_step to delegate implementation to the Coder agent.
                     3. Train, tune, and evaluate models iteratively until performance criteria are met.
                     4. Summarize the best model, including metrics, parameters, and interpretability insights.
                     5. When modeling and evaluation are complete, call complete_modeling_task with the final model artifacts, metrics, and summary report.
                 """
                 )
             ],
-            functions=[complete_modeling_task, execute_modeling_plan]
+            functions=[execute_data_scientist_step]
         )

@@ -18,6 +18,18 @@ class BizAnalystOutput(BaseModel):
             "and reducing revenue loss."
         )
     )
+    stakeholders_expectations_explanations: str = Field(
+        ...,
+        description=(
+            "Explain how the results will be used, who will use them, and who will "
+            "be impacted by them. Identify both direct users and downstream stakeholders."
+        ),
+        example=(
+            "The marketing team will use the predictions to design retention campaigns. "
+            "Customer success managers will use them to prioritize outreach. "
+            "Customers may experience more relevant engagement, improving satisfaction."
+        )
+    )
     research_questions: List[str] = Field(
         ...,
         description="A list of specific research questions that the analysis aims to answer.",

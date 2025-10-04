@@ -1,3 +1,4 @@
+from typing import Annotated
 from pydantic import BaseModel, Field
 from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
@@ -58,6 +59,7 @@ def execute_data_engineer_step(
 def complete_data_engineer_task(
     context_variables: ContextVariables,
 ) -> ReplyResult:
+    context_variables["current_agent"] = "DataScientist"
     return ReplyResult(
         message=f"Data engineering is complete.",
         target=AgentNameTarget("DataScientist"),
@@ -98,7 +100,6 @@ class DataEngineer(AssistantAgent):
                 - Temporal & sequential features: Generate lag variables, rolling statistics, or trend-based indicators.
                 - Domain-driven enrichment: Incorporate domain insights to create features with business relevance.
                 - Data splitting: Partition data into training, validation, and test sets to prevent data leakage.
-                - Validation: Ensure engineered features are consistent, non-leaky, and meet quality standards.
 
                 Workflow:
                 1. Ingest Data & Review Findings:
@@ -107,15 +108,11 @@ class DataEngineer(AssistantAgent):
                 For each cleaning or feature engineering step, call execute_data_engineer_step to delegate implementation to the Coder agent.
                 3. Validation & Completion:
                 - Verify that all cleaned and engineered data meets consistency and reproducibility standards.
-                - Once all preprocessing and feature engineering are complete, call complete_data_engineering_task to hand off to the Modeler.
+                - Once all preprocessing and feature engineering are complete, you have to call complete_data_engineer_task to hand off to the DataScientist.
 
                 Rules:
-                - Scope Limitations:
-                Do not perform model training, evaluation, or selection. Your focus ends with high-quality, feature-rich datasets.
-                - Data Integrity:
-                Ensure all outputs are reproducible, traceable, and adhere to data governance and business logic.
-                - Documentation:
-                Maintain clear records of every cleaning and feature engineering transformation for auditability.
+                Do not perform anything related to model training, evaluation, or selection. 
+                Your focus ends with no issues and high-quality datasets.
                 """,
-            functions=[execute_data_engineer_step, complete_data_engineer_task]
+            functions=[execute_data_engineer_step]
         )
