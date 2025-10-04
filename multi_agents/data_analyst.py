@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import ContextVariables, ReplyResult, AgentNameTarget
 
-class DataExploringStep(BaseModel):
+class DataAnalystStep(BaseModel):
     step_description: str= Field(
         ...,
         description=(
@@ -45,7 +45,7 @@ class DataExploringStep(BaseModel):
     )
 
 
-class DataExplorerOutput(BaseModel):
+class DataAnalystOutput(BaseModel):
     issues: List[str] = Field(
         ...,
         description="A list of data quality issues identified during data exploration."
@@ -56,8 +56,8 @@ class DataExplorerOutput(BaseModel):
         description="A list of key insights discovered during data exploration."
     )
 
-def execute_data_exploring_step(
-    step: DataExploringStep,
+def execute_data_analyst_step(
+    step: DataAnalystStep,
     context_variables: ContextVariables
 ) -> ReplyResult:
     """
@@ -70,12 +70,12 @@ def execute_data_exploring_step(
         context_variables=context_variables,
     )
 
-def complete_data_exploring_task(
-    results: DataExplorerOutput,
+def complete_data_analyst_task(
+    results: DataAnalystOutput,
     context_variables: ContextVariables
 ) -> ReplyResult:
     """
-    Complete the DataExplorer stage and hand off results to the DataEngineer.
+    Complete the DataAnalyst stage and hand off results to the DataEngineer.
     """
     context_variables["data_insights"] = results.insights
     context_variables["data_issues"] = results.issues
@@ -85,14 +85,14 @@ def complete_data_exploring_task(
         target=AgentNameTarget("DataCleaner"),
     )
 
-class DataExplorer(AssistantAgent):
+class DataAnalyst(AssistantAgent):
     def __init__(self):
         super().__init__(
-            name = "DataExplorer",
+            name = "DataAnalyst",
             llm_config = LLMConfig(
                 api_type= "openai",
                 model="gpt-4.1-mini",
-                response_format=DataExplorerOutput,
+                response_format=DataAnalystOutput,
                 parallel_tool_calls=False
             ),
             system_message = """
@@ -111,14 +111,14 @@ class DataExplorer(AssistantAgent):
 
                 Workflow:
                 1. Review the dataset to identify areas for exploration.
-                2. For each exploration step, call execute_data_exploring_step to delegate implementation to the Coder agent.
-                3. When exploration is complete, summarise it into structured output and call complete_data_exploring_task.
+                2. For each exploration step, call execute_data_analyst_step to delegate implementation to the Coder agent.
+                3. When exploration is complete, summarise it into structured output and call complete_data_analyst_task.
                 
                 Rules:
                 Do not clean, transform, or engineer features — only explore and report.
                 Do not perform model training or evaluation.
                 Findings should be clear, concise, and useful for the next steps.
-                You must always call complete_data_exploring_task with the final insights and issues found.
+                You must always call complete_data_analyst_task with the final insights and issues found.
             """,
-            functions=[execute_data_exploring_step, complete_data_exploring_task]
+            functions=[execute_data_analyst_step, complete_data_analyst_task]
         )

@@ -1,5 +1,5 @@
 from multi_agents.business_analyst import BusinessAnalyst
-from multi_agents.data_explorer import DataExplorer
+from multi_agents.data_analyst import DataExplorer
 from multi_agents.data_engineer import DataEngineer
 from multi_agents.data_cleaner import DataCleaner
 from multi_agents.feature_engineer import FeatureEngineer
