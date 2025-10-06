@@ -40,7 +40,7 @@ initiate_group_chat(
     pattern=group_chat,
     messages="""
         Here is the dataset path: ./data/house_prices/train.csv. 
-        Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)
+        Can you segment properties into segments (luxury homes, affordable starter homes, investment-ready properties, etc.)
     """,
     max_rounds=150
 )
