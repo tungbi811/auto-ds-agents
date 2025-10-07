@@ -46,7 +46,7 @@ class BusinessTranslatorStep(BaseModel):
         description="Illustrative examples of how this step applies across different analytical tasks.",
         examples=[
             (
-                "• Clustering: Explain how clusters are formed based on defining characteristics and analyze the opportunities "
+                "• Clustering: Explain how clusters are formed and its deatail information based on defining characteristics and analyze the opportunities "
                 "and risks of business actions targeting each cluster.\n"
                 "• Regression / Time-Series: Identify which variables most influence the target, interpret their business meaning, "
                 "and propose actions that could optimize future outcomes.\n"
