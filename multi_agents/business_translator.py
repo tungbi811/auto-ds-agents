@@ -2,20 +2,76 @@ from autogen import ConversableAgent, LLMConfig, UpdateSystemMessage
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, RevertToUserTarget,ReplyResult
 from pydantic import BaseModel, Field
 
-# def execute_business_translation_step(
-#     task: Annotated[str, "The business task or goal to be translated."],
-#     context_variables: ContextVariables,
-# ) -> ReplyResult:
-#     """
-#     Translate a high-level business task into specific data science objectives.
-#     Example task: 'Increase customer retention by 10% over the next quarter.'
-#     """
-#     context_variables["current_agent"] = "BusinessTranslator"
-#     return ReplyResult(
-#         message=f"Please translate this business task into specific data science objectives:\n{task}",
-#         target=AgentNameTarget("BusinessAnalyst"),
-#         context_variables=context_variables,
-#     )
+
+class BusinessTranslatorStep(BaseModel):
+    step_description: str = Field(
+        ...,
+        description=(
+            "Type of business translation step to perform."
+        ),
+        examples=[
+            "Interpret analytical results and connect them to business objectives."
+        ]
+    )
+
+    instruction: str = Field(
+        ...,
+        description="Detailed instructions on what and how to perform this step.",
+        examples=[
+            (
+                "1. Review the user’s question to determine if it requires a concise or detailed analytical explanation.\n"
+                "2. Examine outputs from all previous agents to fully understand the analytical context.\n"
+                "3. Summarize analytical and model findings, identifying key variables that influence the target outcome.\n"
+                "4. Translate these findings into clear business insights.\n"
+                "5. If detailed interpretation is needed, provide business action recommendations — explain their rationale, "
+                "associated risks, and alignment with business goals."
+            )
+        ]
+    )
+
+    reason: str = Field(
+        ...,
+        description="Purpose and rationale for performing this step.",
+        examples=[
+            (
+                "Ensure that analytical insights are directly tied to the business question, clearly explained, and "
+                "supported by evidence. This step helps the user understand the reasoning behind conclusions and "
+                "recognize the potential risks and strategic implications of recommended business actions."
+            )
+        ]
+    )
+
+    examples: str = Field(
+        ...,
+        description="Illustrative examples of how this step applies across different analytical tasks.",
+        examples=[
+            (
+                "• Clustering: Explain how clusters are formed based on defining characteristics and analyze the opportunities "
+                "and risks of business actions targeting each cluster.\n"
+                "• Regression / Time-Series: Identify which variables most influence the target, interpret their business meaning, "
+                "and propose actions that could optimize future outcomes.\n"
+                "• Classification: Highlight variables that affect the target decision (e.g., Yes/No), clarify positive and negative "
+                "drivers, and suggest actions to improve the likelihood of desired results."
+            )
+        ]
+    )
+
+
+
+def execute_business_translation_step(
+    step: BusinessTranslatorStep,
+    context_variables: ContextVariables,
+) -> ReplyResult:
+    """
+    Translate a high-level business task into specific data science objectives.
+    Example task: 'Increase customer retention by 10% over the next quarter.'
+    """
+    context_variables["current_agent"] = "BusinessTranslator"
+    return ReplyResult(
+        message=f"Please translate this business task into specific data science objectives:\n{task}",
+        target=AgentNameTarget("BusinessAnalyst"),
+        context_variables=context_variables,
+    )
 
 def complete_business_translation_task(
     context_variables: ContextVariables,
@@ -72,7 +128,7 @@ class BusinessTranslator(ConversableAgent):
 
             Rules:
             - Do not include technical details such as algorithms, data preprocessing, or modeling methods.
-            - Do not use any technical terms such as “regression,” “clustering,” “p-value,” “confidence interval,” or “feature importance.”
+            - Do not use any technical terms such as “regression,” “cluster,” “p-value,” “confidence interval,” or “feature importance.”
             - A strong understanding of the underlying characteristics provides the foundation for meaningful business insights.
             - Focus on clarity, relevance, and real-world applicability.
             - Ensure that each recommendation or action plan directly aligns with both the research question and stakeholder expectations.
@@ -83,3 +139,5 @@ class BusinessTranslator(ConversableAgent):
 
             ),
         )
+
+

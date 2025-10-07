@@ -108,8 +108,12 @@ class DataScientist(ConversableAgent):
                     1. Review the business objectives and problem type provided by the BusinessAnalyst.
                     2. For each modeling or evaluation step, call execute_data_scientist_step to delegate implementation to the Coder agent.
                     3. Train, tune, and evaluate models iteratively until performance criteria are met.
-                    4. Summarize the best model, including metrics, parameters, and interpretability insights.
-                    5. When modeling and evaluation are complete, call complete_modeling_task with the final model artifacts, metrics, and summary report.
+                    4. Summarize the best model, including metrics, parameters, and interpretability detail insights of variables related to the best models.
+                    5. Run prediction on the user data point if it is provided in the user question.
+                    6. When modeling and evaluation are complete, call complete_modeling_task with the final model artifacts, metrics, and summary report.
+
+                    Rules:
+                    - Do not sugest any things to BusinessTranslator, only focus on providing final summary report and prediction result if the user question contains a data point.
                 """
                 )
             ],

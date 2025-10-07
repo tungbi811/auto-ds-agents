@@ -108,6 +108,8 @@ class DataEngineer(AssistantAgent):
                 For each cleaning or feature engineering step, call execute_data_engineer_step to delegate implementation to the Coder agent.
                 3. Validation & Completion:
                 - Verify that all cleaned and engineered data meets consistency and reproducibility standards.
+                - Ensure that the data set will contain all the nesscessary feature to support the modeling tasks defined by the DataScientist.
+                - You only be able to give the final dataset to the DataScientist and you can not ask DataScientist any things.
                 - Once all preprocessing and feature engineering are complete, you have to call complete_data_engineer_task to hand off to the DataScientist.
 
                 Rules:
