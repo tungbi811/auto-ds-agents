@@ -18,9 +18,6 @@ import io
 import re
 import queue
 
-load_dotenv()
-
-
 # Streamlit page config
 st.set_page_config(
     page_title="AG2 Studio - Multi-Agent Data Science",
