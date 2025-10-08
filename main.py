@@ -17,7 +17,7 @@ if "terminated" not in st.session_state:
 
 sidebar = Sidebar()
 st.set_page_config(page_title="🤖 Multi-Agent for Data Science", layout="wide")
-col1, col2, col3 = st.columns([0.3, 0.4, 0.2])
+col1, col2, col3 = st.columns([0.25, 0.5, 0.25])
 with col2:
     st.title("🤖 Multi-Agent for Data Science")
     st.write("👋 Upload your dataset and describe your requirements in the sidebar, then click **Run Analysis** to start.")
@@ -100,9 +100,6 @@ with col2:
         user_input = st.text_area("Your Response:", key="user_input")
         if st.button("Submit Response", key="submit_response"):
             if user_input.strip():
-                st.session_state.messages.append(
-                    {"role": "User", "content": user_input}
-                )
                 st.session_state.awaiting_response = False
                 st.rerun()
             else:
