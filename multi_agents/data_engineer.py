@@ -7,10 +7,11 @@ class DataEngineerStep(BaseModel):
     step_description: str = Field(
         ...,
         description=(
-            "Type of data engineering step to perform. "
+            "Type of data engineering step to perform."
         ),
         examples=[
             "Data cleaning",
+            "Feature selection"
             "Feature engineering",
             "Data transformation",
             "Data normalization",
@@ -22,11 +23,36 @@ class DataEngineerStep(BaseModel):
         ...,
         description="Description of what and how to do for this step.",
         examples=[
-            "Use statistical IQR methods to identify extreme values that are higher than max+3*IQR or lower than min-3*IQR in numeric columns.",
-            "Use pandas get_dummies() method to one-hot encode categorical columns.",
-            "Use sklearn StandardScaler to standardize numeric features to have mean=0 and std=1.",
-            "Use pandas fillna() method with median values for numeric columns and mode for categorical columns.",
-            "Create new features like 'TotalSpent' by multiplying 'Quantity' and 'Price' columns and then drop the original columns."
+            # CLEANING
+            "Perform data cleaning using pandas only: drop duplicates; fix dtypes; standardize category values "
+            "(e.g., casing/whitespace); unify date formats; remove impossible values (e.g., negative ages) and obvious data-entry errors.",
+
+            "Handle missing values: for numeric columns fill with median; for categorical columns fill with mode. "
+            "Document the imputation strategy per column and produce a summary table of missingness before/after.",
+
+            "Detect and treat outliers using the IQR rule for numeric features (winsorize or cap at [Q1-1.5*IQR, Q3+1.5*IQR]). "
+            "Record how many values were capped per column.",
+
+            # FEATURE SELECTION 
+            "Run filter-based feature selection: remove constant/near-zero variance features; drop features with excessive "
+            "missingness (e.g., >40%) or extreme cardinality where inappropriate for the task.",
+
+            "For supervised selection, compute univariate statistics: Pearson correlation (regression), ANOVA F-test "
+            "(continuous vs categorical), or Chi-square (categorical vs categorical). Rank features and keep the top-K most relevant.",
+
+            "Remove multicollinearity : compute a correlation matrix and/or VIF; for pairs of variables with |corr|>0.9 or VIF>10, "
+            "keep one representative feature based on relevance to the target and business interpretability.",
+
+            "Optionally run a quick model-based selector (e.g., tree-based feature importance on a small RandomForest) "
+            "to cross-check the filtered list; do NOT use this as the final model—this is only for selection heuristics.",
+
+            # OUTPUTS (files & reports)
+            "Save the cleaned splits to the REQUIRED filenames (overwrite if they already exist): "
+            "./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv. "
+            "Ensure parent directories exist (Path(...).parent.mkdir(parents=True, exist_ok=True)) and write with mode='w', index=False.",
+
+            # IMPORTANT CONSTRAINTS
+            "All cleaning and feature selection must be done "
         ]
     )
     reason: str = Field(
@@ -92,11 +118,9 @@ class DataEngineer(AssistantAgent):
                 - Filter noise: Remove irrelevant or erroneous records that compromise integrity.
                 - Validate outputs: Confirm cleaned data aligns with business rules (e.g., no negative ages, totals reconcile).
 
-                Feature Engineering & Transformation:
+                Feature Selection & Engineering:
                 - Feature creation: Derive new features from existing variables (e.g., ratios, time-based aggregations, interactions).
-                - Feature transformation: Normalize, scale, bin, or encode features to enhance model compatibility.
                 - Feature selection: Retain informative and non-redundant features to improve data efficiency.
-                - Encoding categorical data: Convert categories using one-hot, label, target encoding, or embeddings.
                 - Temporal & sequential features: Generate lag variables, rolling statistics, or trend-based indicators.
                 - Domain-driven enrichment: Incorporate domain insights to create features with business relevance.
                 - Data splitting: Partition data into training, validation, and test sets to prevent data leakage.
@@ -113,6 +137,7 @@ class DataEngineer(AssistantAgent):
                 - Once all preprocessing and feature engineering are complete, you have to call complete_data_engineer_task to hand off to the DataScientist.
 
                 Rules:
+                You must to make sure that no dubplicate, no missing values, no inconsistencies, and no obvious errors remain in the final datasets.
                 Do not perform anything related to model training, evaluation, or selection. 
                 Your focus ends with no issues and high-quality datasets.
                 """,

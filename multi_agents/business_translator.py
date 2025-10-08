@@ -1,31 +1,66 @@
 from autogen import ConversableAgent, LLMConfig, UpdateSystemMessage
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, RevertToUserTarget,ReplyResult
 from pydantic import BaseModel, Field
+from typing import Dict, List, Literal, Optional
 
 
 class BusinessTranslatorStep(BaseModel):
     step_description: str = Field(
         ...,
-        description=(
-            "Type of business translation step to perform."
-        ),
+        description= "Type of business translation step to perform.",
         examples=[
-            "Interpret analytical results and connect them to business objectives."
+                "Reload the best model from the specified path ./artifacts/best_model_{problem_type}.joblib and use it to generate predictions for user-provided data point."
+                "=== Classification ===\n"
+                "- Run the best classification model on the user’s data point; if features are missing, enrich with related variables to improve prediction.\n"
+                "- Interpret model output (e.g., predicted class, probability) and explain top features driving the decision.\n"
+                "- Translate the prediction into business meaning — e.g., likelihood of churn and factors influencing it.\n\n"
+                "=== Regression ===\n"
+                "- Check if user data point is incomplete, estimate missing variables from known correlations or imputation.\n"
+                "- Predict target value (e.g., sales, rainfall, price) using the best regression model base one.\n"
+                "- Analyze sensitivity of the prediction to top influencing variables and explain their economic meaning.\n"
+                "- Summarize key drivers, potential scenarios, and expected business outcomes.\n\n"
+                "=== Clustering ===\n"
+                "- Analyze cluster profiles based on the initial dataset and centroid statistics.\n"
+                "- Determine which cluster the user's data point belongs to, based on nearest centroid distance.\n"
+                "- Describe defining characteristics of that cluster (e.g., average income, age range, behavior).\n"
+                "- Summarize opportunities and risks for business actions related to this cluster.\n\n"
+                "=== Time Series ===\n"
+                "- Generate forecasts for the next H periods using the trained time series model.\n"
+                "- Decompose the forecast into trend, seasonality, and residual components.\n"
+                "- Identify anomalies or sudden structural changes in the series.\n"
+                "- If exogenous variables (X) are used, explain their contribution to the forecast.\n"
+                "- Provide scenario-based simulations (e.g., +10% marketing spend, -5% demand) and recommend business actions such as inventory, staffing, or budgeting adjustments."
         ]
     )
-
     instruction: str = Field(
         ...,
-        description="Detailed instructions on what and how to perform this step.",
+        description="Description of what and how to do for this step.",
         examples=[
-            (
-                "1. Review the user’s question to determine if it requires a concise or detailed analytical explanation.\n"
-                "2. Examine outputs from all previous agents to fully understand the analytical context.\n"
-                "3. Summarize analytical and model findings, identifying key variables that influence the target outcome.\n"
-                "4. Translate these findings into clear business insights.\n"
-                "5. If detailed interpretation is needed, provide business action recommendations — explain their rationale, "
-                "associated risks, and alignment with business goals."
-            )
+                "Reload the best model from the specified path (e.g., ./artifacts/best_model_{problem_type}.pkl) and use it to generate predictions for a new user-provided data point."
+                "=== Classification ===\n"
+                "1. Use the trained classification model to predict the class and probability for the user’s provided data point.\n"
+                "2. If important features are missing, enrich the input with correlated variables to improve accuracy.\n"
+                "3. Analyze the top features influencing the prediction (e.g., SHAP values or feature importance).\n"
+                "4. Translate these drivers into business meaning, explaining why a certain outcome (e.g., churn) is likely.\n"
+                "5. Provide concrete business recommendations to improve the likelihood of a positive outcome.\n\n"
+                "=== Regression ===\n"
+                "1. Run the trained regression model to estimate the target value for the user’s data point.\n"
+                "2. Handle missing variables using interpolation or appropriate imputation techniques.\n"
+                "3. Evaluate how each independent variable impacts the predicted value and interpret it economically.\n"
+                "4. Compute and explain the 95% prediction interval to express model uncertainty.\n"
+                "5. Discuss the potential business implications, benefits, and risks of the prediction results.\n\n"
+                "=== Clustering ===\n"
+                "1. Do not rerun the clustering model — use the existing segmentation output.\n"
+                "2. Assign the user’s data point to the nearest cluster by computing the distance to the centroid.\n"
+                "3. Calculate key statistics (mean, median) of variables within the assigned cluster.\n"
+                "4. Describe the main characteristics that define this cluster and how it differs from others.\n"
+                "5. Evaluate opportunities and business risks associated with this segment and propose relevant actions.\n\n"
+                "=== Time Series ===\n"
+                "1. Apply the trained forecasting model to predict values for the next H time steps.\n"
+                "2. Decompose the forecast into trend, seasonality, and residual components to reveal underlying patterns.\n"
+                "3. Identify anomalies or regime shifts that could signal changes in business performance.\n"
+                "4. Interpret the influence of exogenous variables (if applicable) and conduct scenario simulations (e.g., +10% marketing budget). "
+                "Provide actionable recommendations such as adjusting inventory, workforce planning, or investment timing."
         ]
     )
 
@@ -33,29 +68,11 @@ class BusinessTranslatorStep(BaseModel):
         ...,
         description="Purpose and rationale for performing this step.",
         examples=[
-            (
                 "Ensure that analytical insights are directly tied to the business question, clearly explained, and "
                 "supported by evidence. This step helps the user understand the reasoning behind conclusions and "
                 "recognize the potential risks and strategic implications of recommended business actions."
-            )
         ]
     )
-
-    examples: str = Field(
-        ...,
-        description="Illustrative examples of how this step applies across different analytical tasks.",
-        examples=[
-            (
-                "• Clustering: Explain how clusters are formed and its deatail information based on defining characteristics and analyze the opportunities "
-                "and risks of business actions targeting each cluster.\n"
-                "• Regression / Time-Series: Identify which variables most influence the target, interpret their business meaning, "
-                "and propose actions that could optimize future outcomes.\n"
-                "• Classification: Highlight variables that affect the target decision (e.g., Yes/No), clarify positive and negative "
-                "drivers, and suggest actions to improve the likelihood of desired results."
-            )
-        ]
-    )
-
 
 
 def execute_business_translation_step(
@@ -63,13 +80,12 @@ def execute_business_translation_step(
     context_variables: ContextVariables,
 ) -> ReplyResult:
     """
-    Translate a high-level business task into specific data science objectives.
-    Example task: 'Increase customer retention by 10% over the next quarter.'
+    Delegate coding of a specific business translator step to the Coder agent.
     """
     context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
-        message=f"Please translate this business task into specific data science objectives:\n{task}",
-        target=AgentNameTarget("BusinessAnalyst"),
+        message=f"Please write Python code to execute this business translator step:\n{step.step_description}\nInstruction: {step.instruction}",
+        target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
@@ -92,7 +108,7 @@ class BusinessTranslator(ConversableAgent):
                 # parallel_tool_calls=False,
                 # temperature=0.3,
             ),
-            update_agent_state_before_reply=UpdateSystemMessage(
+            update_agent_state_before_reply= [UpdateSystemMessage(
             """
             You are the BusinessTranslator.
             Your role is to interpret analytical results and translate them into clear, actionable business insights and strategic recommendations tailored to stakeholder needs.
@@ -114,12 +130,13 @@ class BusinessTranslator(ConversableAgent):
             Workflow:
             1. Review stakeholder_expectations to clearly understand the desired business outcomes and key performance indicators.
             2. Examine the analytical results provided by other agents to identify the main findings relevant to the business question.
-            3. If insights are incomplete or unclear, request additional analysis or data exploration from technical agents (e.g., Coder or Data Explorer).
+            3. For each business translator step, call execute_data_scientist_step to delegate implementation to the Coder agent.
+            4. If insights are incomplete or unclear, request additional analysis or data exploration from technical agents (e.g., Coder or Data Explorer).
             - This may include re-scaling or reconstructing datasets to their original form, re-labelling segments or classes, or applying supplementary analytical methods.
             - The goal is to ensure that the findings provide a complete and interpretable view of each segment, pattern, or business condition.
-            4. Once sufficient analytical clarity is achieved, interpret the refined results in business terms.
-            5. Translate the findings into actionable insights, clearly outlining implications, opportunities, risks, and recommended actions for decision-makers.
-            6. Summarize the final output in a concise business format (e.g., **Key Insights** and **Business Recommendations**) that directly answers the stakeholder’s question.
+            5. Once sufficient analytical clarity is achieved, interpret the refined results in business terms.
+            6. Translate the findings into actionable insights, clearly outlining implications, opportunities, risks, and recommended actions for decision-makers.
+            7. Summarize the final output in a concise business format (e.g., **Key Insights** and **Business Recommendations**) that directly answers the stakeholder’s question.
 
             Example style:
             - “The analysis identifies three property segments: luxury, affordable, and investment-ready homes.”
@@ -137,7 +154,9 @@ class BusinessTranslator(ConversableAgent):
             - Ensure every insight and recommendation connects logically to the question and stakeholder goals.
             """
 
-            ),
+            )
+            ],           
+            functions=[execute_business_translation_step]
         )
 
 
