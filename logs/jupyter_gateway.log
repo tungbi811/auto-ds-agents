@@ -1715,3 +1715,140 @@ Connecting to kernel 3df32114-022a-4f7c-b714-3bcddb090b17.
 interrupted
 Shutting down...
 Kernel shutdown: 3df32114-022a-4f7c-b714-3bcddb090b17
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 1af0abf9-3e49-4f20-9d00-fdaeb40c350f
+No session ID specified
+Connecting to kernel 1af0abf9-3e49-4f20-9d00-fdaeb40c350f.
+interrupted
+Shutting down...
+Kernel shutdown: 1af0abf9-3e49-4f20-9d00-fdaeb40c350f
+received signal 2, stopping
+Kernel shutdown: 1af0abf9-3e49-4f20-9d00-fdaeb40c350f
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 97d13686-becc-42a1-86a9-7287857d8c51
+No session ID specified
+Connecting to kernel 97d13686-becc-42a1-86a9-7287857d8c51.
+interrupted
+Shutting down...
+Kernel shutdown: 97d13686-becc-42a1-86a9-7287857d8c51
+received signal 2, stopping
+Kernel shutdown: 97d13686-becc-42a1-86a9-7287857d8c51
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: f5614175-358f-49df-80e8-b43a4baae1b6
+No session ID specified
+Connecting to kernel f5614175-358f-49df-80e8-b43a4baae1b6.
+interrupted
+Shutting down...
+Kernel shutdown: f5614175-358f-49df-80e8-b43a4baae1b6
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 103cdcb0-bb79-4fe6-afcb-a5fd0309d45d
+No session ID specified
+Connecting to kernel 103cdcb0-bb79-4fe6-afcb-a5fd0309d45d.
+interrupted
+Shutting down...
+Kernel shutdown: 103cdcb0-bb79-4fe6-afcb-a5fd0309d45d
+received signal 2, stopping
+Kernel shutdown: 103cdcb0-bb79-4fe6-afcb-a5fd0309d45d
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 6e96d05b-e511-4255-9a7a-8b96c13a4067
+No session ID specified
+Connecting to kernel 6e96d05b-e511-4255-9a7a-8b96c13a4067.
+interrupted
+Shutting down...
+Kernel shutdown: 6e96d05b-e511-4255-9a7a-8b96c13a4067
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 80c61946-5c64-4e0b-99a6-5abad96cb659
+No session ID specified
+Connecting to kernel 80c61946-5c64-4e0b-99a6-5abad96cb659.
+WebSocket ping timeout after 90000 ms.
+Starting buffering for 80c61946-5c64-4e0b-99a6-5abad96cb659:b4f422f1-3ff3a13da54b671f76ce7a0c
+interrupted
+Shutting down...
+Kernel shutdown: 80c61946-5c64-4e0b-99a6-5abad96cb659
+received signal 2, stopping
+Kernel shutdown: 80c61946-5c64-4e0b-99a6-5abad96cb659
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 85281869-00f5-4bf1-9e1b-f7d6b83a94f8
+No session ID specified
+Connecting to kernel 85281869-00f5-4bf1-9e1b-f7d6b83a94f8.
+interrupted
+Shutting down...
+Kernel shutdown: 85281869-00f5-4bf1-9e1b-f7d6b83a94f8
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 7c4988ae-efd4-4402-82c1-a032e2303a79
+No session ID specified
+Connecting to kernel 7c4988ae-efd4-4402-82c1-a032e2303a79.
+WebSocket ping timeout after 90001 ms.
+Starting buffering for 7c4988ae-efd4-4402-82c1-a032e2303a79:cdea1bf5-59857db7d3ec90f9967e8680
+interrupted
+Shutting down...
+Discarding 3 buffered messages for 7c4988ae-efd4-4402-82c1-a032e2303a79:cdea1bf5-59857db7d3ec90f9967e8680
+Kernel shutdown: 7c4988ae-efd4-4402-82c1-a032e2303a79
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 47b82902-04cb-4b7e-b7e5-00a5f91c228d
+No session ID specified
+Connecting to kernel 47b82902-04cb-4b7e-b7e5-00a5f91c228d.
+interrupted
+Shutting down...
+Kernel shutdown: 47b82902-04cb-4b7e-b7e5-00a5f91c228d
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: fe15d73c-8de0-4fa1-b214-c6cddc3cd7e8
+No session ID specified
+Connecting to kernel fe15d73c-8de0-4fa1-b214-c6cddc3cd7e8.
+WebSocket ping timeout after 90002 ms.
+Starting buffering for fe15d73c-8de0-4fa1-b214-c6cddc3cd7e8:2eb6435f-19f41cdb624aa3b60886de37
+interrupted
+Shutting down...
+Discarding 3 buffered messages for fe15d73c-8de0-4fa1-b214-c6cddc3cd7e8:2eb6435f-19f41cdb624aa3b60886de37
+Kernel shutdown: fe15d73c-8de0-4fa1-b214-c6cddc3cd7e8
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 66815313-f307-4cbe-89d7-7beaf96532d7
+No session ID specified
+Connecting to kernel 66815313-f307-4cbe-89d7-7beaf96532d7.
+interrupted
+Shutting down...
+Kernel shutdown: 66815313-f307-4cbe-89d7-7beaf96532d7
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 90f9879e-9b58-4248-82f7-ec2233bf5859
+No session ID specified
+Connecting to kernel 90f9879e-9b58-4248-82f7-ec2233bf5859.
+interrupted
+Shutting down...
+Kernel shutdown: 90f9879e-9b58-4248-82f7-ec2233bf5859
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 3c56dd82-1202-4072-90d1-f90bdb9d6ebd
+No session ID specified
+Connecting to kernel 3c56dd82-1202-4072-90d1-f90bdb9d6ebd.
+interrupted
+Shutting down...
+Kernel shutdown: 3c56dd82-1202-4072-90d1-f90bdb9d6ebd
+received signal 2, stopping
+Kernel shutdown: 3c56dd82-1202-4072-90d1-f90bdb9d6ebd
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 23cdaf33-0058-49fc-9762-3d266a542999
+No session ID specified
+Connecting to kernel 23cdaf33-0058-49fc-9762-3d266a542999.
+interrupted
+Shutting down...
+Kernel shutdown: 23cdaf33-0058-49fc-9762-3d266a542999
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 820453c1-cdcf-4671-8f6c-179eb36414e0
+No session ID specified
+Connecting to kernel 820453c1-cdcf-4671-8f6c-179eb36414e0.
+interrupted
+Shutting down...
+Kernel shutdown: 820453c1-cdcf-4671-8f6c-179eb36414e0
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 161f167b-66cb-407a-9e72-2e5139e8826c
+No session ID specified
+Connecting to kernel 161f167b-66cb-407a-9e72-2e5139e8826c.
+interrupted
+Shutting down...
+Kernel shutdown: 161f167b-66cb-407a-9e72-2e5139e8826c
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 88deee02-4b5e-47f9-8fff-c6679dff1475
+No session ID specified
+Connecting to kernel 88deee02-4b5e-47f9-8fff-c6679dff1475.
+interrupted
+Shutting down...
+Kernel shutdown: 88deee02-4b5e-47f9-8fff-c6679dff1475

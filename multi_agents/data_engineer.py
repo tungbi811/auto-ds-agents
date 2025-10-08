@@ -15,7 +15,7 @@ class DataEngineerStep(BaseModel):
             "Feature engineering",
             "Data transformation",
             "Data normalization",
-            "Handling missing values",
+            "Fill missing values",
             "Encoding categorical variables"
         ]
     )
@@ -27,7 +27,7 @@ class DataEngineerStep(BaseModel):
             "Perform data cleaning using pandas only: drop duplicates; fix dtypes; standardize category values "
             "(e.g., casing/whitespace); unify date formats; remove impossible values (e.g., negative ages) and obvious data-entry errors.",
 
-            "Handle missing values: for numeric columns fill with median; for categorical columns fill with mode. "
+            "Fill missing values: for numeric columns fill with median; for categorical columns fill with mode. "
             "Document the imputation strategy per column and produce a summary table of missingness before/after.",
 
             "Detect and treat outliers using the IQR rule for numeric features (winsorize or cap at [Q1-1.5*IQR, Q3+1.5*IQR]). "
@@ -37,19 +37,15 @@ class DataEngineerStep(BaseModel):
             "Run filter-based feature selection: remove constant/near-zero variance features; drop features with excessive "
             "missingness (e.g., >40%) or extreme cardinality where inappropriate for the task.",
 
-            "For supervised selection, compute univariate statistics: Pearson correlation (regression), ANOVA F-test "
-            "(continuous vs categorical), or Chi-square (categorical vs categorical). Rank features and keep the top-K most relevant.",
+            "For feature selection, compute univariate statistics: Pearson correlation (regression), ANOVA F-test "
+            "(continuous vs categorical), or Chi-square (categorical vs categorical). Rank features and keep the top-K most relevant to the target variable.",
 
             "Remove multicollinearity : compute a correlation matrix and/or VIF; for pairs of variables with |corr|>0.9 or VIF>10, "
             "keep one representative feature based on relevance to the target and business interpretability.",
 
-            "Optionally run a quick model-based selector (e.g., tree-based feature importance on a small RandomForest) "
-            "to cross-check the filtered list; do NOT use this as the final model—this is only for selection heuristics.",
-
             # OUTPUTS (files & reports)
-            "Save the cleaned splits to the REQUIRED filenames (overwrite if they already exist): "
-            "./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv. "
-            "Ensure parent directories exist (Path(...).parent.mkdir(parents=True, exist_ok=True)) and write with mode='w', index=False.",
+            "MANDATORY: Save the cleaned splits to the EXACT paths under ./data/ — ./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv."
+            "OVERWRITE files unconditionally (mode='w') and write CSVs with index=False. Any deviation from these filenames or location is NOT allowed."
 
             # IMPORTANT CONSTRAINTS
             "All cleaning and feature selection must be done "
@@ -118,13 +114,21 @@ class DataEngineer(AssistantAgent):
                 - Filter noise: Remove irrelevant or erroneous records that compromise integrity.
                 - Validate outputs: Confirm cleaned data aligns with business rules (e.g., no negative ages, totals reconcile).
 
-                Feature Selection & Engineering:
-                - Feature creation: Derive new features from existing variables (e.g., ratios, time-based aggregations, interactions).
-                - Feature selection: Retain informative and non-redundant features to improve data efficiency.
-                - Temporal & sequential features: Generate lag variables, rolling statistics, or trend-based indicators.
-                - Domain-driven enrichment: Incorporate domain insights to create features with business relevance.
-                - Data splitting: Partition data into training, validation, and test sets to prevent data leakage.
-
+                Feature Selection & Engineering (MANDATORY):
+                1) Filter-based pruning
+                - Remove constant/near-zero variance features.
+                - Drop features with excessive missingness (e.g., >40%) or extreme cardinality when inappropriate for the task domain.
+                2) Univariate relevance scoring (choose method by {problem_type} and data type)
+                - Regression target: Pearson correlation |r| and/or f_regression scores; rank features and keep top-K (use provided K; otherwise default K=10).
+                - Classification target: ANOVA F-test (f_classif) for continuous predictors vs class label; Chi-square for non-negative categorical/encoded counts.
+                    * If using Chi-square, ensure inputs are non-negative (apply suitable encoding/counting beforehand).
+                3) Multicollinearity control
+                - Compute correlation matrix and Variance Inflation Factor (VIF) on candidate set.
+                - For pairs with |corr| > 0.90 or VIF > 10, keep one representative feature based on higher univariate relevance and business interpretability; drop the rest.
+                
+                Data Splitting (MANDATORY):
+                - Partition data into training, validation, and test sets to prevent data leakage.
+                
                 Workflow:
                 1. Ingest Data & Review Findings:
                 Begin with the raw or explored dataset, using insights from the DataExplorer or data quality reports.
@@ -138,6 +142,7 @@ class DataEngineer(AssistantAgent):
 
                 Rules:
                 You must to make sure that no dubplicate, no missing values, no inconsistencies, and no obvious errors remain in the final datasets.
+                You are not allowed to do any data analysis tasks.
                 Do not perform anything related to model training, evaluation, or selection. 
                 Your focus ends with no issues and high-quality datasets.
                 """,

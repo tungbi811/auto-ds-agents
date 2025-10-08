@@ -39,8 +39,12 @@ group_chat = DefaultPattern(
 initiate_group_chat(
     pattern=group_chat,
     messages="""
-        Here is the dataset path: ./data/house_prices/train.csv. 
+        Here is the dataset path: ./data/house_prices/train.csv.
         Can you help me to find out the reasonable sale price of a house with 3 bedroom, 2 bathroom, 1500 sqft, 1 car garage built in 2000?
     """,
     max_rounds=150
 )
+
+#Can you help me to find out the reasonable sale price of a house with 3 bedroom, 2 bathroom, 1500 sqft, 1 car garage built in 2000?
+#Could you help me identiy my house (with 3 bedrooms, 2 bathrooms, 1500 sqft, and a 1-car garage built in 2000) is in which segmentation? Such as luxury homes, affordable starter homes, or investment-ready properties...?
+#Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.).

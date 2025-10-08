@@ -84,7 +84,7 @@ def execute_business_translation_step(
     """
     context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
-        message=f"Please write Python code to execute this business translator step:\n{step.step_description}\nInstruction: {step.instruction}",
+        message=f"Please write Python code to execute this business translator step:\n{step.step_description} - {step.instruction}",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
@@ -128,20 +128,17 @@ class BusinessTranslator(ConversableAgent):
             - **Plain business language** — never mention algorithms, preprocessing steps, or statistical terminology.
 
             Workflow:
-            1. Review stakeholder_expectations to clearly understand the desired business outcomes and key performance indicators.
-            2. Examine the analytical results provided by other agents to identify the main findings relevant to the business question.
-            3. For each business translator step, call execute_data_scientist_step to delegate implementation to the Coder agent.
-            4. If insights are incomplete or unclear, request additional analysis or data exploration from technical agents (e.g., Coder or Data Explorer).
-            - This may include re-scaling or reconstructing datasets to their original form, re-labelling segments or classes, or applying supplementary analytical methods.
-            - The goal is to ensure that the findings provide a complete and interpretable view of each segment, pattern, or business condition.
-            5. Once sufficient analytical clarity is achieved, interpret the refined results in business terms.
-            6. Translate the findings into actionable insights, clearly outlining implications, opportunities, risks, and recommended actions for decision-makers.
-            7. Summarize the final output in a concise business format (e.g., **Key Insights** and **Business Recommendations**) that directly answers the stakeholder’s question.
-
-            Example style:
-            - “The analysis identifies three property segments: luxury, affordable, and investment-ready homes.”
-            - “Luxury homes show strong price stability but slower turnover; affordable homes attract first-time buyers.”
-            - “Recommendation: Focus marketing efforts on affordable homes to drive higher sales volume, while positioning luxury homes through exclusive channels to maximize margins.”
+            1) Understand the user’s intent and whether a specific data point was provided (and which features are present/missing).
+            2) Review available analytical outputs (models, centroids, profiles) from other agents relevant to the question.
+            3) Branch:
+            - For classification/regression/time_series with user data:
+                • Build a BusinessTranslatorStep that tells the Coder to reload ./artifacts/best_model_{problem_type}.joblib and predict for that data point (no retraining).
+                • Call execute_business_translation_step to send that step to the Coder.
+            - For clustering:
+                • Do NOT call any predictive model. Determine the best-fit cluster by comparing the user’s features with existing cluster profiles/centroids.
+                • (Optional) If numeric distance is necessary, you may call the Coder for a simple nearest-centroid computation—no model loading.
+            4) Convert the technical outcome into business terms: key insight(s), what it means, and what the business should do next.
+            5) Summarize the final output concisely under headings like **Key Insights** and **Business Recommendations**.
 
             Rules:
             - Do not include technical details such as algorithms, data preprocessing, or modeling methods.

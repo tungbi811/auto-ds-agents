@@ -21,14 +21,14 @@ class DataScientistStep(BaseModel):
         ...,
         description=(
             "Implement the workflow in this exact order: "
-            "(1) load the cleaned splits saved by the Data Engineer, "
-            "(2) build a processing pipeline with categorical → OneHotEncoder → StandardScaler; numerical → StandardScaler; "
-            "datetime → extract [day, month] → cosine transform → StandardScaler, "
-            "(3) for each candidate model, create ONE sklearn Pipeline [('preprocess', processing_pipeline), ('est', estimator)], "
-            "(4) NEVER call fit() on the preprocessing pipeline by itself; call fit() ONLY on the combined pipeline using the train_cleaned split"
-            "(5) select the appropriate cross-validation strategy (e.g., StratifiedKFold/KFold/TimeSeriesSplit) and scoring metric based on the {problem_type}, "
-            "(6) ALWAYS fit on the train_cleaned split you loaded (no validation/test leakage), then evaluate on val_cleaned and optionally test_cleaned, "
-            "and (7) persist the best fitted pipeline (processing + estimator) to the specified artifact path."
+            "(1) Load the cleaned splits produced by the Data Engineer (train_cleaned, val_cleaned, test_cleaned if available). "
+            "(2) Build ONE processing pipeline via ColumnTransformer: categorical → OneHotEncoder(handle_unknown='ignore') → StandardScaler(with_mean=False); numerical → StandardScaler; datetime → extract [day, month] → cosine transform → StandardScaler. "
+            "(3) For each candidate estimator, MUST create ONE sklearn Pipeline: Pipeline([('preprocess', processing_pipeline), ('est', estimator)]). "
+            "(4) NEVER call fit()/transform() on the processing pipeline by itself; call fit() ONLY on the combined pipeline using the train_cleaned split. "
+            "(5) Choose the correct cross-validation (StratifiedKFold/KFold/TimeSeriesSplit) and scoring for {problem_type}; when tuning, pass parameters with the 'est__' prefix. "
+            "(6) ALWAYS fit on (X_train_cleaned, y_train_cleaned) only (no validation/test leakage); then evaluate on val_cleaned and, if available, test_cleaned. "
+            "(7) Persist the best fitted pipeline (processing + estimator) to the specified artifact path (e.g., ./artifacts/best_model_{problem_type}.joblib) and record key metrics."
+
         ),
         examples=[
             "Load ./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv; set X_* and y_* using the 'target' column.",
@@ -39,6 +39,129 @@ class DataScientistStep(BaseModel):
             "evaluate on (X_val_cleaned, y_val_cleaned), and report test metrics if (X_test_cleaned, y_test_cleaned) exist.",
             "Use GridSearchCV/RandomizedSearchCV with the correct splitter (StratifiedKFold/KFold/TimeSeriesSplit) and an appropriate scoring metric.",
             "Select the best pipeline by the primary metric and persist it (processing + model) to ./artifacts/best_model_{problem_type}.joblib, with key metrics."
+            
+            """
+            # Full example: end-to-end pipeline (processing + model) + Grid Search
+
+            import pandas as pd
+            import numpy as np
+            from pathlib import Path
+            from sklearn.compose import ColumnTransformer
+            from sklearn.pipeline import Pipeline
+            from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
+            from sklearn.ensemble import RandomForestRegressor
+            from sklearn.metrics import mean_squared_error
+            from sklearn.model_selection import GridSearchCV, KFold
+            import joblib
+
+            # 1) Load cleaned splits (produced by Data Engineer)
+            train = pd.read_csv("./data/train_cleaned.csv")
+            val   = pd.read_csv("./data/val_cleaned.csv")
+            # (Optional) test = pd.read_csv("./data/test_cleaned.csv")
+
+            TARGET = "target"
+            X_train, y_train = train.drop(columns=[TARGET]), train[TARGET]
+            X_val,   y_val   = val.drop(columns=[TARGET]),   val[TARGET]
+
+            # 2) Identify column types (example heuristics)
+            cat_cols = X_train.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
+            num_cols = X_train.select_dtypes(include=["number"]).columns.tolist()
+
+            # Try to coerce likely datetime columns (if any)
+            for c in X_train.columns:
+                if c.lower().endswith(("date", "_dt")) or ("date" in c.lower()):
+                    X_train[c] = pd.to_datetime(X_train[c], errors="ignore")
+                    X_val[c]   = pd.to_datetime(X_val[c],   errors="ignore")
+
+            dt_cols = X_train.select_dtypes(
+                include=["datetime64[ns]", "datetime64[ms]", "datetimetz"]
+            ).columns.tolist()
+
+            # 3) Define datetime feature extractors (day, month → cosine)
+            def extract_day_month(df: pd.DataFrame) -> pd.DataFrame:
+                out = pd.DataFrame(index=df.index)
+                for col in df.columns:
+                    s = pd.to_datetime(df[col], errors="coerce")
+                    out[f"{col}_day"]   = s.dt.day.fillna(0)
+                    out[f"{col}_month"] = s.dt.month.fillna(0)
+                return out
+
+            def cosine_transform(df: pd.DataFrame) -> pd.DataFrame:
+                g = df.copy()
+                for c in g.columns:
+                    if c.endswith("_day"):
+                        g[c] = np.cos(2 * np.pi * (g[c] - 1) / 31.0)
+                    elif c.endswith("_month"):
+                        g[c] = np.cos(2 * np.pi * (g[c] - 1) / 12.0)
+                return g
+
+            extractor = FunctionTransformer(extract_day_month, feature_names_out="one-to-one")
+            cosiner   = FunctionTransformer(cosine_transform,   feature_names_out="one-to-one")
+
+            # 4) Build processing pipeline
+            numeric_tf = Pipeline([
+                ("scale", StandardScaler())
+            ])
+
+            categorical_tf = Pipeline([
+                ("onehot", OneHotEncoder(handle_unknown="ignore")),
+                ("scale",  StandardScaler(with_mean=False))
+            ])
+
+            datetime_tf = Pipeline([
+                ("extract", extractor),
+                ("cosine",  cosiner),
+                ("scale",   StandardScaler())
+            ])
+
+            processing = ColumnTransformer(
+                transformers=[
+                    ("num", numeric_tf, num_cols),
+                    ("cat", categorical_tf, cat_cols),
+                    ("dt",  datetime_tf, dt_cols),
+                ],
+                remainder="drop"
+            )
+
+            # 5) Build full model pipeline (processing + estimator)
+            full_pipe = Pipeline([
+                ("preprocess", processing),
+                ("est", RandomForestRegressor(random_state=42))
+            ])
+
+            # 6) Grid Search on the FULL pipeline (fit ONLY after combining)
+            param_grid = {
+                "est__n_estimators": [100, 200, 400],
+                "est__max_depth": [None, 10, 20],
+                "est__min_samples_split": [2, 5, 10]
+            }
+
+            cv = KFold(n_splits=5, shuffle=True, random_state=42)
+            search = GridSearchCV(
+                estimator=full_pipe,
+                param_grid=param_grid,
+                scoring="neg_root_mean_squared_error",
+                cv=cv,
+                n_jobs=-1,
+                verbose=1
+            )
+
+            search.fit(X_train, y_train)
+            best_pipe = search.best_estimator_
+            best_cv_rmse = -search.best_score_
+            print(f"Best CV RMSE: {best_cv_rmse:.3f}")
+            print(f"Best params: {search.best_params_}")
+
+            # 7) Evaluate best pipeline on validation
+            val_pred = best_pipe.predict(X_val)
+            val_rmse = mean_squared_error(y_val, val_pred, squared=False)
+            print(f"Validation RMSE (best pipeline): {val_rmse:.3f}")
+
+            # 8) Persist the best fitted pipeline (processing + model)
+            Path("./artifacts").mkdir(parents=True, exist_ok=True)
+            joblib.dump(best_pipe, "./artifacts/best_model_regression.joblib")
+            print("Saved: ./artifacts/best_model_regression.joblib")
+            """
         ]
     )
     reason: str = Field(

@@ -1,0 +1,21 @@
+{
+    "best_hyperparameters": {
+        "regressor__max_depth": null,
+        "regressor__min_samples_split": 5,
+        "regressor__n_estimators": 200
+    },
+    "validation_rmse": 26459.994913733077,
+    "test_rmse": 29181.112330022323,
+    "feature_importances": {
+        "OverallQual": 0.5721978117177916,
+        "GrLivArea": 0.16029811447145662,
+        "TotalBsmtSF": 0.05943609062219077,
+        "1stFlrSF": 0.056486864876284903,
+        "YearBuilt": 0.03652228357077711,
+        "GarageArea": 0.03370641653016808,
+        "GarageCars": 0.0282265272398143,
+        "YearRemodAdd": 0.027149039954756836,
+        "TotRmsAbvGrd": 0.015611354997725693,
+        "FullBath": 0.010365496019034049
+    }
+}
