@@ -88,7 +88,7 @@ class BusinessAnalyst(AssistantAgent):
                 api_type= "openai",
                 model="gpt-4.1-mini",
                 response_format=BizAnalystOutput,
-                temperature=0.3,
+                temperature=0.7,
                 parallel_tool_calls=False
             ),
             system_message="""

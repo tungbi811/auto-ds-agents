@@ -2,11 +2,11 @@ import streamlit as st
 from .sidebar import ROLE_EMOJI
 from autogen.agentchat import run_group_chat
 from autogen import UserProxyAgent, LLMConfig
-from autogen.agentchat.group.patterns import DefaultPattern
-from autogen.agentchat.group import AgentTarget, ContextVariables
+from autogen.agentchat.group.patterns import DefaultPattern, AutoPattern
+from autogen.agentchat.group import AgentTarget, ContextVariables, RevertToUserTarget
 from multi_agents import BusinessAnalyst, DataAnalyst, DataEngineer, DataScientist, Coder, BusinessTranslator
 
-def start_group_chat(provider_choice, model_choice, api_key, temperature, dataset_paths, user_requirements):
+def start_group_chat(dataset_paths, user_requirements):
     context_variables = ContextVariables(data={
         "current_agent": "",
         "objective": "",
@@ -14,15 +14,6 @@ def start_group_chat(provider_choice, model_choice, api_key, temperature, datase
         "stakeholders_expectations": [],
         "research_questions": [],
     })
-
-    # --- Agent setup ---
-    llm_config = LLMConfig(
-        api_type=provider_choice.lower(),
-        model=model_choice,
-        api_key=api_key,
-        temperature=temperature,
-        stream=False,
-    )
     
     business_analyst = BusinessAnalyst()
     data_analyst = DataAnalyst()
@@ -32,16 +23,23 @@ def start_group_chat(provider_choice, model_choice, api_key, temperature, datase
     coder = Coder()
     user = UserProxyAgent(name="User", code_execution_config=False)
 
-    business_analyst.handoffs.set_after_work(AgentTarget(data_analyst))
+    business_analyst.handoffs.set_after_work(AgentTarget(data_engineer))
     data_analyst.handoffs.set_after_work(AgentTarget(data_engineer))
     data_engineer.handoffs.set_after_work(AgentTarget(data_scientist))
     data_scientist.handoffs.set_after_work(AgentTarget(business_translator))
+    business_translator.handoffs.set_after_work(RevertToUserTarget())
 
-    pattern = DefaultPattern(
+    pattern = AutoPattern(
         initial_agent=business_analyst,
-        agents=[business_analyst, coder, data_analyst, data_engineer, data_scientist, business_translator],
+        agents=[business_analyst, data_analyst, coder, data_engineer, data_scientist, business_translator],
         user_agent=user,
-        context_variables=context_variables
+        context_variables=context_variables,
+        group_manager_args={
+            "llm_config": LLMConfig(
+                api_type= "openai",
+                model="gpt-5-mini",
+            ),
+        }
     )
 
     message = f"""
@@ -63,4 +61,7 @@ def display_group_chat():
         role = msg["role"]
         with st.chat_message(role, avatar=ROLE_EMOJI.get(role, "")):
             st.markdown(f"**{role}**")
-            st.text(msg["content"])
+            if role == "Coder":
+                st.code(msg["content"])
+            else:
+                st.text(msg["content"])
