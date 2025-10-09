@@ -4,49 +4,14 @@ from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import ContextVariables, ReplyResult, AgentNameTarget
 
 class DataAnalystStep(BaseModel):
-    step_description: str= Field(
-        ...,
-        description=(
-            "Type of exploration step to perform. "
-        ),
-        examples=[
-            "Profile dataset",
-            "Missing value analysis",
-            "Outlier detection",
-            "Duplicate check.",
-            "Inconsistency check",
-        ]
-    )
     instruction: str = Field(
         ...,
         description="Description of what and how to do for this step.",
         examples=[
             "Use statistical IQR methods to identify extreme values that are higher than max+3*IQR or lower than min-3*IQR in numeric columns.",
-            "Use pandas duplicated() method on dataset excluding 'Id' column.",
-            "Use pandas isnull() and sum() methods to report count and percentage of missing values per column.",
+            "Check for duplicate rows excluding the index column or unique identifier.",
+            "Calculate the number and percentage of missing values for each column.",
         ]
-    )
-    reason: str = Field(
-        ...,
-        description="Reason for this step.",
-        examples=[
-            "Understanding data structure is foundational for all subsequent tasks.",
-            "Missing data can bias analyses and degrade model performance.",
-            "Outliers can skew statistics and mislead models.",
-            "Duplicates can distort analyses and lead to overfitting.",
-            "Inconsistencies can cause errors in processing and analysis."
-        ]
-    )
-
-class DataAnalystOutput(BaseModel):
-    issues: List[str] = Field(
-        ...,
-        description="A list of data quality issues identified during data exploration."
-    )
-
-    insights: List[str] = Field(
-        ...,
-        description="A list of key insights discovered during data exploration."
     )
 
 def execute_data_analyst_step(
@@ -58,36 +23,23 @@ def execute_data_analyst_step(
     """
     context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
-        message=f"Can you write Python code for me to execute this exploration step: \n{step.step_description}\nInstruction: {step.instruction}",
+        message=f"Coder! Can you write Python code to :\n {step.instruction}. \n",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
-def complete_data_analyst_task(
-    results: DataAnalystOutput,
-    context_variables: ContextVariables
-) -> ReplyResult:
-    """
-    Complete the DataAnalyst stage and hand off results to the DataEngineer.
-    """
-    context_variables["data_insights"] = results.insights
-    context_variables["data_issues"] = results.issues
-    context_variables["current_agent"] = "DataEngineer"
-    return ReplyResult(
-        message=f"Here are the data quality insights {results.insights} and issues found: {results.issues}",
-        target=AgentNameTarget("DataEngineer"),
-    )
-
 class DataAnalyst(AssistantAgent):
     def __init__(self):
+        llm_config = LLMConfig(
+            api_type= "openai",
+            model="gpt-4.1-mini",
+            temperature=0.3,
+            stream=False,
+            parallel_tool_calls=False
+        )
         super().__init__(
             name = "DataAnalyst",
-            llm_config = LLMConfig(
-                api_type= "openai",
-                model="gpt-4.1-mini",
-                response_format=DataAnalystOutput,
-                parallel_tool_calls=False
-            ),
+            llm_config=llm_config,
             system_message = """
                 You are the DataAnalyst.
                 Your role is to explore datasets in order to discover insights, patterns, and issues. You provide a clear picture 
@@ -105,13 +57,12 @@ class DataAnalyst(AssistantAgent):
                 Workflow:
                 1. Review the dataset to identify areas for exploration.
                 2. For each exploration step, call execute_data_analyst_step to delegate implementation to the Coder agent.
-                3. When exploration is complete, summarise it into structured output and call complete_data_analyst_task.
+                3. When exploration is complete, summarise insights and findings.
 
                 Rules:
                 Do not clean, transform, or engineer features — only explore and report.
                 Do not perform model training or evaluation.
                 Findings should be clear, concise, and useful for the next steps.
-                You must always call complete_data_analyst_task with the final insights and issues found.
             """,
             functions=[execute_data_analyst_step]
         )

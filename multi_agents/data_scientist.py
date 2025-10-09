@@ -3,34 +3,13 @@ from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResu
 from pydantic import BaseModel, Field
 
 class DataScientistStep(BaseModel):
-    step_description: str = Field(
-        ...,
-        description="Modeling step to perform.",
-        examples=[
-            "Select algorithms",
-            "Train models",
-            "Hyperparameter tuning",
-            "Evaluate models"
-        ]
-    )
     instruction: str = Field(
         ...,
         description="Description of what and how to do for this step.",
         examples=[
-            "Choose algorithms suitable for classification tasks, such as logistic regression, decision trees, or random forests.",
-            "Train models using the training dataset, ensuring to validate with cross-validation techniques.",
-            "Use grid search or random search to find optimal hyperparameters for the selected models.",
-            "Evaluate models using metrics like accuracy, precision, recall, and F1-score to determine the best performer."
-        ]
-    )
-    reason: str = Field(
-        ...,
-        description="Reason for this step.",
-        examples=[
-            "Different algorithms have varying strengths; selection impacts performance.",
-            "Training is essential to learn patterns from data.",
-            "Optimal hyperparameters can significantly improve model performance.",
-            "Evaluation ensures the model meets the desired performance criteria."
+            ""
+            "Use KMeans algorithm from sklearn for clustering tasks, determining optimal number of clusters with the elbow method.",
+            "For time series forecasting, implement ARIMA model using statsmodels library.",
         ]
     )
 
@@ -65,7 +44,7 @@ def execute_data_scientist_step(
     """
     context_variables["current_agent"] = "DataScientist"
     return ReplyResult(
-        message=f"Please write Python code to execute this data scientist step:\n{step.step_description} - {step.instruction}",
+        message=f"Hey Coder! Here is the instruction for the data science step:\n {step.instruction}\n Can you write Python code for me to execute it?",
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
@@ -81,35 +60,61 @@ def complete_data_scientist_task(
 
 class DataScientist(ConversableAgent):
     def __init__(self):
+        llm_config = LLMConfig(
+            api_type="openai",
+            model="gpt-5-mini",
+            parallel_tool_calls=False
+        )
+
         super().__init__(
             name="DataScientist",
-            llm_config=LLMConfig(
-                api_type= "openai",
-                model="gpt-4.1-mini",
-                parallel_tool_calls=False,
-                temperature=0.3,
-            ),
+            llm_config=llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
             update_agent_state_before_reply=[
                 UpdateSystemMessage(
-                    """
-                    You are a Data Scientist.
-                    Your role is to design, build, and evaluate machine learning models to achieve {objective} for a {problem_type} task. You translate business and 
-                    analytical goals into concrete modeling strategies, ensuring results are accurate, explainable, and aligned with stakeholder expectations.
-
-                    Key Responsibilities:
-                    - Model selection: Choose appropriate algorithms based on the problem type (e.g., regression, classification, clustering).
-                    - Model training: Train models using the processed datasets, ensuring proper validation techniques (e.g., cross-validation).
-                    - Hyperparameter tuning: Optimize model performance through systematic hyperparameter tuning (e.g., grid search, random search).
-                    - Model evaluation: Assess models using relevant metrics (e.g., accuracy, RMSE, F1-score) and validate against business objectives.
+                """
+                    You are the DataScientist.
+                    Your role is to design, build, and evaluate machine learning models to achieve {objective} for a {problem_type} task.
+                    You translate business and analytical goals into concrete modeling strategies, ensuring results are accurate, explainable, and aligned with stakeholder expectations.
 
                     Workflow:
-                    1. Review the business objectives and problem type provided by the BusinessAnalyst.
-                    2. For each modeling or evaluation step, call execute_data_scientist_step to delegate implementation to the Coder agent.
-                    3. Train, tune, and evaluate models iteratively until performance criteria are met.
-                    4. Summarize the best model, including metrics, parameters, and interpretability insights.
-                    5. When modeling and evaluation are complete, call complete_modeling_task with the final model artifacts, metrics, and summary report.
+                    1. Review Inputs
+                    - Understand the {objective} and determine the {problem_type} (e.g., regression, classification, clustering).
+                    - Identify key target variables, input features, and performance requirements.
+
+                    2. Model Selection
+                    - Choose appropriate algorithms based on the {problem_type}.
+                    - For regression: consider models like LinearRegression, RandomForestRegressor, XGBoostRegressor.
+                    - For classification: consider LogisticRegression, RandomForestClassifier, XGBoostClassifier.
+                    - For clustering: consider KMeans, DBSCAN, or hierarchical clustering.
+                    - Document the reasoning behind the model choice.
+
+                    3. Model Training
+                    - Train selected models using the processed datasets.
+                    - Apply proper validation methods (e.g., train/test split, cross-validation).
+                    - Ensure data leakage prevention and reproducibility.
+
+                    4. Hyperparameter Tuning
+                    - Optimize model performance using grid search or randomized search.
+                    - Avoid overfitting by using validation data or cross-validation folds.
+
+                    5. Model Evaluation
+                    - Assess model performance using suitable metrics based on the {problem_type}.
+                    - Compare models and summarize performance results.
+
+                    6. Execution of Steps
+                    - For each modeling or evaluation step, call execute_data_scientist_step to delegate implementation to the Coder agent.
+
+                    7. Summarization
+                    - Summarize the final model, including algorithm, hyperparameters, key performance metrics, and interpretation of results.
+                    - Provide concise recommendations based on the evaluation results.
+
+                    Rules:
+                    - Do not perform any data cleaning or feature engineering (these are done by the DataEngineer).
+                    - Do not generate plots or visualizations.
+                    - Ensure models are reproducible, interpretable, and properly validated.
+                    - Focus on clarity, correctness, and alignment with the stated {objective}.
                 """
                 )
             ],

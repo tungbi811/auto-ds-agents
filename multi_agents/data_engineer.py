@@ -4,41 +4,17 @@ from autogen import AssistantAgent, LLMConfig
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
 
 class DataEngineerStep(BaseModel):
-    step_description: str = Field(
-        ...,
-        description=(
-            "Type of data engineering step to perform. "
-        ),
-        examples=[
-            "Data cleaning",
-            "Feature engineering",
-            "Data transformation",
-            "Data normalization",
-            "Handling missing values",
-            "Encoding categorical variables"
-        ]
-    )
     instruction: str = Field(
         ...,
         description="Description of what and how to do for this step.",
         examples=[
-            "Use statistical IQR methods to identify extreme values that are higher than max+3*IQR or lower than min-3*IQR in numeric columns.",
-            "Use pandas get_dummies() method to one-hot encode categorical columns.",
+            "Remove duplicate rows based on all columns except the index or unique identifier.",
+            "Standardize date formats to YYYY-MM-DD across all date columns.",
+            "Impute missing values in numeric columns using median and categorical columns using mode.",
             "Use sklearn StandardScaler to standardize numeric features to have mean=0 and std=1.",
-            "Use pandas fillna() method with median values for numeric columns and mode for categorical columns.",
+            "For categorical variables with high cardinality, use frequency encoding.",
+            "Remove columns that have more than 30% missing values.",
             "Create new features like 'TotalSpent' by multiplying 'Quantity' and 'Price' columns and then drop the original columns."
-        ]
-    )
-    reason: str = Field(
-        ...,
-        description="Reason for this step.",
-        examples=[
-            "Cleaning data ensures accuracy and reliability for modeling.",
-            "Engineering relevant features can improve model performance.",
-            "Transforming data into suitable formats is essential for algorithms.",
-            "Normalizing data helps models converge faster and perform better.",
-            "Handling missing values prevents biases and errors in analysis.",
-            "Encoding categorical variables allows models to interpret them correctly."
         ]
     )
 
@@ -51,31 +27,25 @@ def execute_data_engineer_step(
     """
     context_variables["current_agent"] = "DataEngineer"
     return ReplyResult(
-        message=f"Can you write Python code for me to execute this data engineering step: \n{step.step_description}\nInstruction: {step.instruction}",
+        message=f"Hey Coder! Here is the instruction for the data engineering step: \n{step.instruction} \nCan you write Python code for me to execute it?",
         target=AgentNameTarget("Coder"),
-        context_variables=context_variables,
-    )
-
-def complete_data_engineer_task(
-    context_variables: ContextVariables,
-) -> ReplyResult:
-    context_variables["current_agent"] = "DataScientist"
-    return ReplyResult(
-        message=f"Data engineering is complete.",
-        target=AgentNameTarget("DataScientist"),
         context_variables=context_variables,
     )
 
 class DataEngineer(AssistantAgent):
     def __init__(self):
+        llm_config = LLMConfig(
+            api_type="openai",
+            api_key=None,  # to be set later
+            model="gpt-4.1-mini",
+            temperature=0.3,
+            stream=False,
+            parallel_tool_calls=False
+        )
+        
         super().__init__(
             name="DataEngineer",
-            llm_config=LLMConfig(
-                api_type= "openai",
-                model="gpt-4.1-mini",
-                parallel_tool_calls=False,
-                temperature=0.3,
-            ),
+            llm_config=llm_config,
             system_message = """
                 You are the DataEngineer.
                 Your role is to clean, preprocess, and engineer features from raw datasets to ensure they are accurate, consistent, and optimized for analysis or modeling.
@@ -108,7 +78,7 @@ class DataEngineer(AssistantAgent):
                 For each cleaning or feature engineering step, call execute_data_engineer_step to delegate implementation to the Coder agent.
                 3. Validation & Completion:
                 - Verify that all cleaned and engineered data meets consistency and reproducibility standards.
-                - Once all preprocessing and feature engineering are complete, you have to call complete_data_engineer_task to hand off to the DataScientist.
+                - Once all preprocessing and feature engineering are complete, summarise what was done.
 
                 Rules:
                 Do not perform anything related to model training, evaluation, or selection. 
