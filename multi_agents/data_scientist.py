@@ -7,7 +7,7 @@ class DataScientistStep(BaseModel):
         ...,
         description="Modeling step to perform.",
         examples=[
-            "Load cleaned datasets produced by the Data Engineer (e.g., ./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv)",
+            "Load data depending on {problem_type}: for clustering, load the WHOLE cleaned dataset (e.g., ./data/df_cleaned.csv; if not available, concatenate ./data/train_cleaned.csv, ./data/val_cleaned.csv, and ./data/test_cleaned.csv). For classification/regression/time_series, load the cleaned splits (./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv).",
             "Define the processing pipeline: categorical → OneHotEncoder → StandardScaler; numerical → StandardScaler; datetime → extract [day, month] → cosine transform → StandardScaler",
             "Build per-model training pipelines that combine the processing pipeline with each estimator",
             "Do NOT fit the preprocessing pipeline alone; ONLY fit the combined (processing + model) pipeline",
@@ -21,17 +21,21 @@ class DataScientistStep(BaseModel):
         ...,
         description=(
             "Implement the workflow in this exact order: "
-            "(1) Load the cleaned splits produced by the Data Engineer (train_cleaned, val_cleaned, test_cleaned if available). "
+            "(1) Load data based on {problem_type}: "
+            "• If clustering → load the WHOLE cleaned dataset (./data/whole_cleaned.csv). If not present, CONCATENATE ./data/train_cleaned.csv, ./data/val_cleaned.csv, and ./data/test_cleaned.csv to form a single full dataset. "
+            "• If classification/regression/time_series → load the cleaned splits (train_cleaned, val_cleaned, test_cleaned if available). "
             "(2) Build ONE processing pipeline via ColumnTransformer: categorical → OneHotEncoder(handle_unknown='ignore') → StandardScaler(with_mean=False); numerical → StandardScaler; datetime → extract [day, month] → cosine transform → StandardScaler. "
             "(3) For each candidate estimator, MUST create ONE sklearn Pipeline: Pipeline([('preprocess', processing_pipeline), ('est', estimator)]). "
             "(4) NEVER call fit()/transform() on the processing pipeline by itself; call fit() ONLY on the combined pipeline using the train_cleaned split. "
             "(5) Choose the correct cross-validation (StratifiedKFold/KFold/TimeSeriesSplit) and scoring for {problem_type}; when tuning, pass parameters with the 'est__' prefix. "
             "(6) ALWAYS fit on (X_train_cleaned, y_train_cleaned) only (no validation/test leakage); then evaluate on val_cleaned and, if available, test_cleaned. "
             "(7) Persist the best fitted pipeline (processing + estimator) to the specified artifact path (e.g., ./artifacts/best_model_{problem_type}.joblib) and record key metrics."
+            "(8) For clustering, label the full dataset with cluster assignments and save to ./data/df_clustered.csv."
 
         ),
         examples=[
-            "Load ./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv; set X_* and y_* using the 'target' column.",
+            "Classification/Regression/Time Series — Loading: read ./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv; set X_* and y_* using the 'target' column.",
+            "Clustering — Loading: prefer ./data/whole_cleaned.csv; if absent, concatenate train_cleaned/val_cleaned/test_cleaned into a single DataFrame for unsupervised fitting (no target).",
             "Create a processing pipeline: categorical → OneHotEncoder → StandardScaler(with_mean=False if sparse); numerical → StandardScaler; "
             "datetime → extract day & month → cosine transform (encode cyclicality) → StandardScaler.",
             "Assemble per-model pipelines: Pipeline([('preprocess', processing_pipeline), ('est', estimator)]) for each candidate estimator.",
@@ -39,6 +43,7 @@ class DataScientistStep(BaseModel):
             "evaluate on (X_val_cleaned, y_val_cleaned), and report test metrics if (X_test_cleaned, y_test_cleaned) exist.",
             "Use GridSearchCV/RandomizedSearchCV with the correct splitter (StratifiedKFold/KFold/TimeSeriesSplit) and an appropriate scoring metric.",
             "Select the best pipeline by the primary metric and persist it (processing + model) to ./artifacts/best_model_{problem_type}.joblib, with key metrics."
+            "For clustering, after fitting, assign cluster labels to the full dataset and save to ./data/df_clustered.csv."
             
             """
             # Full example: end-to-end pipeline (processing + model) + Grid Search
@@ -249,8 +254,9 @@ class DataScientist(ConversableAgent):
                     1. Review the business objectives and problem type provided by the BusinessAnalyst.
                     2. For each modeling or evaluation step, call execute_data_scientist_step to delegate implementation to the Coder agent.
                     3. Train, tune, and evaluate models iteratively until performance criteria are met.
-                    4. Summarize the best model, including metrics, parameters, and interpretability detail insights of variables related to the best models.
-                    5. When modeling and evaluation are complete, call complete_modeling_task with the final model artifacts, metrics, and summary report.
+                    4. For clustering tasks, after fitting the model, assign cluster labels to the entire dataset and save the labeled data to ./data/df_clustered.csv.
+                    5. Summarize the best model, including metrics, parameters, and variables related to the best models.
+                    6. When modeling and evaluation are complete, call complete_modeling_task with the final model artifacts, metrics, and summary report.
 
                     Rules:
                     - Do not recommend any thing to Business Translator, only focus on modeling tasks. 

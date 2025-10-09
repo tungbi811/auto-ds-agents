@@ -4,6 +4,49 @@ from pydantic import BaseModel, Field
 from typing import Dict, List, Literal, Optional
 
 
+class BsinessTranslatorOutput(BaseModel):
+    key_answer: str = Field(
+        ...,
+        description=(
+            "A concise but complete business-facing summary of the answer derived from analysis/modeling. "
+            "State: (1) the primary result (prediction/label/cluster/forecast) and any range/uncertainty; "
+            "(2) key assumptions/conditions;"
+            "(3) a brief business takeaway without technical jargon."
+        ),
+        example=(
+            "Suggested listing price: 3.45B VND (range 3.10–3.80B, moderate certainty). "
+            "Takeaway: pricing aligns with the family-home segment, with ~5–8% room for negotiation."
+        )
+    )
+    important_related_factor: str = Field(
+        ...,
+        description=(
+            "Explain the key business drivers that push the outcome up/down, in plain language. "
+            "Prioritize the top 3–5 factors, clarify their business meaning and practical implications, "
+            "highlight important thresholds if any, mention real-world considerations outside the model, "
+            "and note interpretation limits/risks."
+        ),
+        example=(
+            "- Living area (GrLivArea): >120 m² materially increases expected price.\n"
+            "- Overall quality: each higher tier corresponds to a meaningful price uplift.\n"
+            "- Garage capacity: going from 0→1 space lifts value; 1→2 adds more but with diminishing returns.\n"
+            "Note: neighborhood dynamics and recent renovations can move actual prices beyond model expectations."
+        )
+    )
+    business_action_recommendation: List[str] = Field(
+        ...,
+        description=(
+            "A prioritized list of concrete, feasible actions derived from the results. "
+            "Each item should state: the action → expected impact/estimate → risks/considerations → metric to monitor."
+        ),
+        example=[
+            "Listing strategy: 3.50–3.60B VND to balance time-to-sale and negotiation room (risk: competing supply in nearby blocks); KPI: weekly views and inquiries.",
+            "Marketing focus: emphasize living area and finish quality in visuals/copy (impact: higher inquiry rate); KPI: click-through and contact rate.",
+            "Low-cost upgrades (paint, lighting, hardware) pre-photography; expected 1–3% uplift (risk: limited effect if location desirability is low); KPI: offer-to-list ratio."
+        ]
+    )
+
+
 class BusinessTranslatorStep(BaseModel):
     step_description: str = Field(
         ...,
@@ -22,7 +65,7 @@ class BusinessTranslatorStep(BaseModel):
                 "- Analyze sensitivity of the prediction to top influencing variables and explain their economic meaning.\n"
                 "- Summarize key drivers, potential scenarios, and expected business outcomes.\n\n"
                 "=== Clustering ===\n"
-                "- Analyze cluster profiles based on the initial dataset and centroid statistics.\n"
+                "- Analyze cluster profiles included detail insight of the related variables based on the initial dataset and centroid statistics.\n"
                 "- Determine which cluster the user's data point belongs to, based on nearest centroid distance.\n"
                 "- Describe defining characteristics of that cluster (e.g., average income, age range, behavior).\n"
                 "- Summarize opportunities and risks for business actions related to this cluster.\n\n"
@@ -91,10 +134,17 @@ def execute_business_translation_step(
     )
 
 def complete_business_translation_task(
+    output: BsinessTranslatorOutput,
     context_variables: ContextVariables,
 ) -> ReplyResult:
+    context_variables["key_answer"] = output.key_answer
+    context_variables["important_related_factor"] = output.important_related_factor
+    context_variables["business_action_recommendation"] = output.business_action_recommendation
+    context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
-        message=f"Business translation is complete.",
+        message=f"""
+
+    I have completed the business translation task with the following key answer: {output.key_answer}, important related factors: {output.important_related_factor}, and business action recommendations: {output.business_action_recommendation}""",
         target=RevertToUserTarget(),
         context_variables=context_variables,
     )
@@ -136,7 +186,7 @@ class BusinessTranslator(ConversableAgent):
                 • Build a BusinessTranslatorStep that tells the Coder to reload ./artifacts/best_model_{problem_type}.joblib and predict for that data point (no retraining).
                 • Call execute_business_translation_step to send that step to the Coder.
             - For clustering:
-                • Do NOT call any predictive model. Determine the best-fit cluster by comparing the user’s features with existing cluster profiles/centroids.
+                • Do NOT call any predictive model. Determine the best-fit cluster by comparing the user’s features with existing cluster profiles.
                 • (Optional) If numeric distance is necessary, you may call the Coder for a simple nearest-centroid computation—no model loading.
             4) Convert the technical outcome into business terms: key insight(s), what it means, and what the business should do next.
             5) Summarize the final output concisely under headings like **Key Insights** and **Business Recommendations**.
@@ -154,6 +204,6 @@ class BusinessTranslator(ConversableAgent):
 
             )
             ],           
-            functions=[execute_business_translation_step]
+            functions=[execute_business_translation_step, complete_business_translation_task]
         )
 

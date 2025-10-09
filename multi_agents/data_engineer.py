@@ -44,7 +44,7 @@ class DataEngineerStep(BaseModel):
             "keep one representative feature based on relevance to the target and business interpretability.",
 
             # OUTPUTS (files & reports)
-            "MANDATORY: Save the cleaned splits to the EXACT paths under ./data/ — ./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv."
+            "MANDATORY: Save the whole cleaned and cleaned splits to the EXACT paths under ./data/ — ./data/df_cleaned.csv, ./data/train_cleaned.csv, ./data/val_cleaned.csv, ./data/test_cleaned.csv."
             "OVERWRITE files unconditionally (mode='w') and write CSVs with index=False. Any deviation from these filenames or location is NOT allowed."
 
             # IMPORTANT CONSTRAINTS

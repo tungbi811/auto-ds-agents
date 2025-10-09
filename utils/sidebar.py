@@ -88,7 +88,7 @@ class Sidebar:
         self.dataset_paths = []
         if uploaded_files:
             # Ensure the target directory exists
-            save_dir = "./data/uploads"
+            save_dir = "data/uploads"
             os.makedirs(save_dir, exist_ok=True)
 
             for file in uploaded_files:

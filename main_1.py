@@ -50,6 +50,9 @@ Can you help me to find out the reasonable sale price of a house with following 
 
 #Can you help me to find out the reasonable sale price of a house with 3 bedroom, 2 bathroom, 1500 sqft, 1 car garage built in 2000?
 #Could you help me identiy my house (with 3 bedrooms, 2 bathrooms, 1500 sqft, and a 1-car garage built in 2000) is in which segmentation? Such as luxury homes, affordable starter homes, or investment-ready properties...?
-#Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.).
+#Can you segment properties into suitable segmentation (luxury homes, affordable starter homes, investment-ready properties, etc.).
 
 #Can you help me to find out the reasonable sale price of a house with following information: 1545,50,RM,50,6000,Pave,NA,Reg,Lvl,AllPub,Inside,Gtl,BrkSide,Norm,Norm,1Fam,1.5Fin,6,7,1939,1950,Gable,CompShg,MetalSd,MetalSd,None,0,TA,TA,BrkTil,TA,Gd,No,BLQ,452,LwQ,12,144,608,GasA,TA,Y,SBrkr,608,524,0,1132,1,0,1,0,2,1,TA,5,Typ,0,NA,Detchd,1939,Unf,1,240,TA,TA,Y,0,0,128,0,0,0,NA,MnPrv,NA,0,4,2010,WD,Abnorml?
+
+
+# Can you help me to find out the reasonable sale price of a house with following information: 18,90,RL,72,10791,Pave,NA,Reg,Lvl,AllPub,Inside,Gtl,Sawyer,Norm,Norm,Duplex,1Story,4,5,1967,1967,Gable,CompShg,MetalSd,MetalSd,None,0,TA,TA,Slab,NA,NA,NA,NA,0,NA,0,0,0,GasA,TA,Y,SBrkr,1296,0,0,1296,0,0,2,0,2,2,TA,6,Typ,0,NA,CarPort,1967,Unf,2,516,TA,TA,Y,0,0,0,0,0,0,NA,NA,Shed,500,10,2006,WD,Normal

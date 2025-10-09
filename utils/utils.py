@@ -37,7 +37,7 @@ def start_group_chat(dataset_paths, user_requirements):
         group_manager_args={
             "llm_config": LLMConfig(
                 api_type= "openai",
-                model="gpt-5-mini",
+                model="gpt-4.1-mini"
             ),
         }
     )
