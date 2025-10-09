@@ -2,7 +2,7 @@ import streamlit as st
 from .sidebar import ROLE_EMOJI
 from autogen.agentchat import run_group_chat
 from autogen import UserProxyAgent, LLMConfig
-from autogen.agentchat.group.patterns import DefaultPattern
+from autogen.agentchat.group.patterns import DefaultPattern, AutoPattern
 from autogen.agentchat.group import AgentTarget, ContextVariables
 from multi_agents import BusinessAnalyst, DataAnalyst, DataEngineer, DataScientist, Coder, BusinessTranslator
 
@@ -16,7 +16,6 @@ def start_group_chat(dataset_paths, user_requirements):
     })
     
     business_analyst = BusinessAnalyst()
-    # data_analyst = DataAnalyst()
     data_engineer = DataEngineer()
     data_scientist = DataScientist()
     business_translator = BusinessTranslator()
@@ -24,7 +23,6 @@ def start_group_chat(dataset_paths, user_requirements):
     user = UserProxyAgent(name="User", code_execution_config=False)
 
     business_analyst.handoffs.set_after_work(AgentTarget(data_engineer))
-    # data_analyst.handoffs.set_after_work(AgentTarget(data_engineer))
     data_engineer.handoffs.set_after_work(AgentTarget(data_scientist))
     data_scientist.handoffs.set_after_work(AgentTarget(business_translator))
 
@@ -43,7 +41,7 @@ def start_group_chat(dataset_paths, user_requirements):
     response = run_group_chat(
         pattern=pattern,
         messages=message,
-        max_rounds=150
+        max_rounds=200
     )
 
     return response.events

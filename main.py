@@ -19,7 +19,7 @@ if "terminated" not in st.session_state:
 
 sidebar = Sidebar()
 st.set_page_config(page_title="🤖 Multi-Agent for Data Science", layout="wide")
-col1, col2, col3 = st.columns([0.3, 0.4, 0.2])
+col1, col2, col3 = st.columns([0.2, 0.6, 0.2])
 with col2:
     st.title("🤖 Multi-Agent for Data Science")
     st.write("👋 Upload your dataset and describe your requirements in the sidebar, then click **Run Analysis** to start.")
@@ -91,10 +91,9 @@ with col2:
                         )
                     elif st.session_state.event.type == "input_request":
                         st.session_state.awaiting_response = True
-
                     elif st.session_state.event.type == "termination":
                         st.session_state.messages.append(
-                            {"role": "System", "content": "The analysis has been completed."}
+                            {"role": "System", "content": st.session_state.event.content.termination_reason}
                         )
                         st.session_state.terminated = True
                         

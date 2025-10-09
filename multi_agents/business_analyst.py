@@ -76,11 +76,10 @@ def complete_business_analyst(
     context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
         message=f"""
-            Business analysis is completed:\n
-            - Objective: {output.objective}\n
-            - Stakeholder Expectations: {output.stakeholders_expectations}\n
-            - Research Questions: {output.research_questions}\n
-            - Problem Type: {output.problem_type}\n
+            - Objective: {output.objective}
+            - Stakeholder Expectations: {output.stakeholders_expectations}
+            - Research Questions: {output.research_questions}
+            - Problem Type: {output.problem_type}
         """,
         target=AgentNameTarget("DataEngineer"),
         context_variables=context_variables,
@@ -91,7 +90,6 @@ class BusinessAnalyst(AssistantAgent):
         llm_config = LLMConfig(
             api_type= "openai",
             model="gpt-4.1-mini",
-            temperature=0.7,
             stream=False,
             parallel_tool_calls=False,
         )
