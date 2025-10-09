@@ -8,8 +8,11 @@ from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
 output_dir = Path("./artifacts")
 output_dir.mkdir(parents=True, exist_ok=True)
 
-server = LocalJupyterServer(log_file='./logs/jupyter_gateway.log')
-executor = JupyterCodeExecutor(server, output_dir=output_dir, timeout=3600)
+server = LocalJupyterServer(
+    log_file='./logs/jupyter_gateway.log',
+    token=None
+)
+executor = JupyterCodeExecutor(server, output_dir=output_dir)
 
 def run_code(
         code: Annotated[str, "Python code to run in Jupyter"], 
