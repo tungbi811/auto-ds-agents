@@ -1,7 +1,7 @@
 from autogen import LLMConfig, AssistantAgent
 from pydantic import BaseModel, Field
 from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTarget, ContextVariables
-from typing import Annotated, Literal, List, Optional
+from typing import Annotated, Literal, List
 import pandas as pd
 
 class BizAnalystOutput(BaseModel):
@@ -18,7 +18,7 @@ class BizAnalystOutput(BaseModel):
             "and reducing revenue loss."
         )
     )
-    stakeholders_expectations_explanations: str = Field(
+    stakeholders_expectations: str = Field(
         ...,
         description=(
             "Explain how the results will be used, who will use them, and who will "
@@ -60,7 +60,6 @@ def get_data_info(
     data_path: Annotated[str, "Dataset path"],
 ) -> ReplyResult:
     df = pd.read_csv(data_path)
-    print(df.head(5))
     return ReplyResult(
         message=f"Here is the preview:\n {df.head(5)}", 
         target=AgentNameTarget("BusinessAnalyst")
@@ -73,24 +72,32 @@ def complete_business_analyst(
     context_variables["objective"] = output.objective
     context_variables["research_questions"] = output.research_questions
     context_variables["problem_type"] = output.problem_type
+    context_variables["stakeholders_expectations"] = output.stakeholders_expectations
     context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
-        message="I have finished business understanding",
-        target=AgentNameTarget("DataAnalyst"),
+        message=f"""
+            Business analysis is completed:\n
+            - Objective: {output.objective}\n
+            - Stakeholder Expectations: {output.stakeholders_expectations}\n
+            - Research Questions: {output.research_questions}\n
+            - Problem Type: {output.problem_type}\n
+        """,
+        target=AgentNameTarget("DataEngineer"),
         context_variables=context_variables,
     )
 
 class BusinessAnalyst(AssistantAgent):
     def __init__(self):
+        llm_config = LLMConfig(
+            api_type= "openai",
+            model="gpt-4.1-mini",
+            temperature=0.7,
+            stream=False,
+            parallel_tool_calls=False,
+        )
         super().__init__(
             name="BusinessAnalyst",
-            llm_config=LLMConfig(
-                api_type= "openai",
-                model="gpt-4.1-mini",
-                response_format=BizAnalystOutput,
-                temperature=0.3,
-                parallel_tool_calls=False
-            ),
+            llm_config=llm_config,
             system_message="""
                 Your role is to transform user requirements into structured, actionable business analysis outputs. 
                 You ensure clarity of the business context, goals, stakeholder expectations, and the research questions 

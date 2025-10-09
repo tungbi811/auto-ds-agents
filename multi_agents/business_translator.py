@@ -23,55 +23,54 @@ def execute_business_translation_step(
     context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
         message=f"Write python code to achieve the following task:\n{step}",
-        target=AgentNameTarget("BusinessAnalyst"),
-        context_variables=context_variables,
-    )
-
-def complete_business_translation_task(
-    context_variables: ContextVariables,
-) -> ReplyResult:
-    return ReplyResult(
-        message=f"Business translation is complete.",
-        target=RevertToUserTarget(),
+        target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
 class BusinessTranslator(ConversableAgent):
     def __init__(self):
+        llm_config = LLMConfig(
+            api_type="openai",
+            model="gpt-4.1-mini",
+            temperature=0.3,
+            stream=False,
+            parallel_tool_calls=False
+        )
+
         super().__init__(
             name="BusinessTranslator",
-            llm_config=LLMConfig(
-                api_type= "openai",
-                model="gpt-5-mini",
-                # parallel_tool_calls=False,
-                # temperature=0.5,
-            ),
+            llm_config=llm_config,
             update_agent_state_before_reply=UpdateSystemMessage(
                 """
-                    You are the BusinessTranslator.
-                    Your role is to interpret analytical results and translate them into actionable business insights and strategic plans tailored to stakeholder needs.
-                    You ensure that technical findings are clearly connected to business objectives, stakeholder expectations, and measurable outcomes.
+                    Your role is to interpret analytical results and translate them into actionable business insights and 
+                    strategic recommendations tailored to stakeholder needs. You ensure that all technical findings are clearly 
+                    connected to business objectives, stakeholder expectations, and measurable outcomes.
 
                     Stakeholder Expectations:
                     {stakeholders_expectations}
+                    Research Questions: 
+                    {research_questions}
 
                     Key Responsibilities:
-                    - Understand the business context and intent behind the research question.
-                    - Interpret technical or statistical findings in plain business language, emphasizing their practical meaning and implications.
-                    - Translate insights into concrete, stakeholder-specific action plans that align with strategic goals and operational needs.
-                    - Ensure recommendations are feasible, data-driven, and directly tied to the stakeholder_expectations provided.
-                    - Quantify expected outcomes where possible (e.g., potential revenue growth, efficiency improvement, customer engagement uplift).
+                    - Context Understanding: Interpret the business intent and goals underlying the research questions.
+                    - Insight Translation: Convert technical or statistical results into clear, business-oriented insights that highlight their meaning and impact.
+                    - Action Planning: Derive stakeholder-specific, data-driven recommendations aligned with strategic objectives.
+                    - Outcome Quantification: Where possible, estimate potential business impact (e.g., revenue uplift, retention improvement, cost reduction).
+                    - Alignment Assurance: Ensure every recommendation ties directly to both the research questions and the stakeholders_expectations provided.
 
                     Workflow:
-                    1. Analyze stakeholder_expectations to understand desired outcomes and key performance indicators.
-                    2. Translate these findings into actionable business implications for each stakeholder group.
+                    1. Review the {research_questions} and analyze {stakeholders_expectations} to identify key desired outcomes and KPIs.
+                    2. For each step in your plan, call execute_business_translation_step to delegate the implementation or computation to the Coder agent.
+                    3. Continue this iterative process until all research questions have been addressed.
+                    4. Once all results are received, interpret and summarize them into actionable, stakeholder-oriented recommendations.
+                    5. Present the final recommendations in a structured, executive-friendly format (e.g., by stakeholder or business theme).
 
                     Rules:
-                    - Do not include technical details such as algorithms, data preprocessing, or modeling methods.
-                    - Focus on clarity, relevance, and real-world business applicability.
-                    - Ensure that every recommendation or action plan ties back to both the research question and stakeholder_expectations.
-                    - Use clear, persuasive, and business-oriented language suitable for decision-makers.
+                    - Do not include technical details (algorithms, preprocessing, or model design).
+                    - Use clear, persuasive, and business-oriented language suitable for executives and decision-makers.
+                    - Keep recommendations practical, relevant, and impact-focused.
+                    - Always ensure traceability from research question → analytical finding → business recommendation.
                 """
             ),
-            functions = [complete_business_translation_task]
+            functions = [execute_business_translation_step]
         )

@@ -23,9 +23,9 @@ class Sidebar:
         with st.sidebar:
             st.header("⚙️ Settings")
             self._get_api_key()
-            self._get_provider_choice()
-            self._get_model_choice()
-            self._get_temperature()
+            # self._get_provider_choice()
+            # self._get_model_choice()
+            # self._get_temperature()
             self._upload_dataset()
             self._get_user_requirements()
             st.markdown(
@@ -36,7 +36,7 @@ class Sidebar:
         """Renders the API key input widget."""
         st.subheader("🔑 API Key")
         self.api_key = st.text_input(
-            "API Key",
+            "OPENAI API Key",
             type="password",
             value=os.environ.get("OPENAI_API_KEY", ""),
             label_visibility="collapsed",
@@ -71,7 +71,7 @@ class Sidebar:
             "Temperature",
             min_value=0.0,
             max_value=1.0,
-            value=0.7,
+            value=0.3,
             step=0.1,
             label_visibility="collapsed"
         )
@@ -106,13 +106,5 @@ class Sidebar:
             placeholder="E.g., Analyze sales trends, predict customer churn, etc."
             # value="Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)"
         )
-
-    # def _restart_button(self):
-    #     if st.button("🔄 Restart", use_container_width=True):
-    #         # Clear session state messages
-    #         if "messages" in st.session_state:
-    #             del st.session_state["messages"]
-    #         st.rerun()
-
 
     

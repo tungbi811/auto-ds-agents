@@ -1,3 +1,5 @@
+import os
+import json
 import streamlit as st
 from utils.sidebar import Sidebar
 from utils.utils import start_group_chat, display_group_chat
@@ -27,6 +29,7 @@ with col2:
         if not sidebar.api_key:
             st.warning("Please enter your API key to proceed.")
             st.stop()
+        os.environ["OPENAI_API_KEY"] = sidebar.api_key
         if not sidebar.dataset_paths:
             st.warning("Please upload at least one dataset to proceed.")
             st.stop()
@@ -39,10 +42,6 @@ with col2:
         )
 
         st.session_state.events = start_group_chat(
-            provider_choice=sidebar.provider_choice,
-            model_choice=sidebar.model_choice,
-            api_key=sidebar.api_key,
-            temperature=sidebar.temperature,
             dataset_paths=sidebar.dataset_paths,
             user_requirements=sidebar.user_requirements
         )
@@ -51,6 +50,8 @@ with col2:
         del st.session_state.messages
         del st.session_state.events
         del st.session_state.awaiting_response
+        del st.session_state.user_input
+        del st.session_state.terminated
         st.rerun()
 
     display_group_chat()
@@ -68,14 +69,22 @@ with col2:
                             st.session_state.messages.append(
                                 {"role": sender, "content": message}
                             )
-
+                        
                     elif st.session_state.event.type == "tool_call":
-                        st.session_state.messages.append(
-                            {
-                                "role": st.session_state.event.content.sender, 
-                                "content": "Calling tool: " + st.session_state.event.content.tool_calls[0].function.name
-                            }
-                        )
+                        if st.session_state.event.content.sender == "Coder":
+                            st.session_state.messages.append(
+                                {
+                                    "role": "Coder", 
+                                    "content": json.loads(st.session_state.event.content.tool_calls[0].function.arguments)["code"]
+                                }
+                            )
+                        else:
+                            st.session_state.messages.append(
+                                {
+                                    "role": st.session_state.event.content.sender, 
+                                    "content": "Calling tool: " + st.session_state.event.content.tool_calls[0].function.name
+                                }
+                            )
                     elif st.session_state.event.type == "tool_response":
                         st.session_state.messages.append(
                             {"role": "System", "content": st.session_state.event.content.content}
@@ -101,11 +110,9 @@ with col2:
         user_input = st.text_area("Your Response:", key="user_input")
         if st.button("Submit Response", key="submit_response"):
             if user_input.strip():
-                st.session_state.messages.append(
-                    {"role": "User", "content": user_input}
-                )
                 st.session_state.awaiting_response = False
                 st.rerun()
             else:
                 st.warning("Please enter a response before submitting.")
 
+# Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)?

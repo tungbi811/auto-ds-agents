@@ -17,29 +17,29 @@ def run_code(code: Annotated[str, "Python code to run in Jupyter"], context_vari
     )
 
     if result.exit_code == 0:
+        msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}"
         target = AgentNameTarget(context_variables["current_agent"])
     else:
         result.output = result.output[:1000]  # truncate long output
+        msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
         target = AgentNameTarget("Coder")
 
-    msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
     return ReplyResult(message=msg, target=target)
 
 
 class Coder(AssistantAgent):
     def __init__(self):
-
         llm_config = LLMConfig(
-            api_type = "openai",
-            model = "gpt-4.1-mini",
-            timeout = 120,
-            stream = False,
+            api_type="openai",
+            model="gpt-4.1-mini",
+            temperature=0.1,
+            stream=False,
             parallel_tool_calls=False
         )
         
         super().__init__(
             name="Coder",
-            llm_config = llm_config,
+            llm_config= llm_config,
             human_input_mode="NEVER",
             system_message = """
                 You are the Coder.
@@ -53,8 +53,13 @@ class Coder(AssistantAgent):
                 - Never use inplace=True. Instead, reassign the result (e.g., df = df.fillna(0) or df['col'] = df['col'].fillna(0)).
                 - Prefer .loc for assignments to avoid chained assignment warnings.
                 - Use .copy() explicitly when a new DataFrame is intended.
-                5. Always call the run_code tool when writing Python code.
-                6. If the result indicates an error, fix it and output the corrected code again.
+                5. When working with NumPy or scikit-learn:
+                - Always include the following import at the very beginning of the script to ignore non-critical warnings:
+                    import warnings
+                    warnings.filterwarnings("ignore")
+                - This ensures that RuntimeWarnings or overflow/underflow logs do not clutter the output.
+                6. Always call the run_code tool when writing Python code.
+                7. If the result indicates an error, fix it and output the corrected code again.
             """,
             functions=[run_code]
         )
