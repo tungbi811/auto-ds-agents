@@ -40,6 +40,7 @@ class BusinessTranslator(ConversableAgent):
         super().__init__(
             name="BusinessTranslator",
             llm_config=llm_config,
+            human_input_mode="NEVER",
             update_agent_state_before_reply=UpdateSystemMessage(
                 """
                     Your role is to interpret analytical results and translate them into actionable business insights and 

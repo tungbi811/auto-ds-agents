@@ -73,7 +73,6 @@ def complete_business_analyst(
     context_variables["research_questions"] = output.research_questions
     context_variables["problem_type"] = output.problem_type
     context_variables["stakeholders_expectations"] = output.stakeholders_expectations
-    context_variables["current_agent"] = "DataAnalyst"
     return ReplyResult(
         message=f"""
             - Objective: {output.objective}
@@ -81,7 +80,7 @@ def complete_business_analyst(
             - Research Questions: {output.research_questions}
             - Problem Type: {output.problem_type}
         """,
-        target=AgentNameTarget("DataEngineer"),
+        target=AgentNameTarget("BusinessTranslator"),
         context_variables=context_variables,
     )
 
