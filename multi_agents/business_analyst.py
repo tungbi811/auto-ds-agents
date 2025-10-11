@@ -94,7 +94,7 @@ class BusinessAnalyst(AssistantAgent):
         llm_config = LLMConfig(
             api_type= "openai",
             model="gpt-4.1-mini",
-            temperature=0.3,
+            temperature=0.5,
             stream=False,
             parallel_tool_calls=False,
         )
@@ -109,9 +109,9 @@ class BusinessAnalyst(AssistantAgent):
                 Key Responsibilities:
                 - Define objectives: List clear, measurable business goals that align with the use case.
                 - Formulate research questions: Define the analytical questions that need to be answered to achieve the objectives.
-                - Get data info: always call get_data_info first to discover what datasets, variables, and metadata are available for the project.
                 - Complete business analysis: When you have a clear understanding of the business context, objectives, and research questions, you must call complete_business_analyst to hand off to the DataExplorer.
-                
+                - Request clarification: If user requirements are ambiguous, incomplete, or conflicting, you must call request_clarification to ask for more details or suggestions and ask for user's choice.
+
                 Workflow:
                 1. Review initial user requirements.
                 2. call get_data_info first to discover what datasets, variables, and metadata are available for the project.
