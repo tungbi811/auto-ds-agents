@@ -37,15 +37,12 @@ def run_code(
         # Split into lines and clean
         lines = result.output.splitlines()
 
-        clean_lines = []
+        errors = []
         for line in lines:
-            # Remove ANSI color codes and strip whitespace
-            clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line).strip()
-            if clean_line:
-                clean_lines.append(clean_line)
-            if len(clean_lines) == 2:
+            errors.append(line)
+            if len(errors) >= 5:
                 break
-        msg = "\n".join(clean_lines)
+        msg = "\n".join(errors)
     return ReplyResult(message=msg, target=target)
 
 
