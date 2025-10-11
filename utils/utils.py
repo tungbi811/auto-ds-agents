@@ -45,4 +45,4 @@ def display_group_chat():
             if role in ("Coder", "System"):
                 st.code(msg["content"])
             else:
-                st.markdown(safe_md(msg["content"]))  # No safe_md needed anymore
+                st.write(safe_md(msg["content"]))  # No safe_md needed anymore

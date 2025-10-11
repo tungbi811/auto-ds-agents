@@ -22,7 +22,7 @@ if "last_agent_name" not in st.session_state:
 
 sidebar = Sidebar()
 st.set_page_config(page_title="🤖 Multi-Agent for Data Science", layout="wide")
-col1, col2, col3 = st.columns([0.2, 0.6, 0.2])
+col1, col2, col3 = st.columns([0.05, 0.9, 0.05])
 with col2:
     st.title("🤖 Multi-Agent for Data Science")
     st.write("👋 Upload your dataset and describe your requirements in the sidebar, then click **Run Analysis** to start.")
@@ -120,7 +120,7 @@ with col2:
         st.info("The analysis has been completed. You can restart the process by clicking the 'Restart' button in the sidebar.")
 
     if st.session_state.awaiting_response:
-        user_input = st.text_area("Your Response:", key="user_input")
+        user_input = st.text_area("Replying as User. Provide feedback to Business Analyst. Type 'exit' to end the conversation:", key="user_input")
         if st.button("Submit Response", key="submit_response"):
             if user_input.strip():
                 st.session_state.awaiting_response = False
