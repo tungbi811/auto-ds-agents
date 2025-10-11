@@ -1,0 +1,63 @@
+[
+    {
+        "task": "Overview of the Dataset",
+        "tools, involved features and correct parameters": [
+            "Tools: Pandas",
+            "Involved Features: All features in both train (train.csv) and test (test.csv) datasets",
+            "Parameters: pd.read_csv(), .head(), .info(), .describe()"
+        ],
+        "expected output or impact on data": [
+            "Preview of datasets (first few rows)",
+            "Summary information including data types and non-null counts",
+            "Basic statistics (mean, std, min, max, etc.) for numerical features"
+        ],
+        "constraints": [
+            "Ensure the datasets are correctly loaded and handle any encoding issues."
+        ]
+    },
+    {
+        "task": "Missing Values Analysis",
+        "tools, involved features and correct parameters": [
+            "Tools: Pandas, Seaborn",
+            "Involved Features: All features, focusing on Age and Cabin",
+            "Parameters: .isnull().sum(), sns.heatmap()"
+        ],
+        "expected output or impact on data": [
+            "List of features with their respective counts of missing values",
+            "Heatmap visualization (if applicable) to illustrate the distribution of missing values"
+        ],
+        "constraints": [
+            "Ensure the heatmap is efficient and clear; limit details to avoid clutter."
+        ]
+    },
+    {
+        "task": "Univariate Analysis of Key Features",
+        "tools, involved features and correct parameters": [
+            "Tools: Pandas, Seaborn/Matplotlib",
+            "Involved Features: Categorical: Sex, Pclass, Embarked; Numerical: Age, Fare",
+            "Parameters: sns.countplot(), sns.histplot(), sns.boxplot()"
+        ],
+        "expected output or impact on data": [
+            "Visualizations showing the distributions of key categorical and numerical features",
+            "Summary statistics revealing survival rates segmented by gender, class, and embarkation port"
+        ],
+        "constraints": [
+            "Limit visualizations to those that provide the most insight; avoid unnecessary complexity."
+        ]
+    },
+    {
+        "task": "Correlation Analysis",
+        "tools, involved features and correct parameters": [
+            "Tools: Pandas, Seaborn",
+            "Involved Features: Numerical features (Age, SibSp, Parch, Fare) and the target variable (Survived)",
+            "Parameters: .corr(), sns.heatmap()"
+        ],
+        "expected output or impact on data": [
+            "Correlation matrix highlighting the relationships between features and survival",
+            "Heatmap visualization to illustrate the correlations clearly"
+        ],
+        "constraints": [
+            "Ensure clarity in visual representation; focus on significant correlations."
+        ]
+    }
+]

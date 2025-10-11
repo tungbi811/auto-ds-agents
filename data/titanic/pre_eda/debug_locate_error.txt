@@ -1,0 +1,8 @@
+Thank you for the information. Based on the provided details and the error message, the most relevant code snippet causing the error remains:
+
+```python
+# Load the datasets
+train_data = pd.read_csv('train.csv')
+```
+
+The code attempts to load a CSV file named `train.csv` using the `pandas` library, but the file cannot be found in the specified directory, resulting in a `FileNotFoundError`. This is the primary source of the error.

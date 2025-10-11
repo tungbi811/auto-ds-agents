@@ -5,7 +5,7 @@ from .coder import Coder
 from autogen import UserProxyAgent
 from autogen.agentchat import run_group_chat
 from autogen.agentchat.group.patterns import DefaultPattern
-from autogen.agentchat.group import ContextVariables, RevertToUserTarget, AgentTarget
+from autogen.agentchat.group import ContextVariables, RevertToUserTarget, AgentTarget, OnCondition, StringLLMCondition
 
 class GroupChat:
     def __init__(self):

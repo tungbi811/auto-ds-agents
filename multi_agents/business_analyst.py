@@ -53,9 +53,8 @@ def request_clarification(
     """
     Request clarification from the user when the query is ambiguous
     """
-    markdown_response = convert_message_to_markdown(clarification_question)
     return ReplyResult(
-        message=markdown_response,
+        message=clarification_question,
         target=RevertToUserTarget(),
     )
 

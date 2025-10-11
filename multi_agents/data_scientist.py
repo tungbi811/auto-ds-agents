@@ -70,7 +70,7 @@ class DataScientist(ConversableAgent):
                 3. For each step, call execute_data_scientist_step to instruct the Coder to implement the required computation.
                 4. Review the Coder’s output (not the code) to ensure the results make sense, then decide the next step if needed.
                 5. Do not request or produce visualizations or plots — focus only on data and numerical/text outputs.
-                6. Once the analysis is complete and results are validated, call complete_data_scientist_task to summarize findings and return them to the Business Translator.
+                6. Once the analysis for the current task is complete and results are validated, call complete_data_scientist_task to summarize findings and return them to the Business Translator.
 
                 Rules:
                 - If you need to build a machine learning model, you should choose strong model like RandomForest or XGBoost instead of simple model like Linear Regression or Decision Tree.

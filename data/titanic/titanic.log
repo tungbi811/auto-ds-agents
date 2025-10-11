@@ -1,0 +1,42 @@
+2025-08-28 17:20:44,529 - root - INFO - Start SOP for competition: titanic
+2025-08-28 17:20:44,530 - root - INFO - Current State: State: Understand Background, Current Step: 0, Current Agent: Reader, Finished: False
+2025-08-28 17:20:44,550 - agent_base - INFO - Agent reader is created with model gpt-4o-mini.
+2025-08-28 17:20:44,550 - agent_base - INFO - State Understand Background - Agent reader is executing.
+2025-08-28 17:21:40,952 - root - INFO - Start SOP for competition: titanic
+2025-08-28 17:21:40,953 - root - INFO - Current State: State: Understand Background, Current Step: 0, Current Agent: Reader, Finished: False
+2025-08-28 17:21:40,973 - agent_base - INFO - Agent reader is created with model gpt-4o-mini.
+2025-08-28 17:21:40,973 - agent_base - INFO - State Understand Background - Agent reader is executing.
+2025-08-28 17:22:18,790 - agent_base - INFO - Agent reviewer is created with model gpt-4o-mini.
+2025-08-28 17:22:18,790 - agent_base - INFO - State Understand Background - Agent reviewer is executing.
+2025-08-28 17:22:26,561 - agent_base - INFO - Attempting to extract JSON from raw reply.
+2025-08-28 17:22:26,563 - root - INFO - Current State: State: Preliminary Exploratory Data Analysis, Current Step: 0, Current Agent: Planner, Finished: False
+2025-08-28 17:22:26,563 - agent_base - INFO - Agent planner is created with model gpt-4o-mini.
+2025-08-28 17:22:26,563 - agent_base - INFO - State Preliminary Exploratory Data Analysis - Agent planner is executing.
+2025-08-28 17:22:34,110 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-08-28 17:23:43,211 - agent_base - INFO - Attempting to extract JSON from raw reply.
+2025-08-28 17:23:43,213 - agent_base - INFO - Agent developer is created with model gpt-4o-mini.
+2025-08-28 17:23:43,213 - agent_base - INFO - State Preliminary Exploratory Data Analysis - Agent developer is executing.
+2025-08-28 17:24:05,713 - agents.developer - INFO - The 1-th try.
+2025-08-28 17:24:05,713 - agents.developer - INFO - All files in directory '/Users/tung/Library/CloudStorage/OneDrive-Personal/Documents/~UTS Spring 2025/36127 Innovation Lab Capstone Project/Code/AutoKaggle/multi_agents/competition/titanic/pre_eda/images/' have been deleted successfully.
+2025-08-28 17:24:08,148 - agents.developer - INFO - Process exited with non-zero status: 1
+2025-08-28 17:24:08,150 - agents.developer - INFO - Start debugging the code.
+2025-08-28 17:24:08,161 - tools.debug - INFO - Debug times: 1
+2025-08-28 17:24:21,319 - agents.developer - INFO - The 2-th try.
+2025-08-28 17:24:21,320 - agents.developer - INFO - All files in directory '/Users/tung/Library/CloudStorage/OneDrive-Personal/Documents/~UTS Spring 2025/36127 Innovation Lab Capstone Project/Code/AutoKaggle/multi_agents/competition/titanic/pre_eda/images/' have been deleted successfully.
+2025-08-28 17:24:23,680 - agents.developer - INFO - Process exited with non-zero status: 1
+2025-08-28 17:24:23,681 - agents.developer - INFO - Start debugging the code.
+2025-08-28 17:24:23,691 - tools.debug - INFO - Debug times: 2
+2025-08-28 17:24:35,847 - agents.developer - INFO - The 3-th try.
+2025-08-28 17:24:35,848 - agents.developer - INFO - All files in directory '/Users/tung/Library/CloudStorage/OneDrive-Personal/Documents/~UTS Spring 2025/36127 Innovation Lab Capstone Project/Code/AutoKaggle/multi_agents/competition/titanic/pre_eda/images/' have been deleted successfully.
+2025-08-28 17:24:38,210 - agents.developer - INFO - Process exited with non-zero status: 1
+2025-08-28 17:24:38,211 - agents.developer - INFO - Start debugging the code.
+2025-08-28 17:24:38,219 - tools.debug - INFO - Debug times: 3
+2025-08-28 17:24:41,948 - agents.developer - INFO - The developer asks for help when debugging the code. Regenerating the code.
+2025-08-28 17:24:41,948 - agents.developer - INFO - The 4-th try.
+2025-08-28 17:25:13,241 - agents.developer - INFO - All error messages saved to /Users/tung/Library/CloudStorage/OneDrive-Personal/Documents/~UTS Spring 2025/36127 Innovation Lab Capstone Project/Code/AutoKaggle/multi_agents/competition/titanic/pre_eda/all_error_messages.txt
+2025-08-28 17:25:13,242 - agents.developer - INFO - The developer asks for help when debugging the code. Regenerating the code.
+2025-08-28 17:25:13,242 - agents.developer - INFO - The 4-th try.
+2025-08-28 17:25:13,242 - agents.developer - INFO - All files in directory '/Users/tung/Library/CloudStorage/OneDrive-Personal/Documents/~UTS Spring 2025/36127 Innovation Lab Capstone Project/Code/AutoKaggle/multi_agents/competition/titanic/pre_eda/images/' have been deleted successfully.
+2025-08-28 17:25:15,325 - agents.developer - INFO - Process exited with non-zero status: 1
+2025-08-28 17:25:15,326 - agents.developer - INFO - Start debugging the code.
+2025-08-28 17:25:15,335 - tools.debug - INFO - Debug times: 1

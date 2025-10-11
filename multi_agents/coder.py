@@ -34,15 +34,18 @@ def run_code(
         msg = f"Output:\n{result.output}"
         target = AgentNameTarget(context_variables["current_agent"])
     else:
+        # Split into lines and clean
         lines = result.output.splitlines()
+
+        clean_lines = []
         for line in lines:
+            # Remove ANSI color codes and strip whitespace
             clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line).strip()
             if clean_line:
-                result.output = clean_line
+                clean_lines.append(clean_line)
+            if len(clean_lines) == 2:
                 break
-        msg = f"Error:\n{result.output}" 
-        target = AgentNameTarget("Coder")
-
+        msg = "\n".join(clean_lines)
     return ReplyResult(message=msg, target=target)
 
 

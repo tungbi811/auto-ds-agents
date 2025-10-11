@@ -102,7 +102,6 @@ with col2:
                                     "content": st.session_state.event.content.content
                                 }
                             )
-
                     elif st.session_state.event.type == "input_request":
                         st.session_state.awaiting_response = True
                     elif st.session_state.event.type == "termination":
@@ -110,7 +109,6 @@ with col2:
                             {"role": "System", "content": st.session_state.event.content.termination_reason}
                         )
                         st.session_state.terminated = True
-                        
                 else:
                     st.session_state.event.content.respond(st.session_state.user_input)
                     st.session_state.user_input = ""
@@ -120,7 +118,7 @@ with col2:
         st.info("The analysis has been completed. You can restart the process by clicking the 'Restart' button in the sidebar.")
 
     if st.session_state.awaiting_response:
-        user_input = st.text_area("Replying as User. Provide feedback to Business Analyst. Type 'exit' to end the conversation:", key="user_input")
+        user_input = st.text_area("Replying as User. Type 'exit' to end the conversation:", key="user_input")
         if st.button("Submit Response", key="submit_response"):
             if user_input.strip():
                 st.session_state.awaiting_response = False

@@ -1,18 +1,6 @@
 import os
 import streamlit as st
 
-ROLE_EMOJI = {
-    "User": "🧑‍💻",
-    "BusinessAnalyst": "💼",
-    "BusinessTranslator": "🗣️",
-    "DataAnalyst": "🔎",
-    "DataEngineer": "🛠️",
-    "DataScientist": "📊",
-    "Coder": "🧠",
-    "Assistant": "🤖",
-    "System": "⚙️"
-}
-
 class Sidebar:
     """
     A class to create and manage the Streamlit sidebar for the application.

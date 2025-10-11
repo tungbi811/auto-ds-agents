@@ -1,19 +1,17 @@
-import re
 import streamlit as st
-from .sidebar import ROLE_EMOJI
 from autogen import OpenAIWrapper
 
-def safe_md(text):
-    return (
-        text.replace("(", "\\(")
-            .replace(")", "\\)")
-            .replace("_", "\\_")
-            .replace("+", "&#43;")
-            .replace("~", "\\~")
-            .replace("$", "\\$")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-    )
+ROLE_EMOJI = {
+    "User": "🧑‍💻",
+    "BusinessAnalyst": "💼",
+    "BusinessTranslator": "🗣️",
+    "DataAnalyst": "🔎",
+    "DataEngineer": "🛠️",
+    "DataScientist": "📊",
+    "Coder": "🧠",
+    "Assistant": "🤖",
+    "System": "⚙️"
+}
 
 config_list = [
     {
@@ -36,7 +34,19 @@ def convert_message_to_markdown(message):
             pass
     return text.strip()
 
-# 2️⃣ Keep your chat renderer clean
+
+def safe_md(text):
+    return (
+        text.replace("(", "\\(")
+            .replace(")", "\\)")
+            .replace("_", "\\_")
+            .replace("+", "&#43;")
+            .replace("~", "\\~")
+            .replace("$", "\\$")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+    )
+
 def display_group_chat():
     for msg in st.session_state.messages:
         role = msg["role"]
