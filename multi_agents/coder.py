@@ -12,7 +12,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 server = LocalJupyterServer(
     log_file='./logs/jupyter_gateway.log',
 )
-executor = JupyterCodeExecutor(server, output_dir=output_dir)
+executor = JupyterCodeExecutor(server, output_dir=output_dir, timeout=1200)
 
 def run_code(
         code: Annotated[str, "Python code to run in Jupyter"], 
@@ -40,7 +40,7 @@ def run_code(
             if clean_line:
                 result.output = clean_line
                 break
-        msg = f"Error:\n{result.output}"
+        msg = f"Error:\n{result.output}" 
         target = AgentNameTarget("Coder")
 
     return ReplyResult(message=msg, target=target)

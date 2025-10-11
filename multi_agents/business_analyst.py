@@ -1,3 +1,4 @@
+import os
 from autogen import LLMConfig, AssistantAgent
 from pydantic import BaseModel, Field
 from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTarget, ContextVariables
@@ -61,8 +62,9 @@ def request_clarification(
 def get_data_info(
     data_path: Annotated[str, "Dataset path"],
 ) -> ReplyResult:
+    dataset_name = os.path.splitext(os.path.basename(data_path))[0].replace('_', ' ').title()
     df = pd.read_csv(data_path)
-    markdown_response = convert_message_to_markdown(f"Take a look at the first few rows of the dataset:\n {df.head(5)} \n Numerical columns: {df.select_dtypes(include=['number']).columns.tolist()} \n Categorical columns: {df.select_dtypes(include=['object', 'category']).columns.tolist()} \n Date columns: {df.select_dtypes(include=['datetime', 'datetimetz']).columns.tolist()} \n Total rows: {df.shape[0]}, Total columns: {df.shape[1]}")
+    markdown_response = convert_message_to_markdown(f"Take a look at the first few rows of the {dataset_name} dataset:\n {df.head(5)} \n Numerical columns: {df.select_dtypes(include=['number']).columns.tolist()} \n Categorical columns: {df.select_dtypes(include=['object', 'category']).columns.tolist()} \n Total rows: {df.shape[0]}, Total columns: {df.shape[1]}")
     return ReplyResult(
         message=markdown_response,
         target=AgentNameTarget("BusinessAnalyst")
@@ -93,7 +95,7 @@ class BusinessAnalyst(AssistantAgent):
         llm_config = LLMConfig(
             api_type= "openai",
             model="gpt-4.1-mini",
-            temperature=0.5,
+            temperature=0.3,
             stream=False,
             parallel_tool_calls=False,
         )
@@ -114,12 +116,8 @@ class BusinessAnalyst(AssistantAgent):
                 Workflow:
                 1. Review initial user requirements.
                 2. call get_data_info first to discover what datasets, variables, and metadata are available for the project.
-                3. If requirements are vague, incomplete, or conflicting, call request_clarification to ask for more details.
-                4. Break requirements into structured outputs:
-                - objective
-                - research_questions
-                - problem_type
-                3. When complete, you must call complete_business_analysis_task to hand off to the DataExplorer.
+                3. If requirements are vague, incomplete, or conflicting or a question arises, call request_clarification to ask for more details.
+                4. When complete, you must call complete_business_analysis_task to hand off to the DataExplorer.
 
                 Rules:
                 - Do not propose data cleaning, feature engineering, or modeling directly.
