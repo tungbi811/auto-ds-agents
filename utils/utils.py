@@ -34,6 +34,6 @@ def display_group_chat():
                 st.code(msg["content"])
             else:
                 if role == "System":
-                    st.text(msg["content"])
+                    st.code(msg["content"])
                 else:
-                    st.markdown(msg["content"], unsafe_allow_html=True)
+                    st.write(msg["content"])

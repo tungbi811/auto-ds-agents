@@ -2580,3 +2580,113 @@ Kernel shutdown: 3080905d-2a22-4d92-b3c3-fdd89a732897
 Kernel shutdown: 201c0a21-e0a7-4a7a-8048-4e0bc114979b
 Kernel shutdown: 315c9b06-e488-43c7-a061-028427403e2d
 Kernel shutdown: 5b6a3dad-6d8a-4429-91e4-d3090456a399
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: 6da8d473-8bc7-472d-9eec-c1273a51c81e
+No session ID specified
+Connecting to kernel 6da8d473-8bc7-472d-9eec-c1273a51c81e.
+The port 8888 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8889
+Kernel started: 3c3ddd6a-a4e7-41b7-a3e6-d6dfafcb0a56
+No session ID specified
+Connecting to kernel 3c3ddd6a-a4e7-41b7-a3e6-d6dfafcb0a56.
+WebSocket ping timeout after 108426 ms.
+Starting buffering for 6da8d473-8bc7-472d-9eec-c1273a51c81e:4c36f217-6fbd98b39804cbfdf614d4da
+Kernel restarted: 6da8d473-8bc7-472d-9eec-c1273a51c81e
+No session ID specified
+Connecting to kernel 6da8d473-8bc7-472d-9eec-c1273a51c81e.
+Discarding 3 buffered messages for 6da8d473-8bc7-472d-9eec-c1273a51c81e:4c36f217-6fbd98b39804cbfdf614d4da
+WebSocket ping timeout after 120000 ms.
+Starting buffering for 3c3ddd6a-a4e7-41b7-a3e6-d6dfafcb0a56:afd06fcb-f90a92609fd7bd0305234348
+Starting buffering for 6da8d473-8bc7-472d-9eec-c1273a51c81e:5931a0b1-c9c971a81097a80484c806ab
+The port 8888 is already in use, trying another port.
+The port 8889 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8890
+Kernel started: f980cff8-6871-4aa6-8c3c-226d46eb6e9b
+No session ID specified
+Connecting to kernel f980cff8-6871-4aa6-8c3c-226d46eb6e9b.
+The port 8888 is already in use, trying another port.
+The port 8889 is already in use, trying another port.
+The port 8890 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8891
+Kernel started: c0bae8ae-26ca-4f13-ba36-acf650f223a9
+No session ID specified
+Connecting to kernel c0bae8ae-26ca-4f13-ba36-acf650f223a9.
+Starting buffering for f980cff8-6871-4aa6-8c3c-226d46eb6e9b:01cdf970-820e8c9552481201362214e4
+The port 8888 is already in use, trying another port.
+The port 8889 is already in use, trying another port.
+The port 8890 is already in use, trying another port.
+The port 8891 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8892
+Kernel started: 3af60992-8748-4277-bc2a-33520e51a85e
+No session ID specified
+Connecting to kernel 3af60992-8748-4277-bc2a-33520e51a85e.
+The port 8888 is already in use, trying another port.
+The port 8889 is already in use, trying another port.
+The port 8890 is already in use, trying another port.
+The port 8891 is already in use, trying another port.
+The port 8892 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8834
+Kernel started: b7154fe5-7d0d-4011-9c5a-e61fcedb6352
+No session ID specified
+Connecting to kernel b7154fe5-7d0d-4011-9c5a-e61fcedb6352.
+Starting buffering for 3af60992-8748-4277-bc2a-33520e51a85e:538720e3-15d3f0c21d11e156860b00f8
+WebSocket ping timeout after 118513 ms.
+Starting buffering for b7154fe5-7d0d-4011-9c5a-e61fcedb6352:9a50aa59-130df4b9bd0f13b8747f5549
+WebSocket ping timeout after 113620 ms.
+Starting buffering for c0bae8ae-26ca-4f13-ba36-acf650f223a9:0d2250da-fd599490c47bbfc1d452c875
+The port 8888 is already in use, trying another port.
+The port 8889 is already in use, trying another port.
+The port 8890 is already in use, trying another port.
+The port 8891 is already in use, trying another port.
+The port 8892 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8971
+Kernel started: d45140f7-19c7-4caf-b720-fc7265dda4fd
+No session ID specified
+Connecting to kernel d45140f7-19c7-4caf-b720-fc7265dda4fd.
+WebSocket ping timeout after 115972 ms.
+Starting buffering for d45140f7-19c7-4caf-b720-fc7265dda4fd:6945bdd8-512a45606cb2386cf9f4ba28
+The port 8888 is already in use, trying another port.
+The port 8889 is already in use, trying another port.
+The port 8890 is already in use, trying another port.
+The port 8891 is already in use, trying another port.
+The port 8892 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8932
+Kernel started: 5c64a973-8539-436c-a740-207ab0b29a51
+No session ID specified
+Connecting to kernel 5c64a973-8539-436c-a740-207ab0b29a51.
+The port 8888 is already in use, trying another port.
+The port 8889 is already in use, trying another port.
+The port 8890 is already in use, trying another port.
+The port 8891 is already in use, trying another port.
+The port 8892 is already in use, trying another port.
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8908
+Kernel started: 802ef7c9-790c-4382-a824-7bf02d565961
+No session ID specified
+Connecting to kernel 802ef7c9-790c-4382-a824-7bf02d565961.
+interrupted
+interrupted
+Shutting down...
+Shutting down...
+interrupted
+interrupted
+Shutting down...
+Shutting down...
+interrupted
+interrupted
+Shutting down...
+interrupted
+Shutting down...
+interrupted
+interrupted
+Shutting down...
+Shutting down...
+Kernel shutdown: 5c64a973-8539-436c-a740-207ab0b29a51
+Shutting down...
+Kernel shutdown: d45140f7-19c7-4caf-b720-fc7265dda4fd
+Kernel shutdown: 802ef7c9-790c-4382-a824-7bf02d565961
+Kernel shutdown: c0bae8ae-26ca-4f13-ba36-acf650f223a9
+Kernel shutdown: 3c3ddd6a-a4e7-41b7-a3e6-d6dfafcb0a56
+Kernel shutdown: 6da8d473-8bc7-472d-9eec-c1273a51c81e
+Kernel shutdown: 3af60992-8748-4277-bc2a-33520e51a85e
+Kernel shutdown: b7154fe5-7d0d-4011-9c5a-e61fcedb6352
+Kernel shutdown: f980cff8-6871-4aa6-8c3c-226d46eb6e9b

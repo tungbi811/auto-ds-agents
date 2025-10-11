@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Annotated
 from autogen import AssistantAgent, LLMConfig
@@ -10,7 +11,6 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 server = LocalJupyterServer(
     log_file='./logs/jupyter_gateway.log',
-    token="123456"
 )
 executor = JupyterCodeExecutor(server, output_dir=output_dir)
 
@@ -34,8 +34,13 @@ def run_code(
         msg = f"Output:\n{result.output}"
         target = AgentNameTarget(context_variables["current_agent"])
     else:
-        result.output = result.output[:1000]  # truncate long output
-        msg = f"Error:\n{result.output}"# \n\nStderr:\n{getattr(result, 'stderr', '')}"
+        lines = result.output.splitlines()
+        for line in lines:
+            clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line).strip()
+            if clean_line:
+                result.output = clean_line
+                break
+        msg = f"Error:\n{result.output}"
         target = AgentNameTarget("Coder")
 
     return ReplyResult(message=msg, target=target)

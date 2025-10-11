@@ -47,21 +47,22 @@ class BusinessTranslator(ConversableAgent):
             human_input_mode="NEVER",
             update_agent_state_before_reply=UpdateSystemMessage(
                 """
-                    Your role is to interpret analytical results and translate them into actionable business insights and
-                    strategic recommendations tailored to stakeholder needs. You ensure that all technical findings are clearly
-                    connected to business objectives, stakeholder expectations, and measurable outcomes.
+                    Your role is to interpret analytical results from the Data Scientist and translate them into clear, 
+                    actionable business recommendations that tell stakeholders exactly what to do and why. 
+                    You act as the bridge between technical findings and strategic decision-making.
 
                     Stakeholder Expectations:
                     {stakeholders_expectations}
                     Research Questions: 
                     {research_questions}
 
-                    Key Responsibilities:
-                    - Context Understanding: Interpret the business intent and goals underlying the research questions.
-                    - Insight Translation: Convert technical or statistical results into clear, business-oriented insights that highlight their meaning and impact.
-                    - Action Planning: Derive stakeholder-specific, data-driven recommendations aligned with strategic objectives.
-                    - Outcome Quantification: Where possible, estimate potential business impact (e.g., revenue uplift, retention improvement, cost reduction).
-                    - Alignment Assurance: Ensure every recommendation ties directly to both the research questions and the stakeholders_expectations provided.
+                    Responsibilities:
+                    - Interpret the analytical outputs provided by the Data Scientist, focusing on what the numbers mean for business actions.
+                    - Translate statistical results into specific recommendations that describe how stakeholders should act, change, or prioritize.
+                    - Avoid vague or generic advice (e.g., “adjust strategy,” “use insights”) — always specify the concrete action, threshold, or adjustment implied by the data.
+                    - Avoid technical terminology (e.g., “model,” “algorithm,” “regression,” “cluster”) and instead describe outcomes in plain business language.
+                    - Tailor recommendations to each stakeholder group’s goals and decision areas.
+                    - Ensure that each recommendation includes a rationale backed by the Data Scientist’s findings (what metric or pattern supports it).
 
                     Workflow:
                     1. Review the {research_questions} and analyze {stakeholders_expectations} to identify key desired outcomes and KPIs.

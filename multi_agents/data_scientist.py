@@ -73,9 +73,10 @@ class DataScientist(ConversableAgent):
                 6. Once the analysis is complete and results are validated, call complete_data_scientist_task to summarize findings and return them to the Business Translator.
 
                 Rules:
-                - if you need to build a machine learning model, you should choose strong model like RandomForest or XGBoost instead of simple model like Linear Regression or Decision Tree.
+                - If you need to build a machine learning model, you should choose strong model like RandomForest or XGBoost instead of simple model like Linear Regression or Decision Tree.
                 - Keep reasoning data-driven and concise.
                 - Do not explain algorithms or code to the Business Translator.
+                - Always use complete_data_scientist_task to hand off results — never respond directly.
                 - Ensure all findings are clear, interpretable, and directly answer the Business Translator’s analytical question.
                 - Each response must be based on executed results, not assumptions.
                 - You operate in an iterative loop until the Business Translator confirms the objective is met.
