@@ -1,8 +1,7 @@
 from .business_analyst import BusinessAnalyst
-from .data_analyst import DataAnalyst
-from .data_engineer import DataEngineer
 from .data_scientist import DataScientist
 from .coder import Coder
 from .business_translator import BusinessTranslator
+from .group_chat import GroupChat
 
-__all__ = [BusinessAnalyst, Coder, DataAnalyst, DataEngineer, DataScientist, BusinessTranslator]
+__all__ = [BusinessAnalyst, Coder, DataScientist, BusinessTranslator, GroupChat]

@@ -1,8 +1,9 @@
 import os
 import json
 import streamlit as st
+from multi_agents.group_chat import GroupChat
 from utils.sidebar import Sidebar
-from utils.utils import start_group_chat, display_group_chat
+from utils.utils import display_group_chat
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -16,6 +17,8 @@ if "user_input" not in st.session_state:
     st.session_state.user_input = ""
 if "terminated" not in st.session_state:
     st.session_state.terminated = False
+if "last_agent_name" not in st.session_state:
+    st.session_state.last_agent_name = None
 
 sidebar = Sidebar()
 st.set_page_config(page_title="🤖 Multi-Agent for Data Science", layout="wide")
@@ -41,7 +44,9 @@ with col2:
             {"role": "User", "content": sidebar.user_requirements}
         )
 
-        st.session_state.events = start_group_chat(
+        group_chat = GroupChat()
+
+        st.session_state.events = group_chat.run(
             dataset_paths=sidebar.dataset_paths,
             user_requirements=sidebar.user_requirements
         )
@@ -49,9 +54,11 @@ with col2:
     if st.sidebar.button("🔄 Restart", use_container_width=True, key="restart"):
         del st.session_state.messages
         del st.session_state.events
+        del st.session_state.event
         del st.session_state.awaiting_response
         del st.session_state.user_input
         del st.session_state.terminated
+        del st.session_state.last_agent_name
         st.rerun()
 
     display_group_chat()
@@ -60,6 +67,8 @@ with col2:
             if st.session_state.events:
                 if not st.session_state.user_input:
                     st.session_state.event = next(st.session_state.events)
+                    print(st.session_state.event)
+                    print("-" *50)
 
                     if st.session_state.event.type == "text":
                         sender = st.session_state.event.content.sender
@@ -78,16 +87,24 @@ with col2:
                                 }
                             )
                         else:
+                            st.session_state.last_agent_name = st.session_state.event.content.sender
+                    elif st.session_state.event.type == "tool_response":
+                        if st.session_state.last_agent_name:
                             st.session_state.messages.append(
                                 {
-                                    "role": st.session_state.event.content.sender, 
-                                    "content": "Calling tool: " + st.session_state.event.content.tool_calls[0].function.name
+                                    "role": st.session_state.last_agent_name, 
+                                    "content": st.session_state.event.content.content
                                 }
                             )
-                    elif st.session_state.event.type == "tool_response":
-                        st.session_state.messages.append(
-                            {"role": "System", "content": st.session_state.event.content.content}
-                        )
+                            st.session_state.last_agent_name = None
+                        else:
+                            st.session_state.messages.append(
+                                {
+                                    "role": "System", 
+                                    "content": st.session_state.event.content.content
+                                }
+                            )
+
                     elif st.session_state.event.type == "input_request":
                         st.session_state.awaiting_response = True
                     elif st.session_state.event.type == "termination":
@@ -114,3 +131,4 @@ with col2:
                 st.warning("Please enter a response before submitting.")
 
 # Can you segment properties into clusters (luxury homes, affordable starter homes, investment-ready properties, etc.)?
+# Predict the sale price of a house based on location, size, features (bedrooms, bathrooms, parking), and historical market data.

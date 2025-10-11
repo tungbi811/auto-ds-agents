@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from autogen.agentchat.group import ReplyResult, AgentNameTarget, RevertToUserTarget, ContextVariables
 from typing import Annotated, Literal, List
 import pandas as pd
+from utils.utils import convert_message_to_markdown
 
 class BizAnalystOutput(BaseModel):
     objective: str = Field(
@@ -51,8 +52,9 @@ def request_clarification(
     """
     Request clarification from the user when the query is ambiguous
     """
+    markdown_response = convert_message_to_markdown(clarification_question)
     return ReplyResult(
-        message=f"Further clarification is required to determine the correct domain: {clarification_question}",
+        message=markdown_response,
         target=RevertToUserTarget(),
     )
 
@@ -60,8 +62,9 @@ def get_data_info(
     data_path: Annotated[str, "Dataset path"],
 ) -> ReplyResult:
     df = pd.read_csv(data_path)
+    markdown_response = convert_message_to_markdown(f"Take a look at the first few rows of the dataset:\n {df.head(5)}")
     return ReplyResult(
-        message=f"Here is the preview:\n {df.head(5)}", 
+        message=markdown_response,
         target=AgentNameTarget("BusinessAnalyst")
     )
 
@@ -73,13 +76,14 @@ def complete_business_analyst(
     context_variables["research_questions"] = output.research_questions
     context_variables["problem_type"] = output.problem_type
     context_variables["stakeholders_expectations"] = output.stakeholders_expectations
-    return ReplyResult(
-        message=f"""
+    markdown_response = convert_message_to_markdown(f"""The business analysis is complete with the following details:
             - Objective: {output.objective}
             - Stakeholder Expectations: {output.stakeholders_expectations}
-            - Research Questions: {output.research_questions}
+            - Research Questions: {', '.join(output.research_questions)}
             - Problem Type: {output.problem_type}
-        """,
+            """)
+    return ReplyResult(
+        message=markdown_response,
         target=AgentNameTarget("BusinessTranslator"),
         context_variables=context_variables,
     )

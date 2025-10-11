@@ -1,60 +1,28 @@
+import re
 import streamlit as st
 from .sidebar import ROLE_EMOJI
-from autogen.agentchat import run_group_chat
-from autogen import UserProxyAgent, LLMConfig
-from autogen.agentchat.group.patterns import DefaultPattern, AutoPattern
-from autogen.agentchat.group import RevertToUserTarget
-from autogen.agentchat.group import AgentTarget, ContextVariables
-from multi_agents import BusinessAnalyst, DataAnalyst, DataEngineer, DataScientist, Coder, BusinessTranslator
+from autogen import OpenAIWrapper
 
-def start_group_chat(dataset_paths, user_requirements):
-    context_variables = ContextVariables(data={
-        "current_agent": "",
-        "objective": "",
-        "problem_type": "",
-        "stakeholders_expectations": [],
-        "research_questions": [],
-    })
-    
-    coder = Coder()
-    business_analyst = BusinessAnalyst()
-    data_scientist = DataScientist()
-    business_translator = BusinessTranslator()
+config_list = [
+    {
+        "model": "gpt-4.1-nano",
+        "api_type": "openai",
+    }
+]
+client = OpenAIWrapper(config_list=config_list)
 
-    business_translator.handoffs.set_after_work(RevertToUserTarget())
-
-    user = UserProxyAgent(
-        name="User",
-        code_execution_config=False
-    )
-
-    pattern = AutoPattern(
-        initial_agent=business_analyst,
-        agents=[business_analyst, coder, data_scientist, business_translator],
-        user_agent=user,
-        context_variables=context_variables,
-        group_manager_args={
-            "llm_config": LLMConfig(
-                api_type="openai",
-                model="gpt-4.1-mini",
-                temperature=0.3,
-                stream=False,
-            ),
-        }
-    )
-
-    message = f"""
-        Data path: {dataset_paths}
-        Requirements: {user_requirements}
-    """
-
-    response = run_group_chat(
-        pattern=pattern,
-        messages=message,
-        max_rounds=200
-    )
-
-    return response.events
+def convert_message_to_markdown(message):
+    messages = [
+        {"role": "user", "content": f"Don't answer the message. Just convert this message to markdown:\n{message}"}
+    ]
+    response = client.create(messages=messages)
+    text = client.extract_text_or_completion_object(response)[0]
+    if "```markdown" in text:
+        try:
+            return text.split("```markdown")[1].split("```")[0].strip()
+        except IndexError:
+            pass
+    return text.strip()
 
 def display_group_chat():
     """Display stored chat messages with avatars."""
@@ -65,4 +33,7 @@ def display_group_chat():
             if role == "Coder":
                 st.code(msg["content"])
             else:
-                st.text(msg["content"])
+                if role == "System":
+                    st.text(msg["content"])
+                else:
+                    st.markdown(msg["content"], unsafe_allow_html=True)

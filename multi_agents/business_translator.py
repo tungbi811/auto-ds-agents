@@ -22,7 +22,11 @@ def execute_business_translation_step(
     """
     context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
-        message=f"Write python code to achieve the following task:\n{step}",
+        message=f"""
+            Coder, can you write python code to achieve the following task:
+            
+            {step.instruction}
+        """,
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
@@ -67,6 +71,7 @@ class BusinessTranslator(ConversableAgent):
                     5. Present the final recommendations in a structured, executive-friendly format (e.g., by stakeholder or business theme).
 
                     Rules:
+                    - Always return your final answer in Markdown format with proper headings, bullet points, and emphasis for key points.
                     - Do not include technical details (algorithms, preprocessing, or model design).
                     - Use clear, persuasive, and business-oriented language suitable for executives and decision-makers.
                     - Keep recommendations practical, relevant, and impact-focused.
