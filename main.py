@@ -67,8 +67,6 @@ with col2:
             if st.session_state.events:
                 if not st.session_state.user_input:
                     st.session_state.event = next(st.session_state.events)
-                    print(st.session_state.event)
-                    print("-" *50)
 
                     if st.session_state.event.type == "text":
                         sender = st.session_state.event.content.sender

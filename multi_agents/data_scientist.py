@@ -1,6 +1,8 @@
 from autogen import ConversableAgent, LLMConfig, UpdateSystemMessage
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
 from pydantic import BaseModel, Field
+from typing import Annotated
+from utils.utils import convert_message_to_markdown
 
 class DataScientistStep(BaseModel):
     instruction: str = Field(
@@ -13,28 +15,6 @@ class DataScientistStep(BaseModel):
         ]
     )
 
-class Metric(BaseModel):
-    name: str = Field(
-        ...,
-        description="Name of the evaluation metric.",
-        examples=["accuracy", "precision", "recall", "F1-score", "RMSE"]
-    )
-    value: float = Field(
-        ...,
-        description="Value of the evaluation metric.",
-        examples=[0.85, 0.92, 0.78, 0.88, 5.67]
-    )
-
-class ModelingOutput(BaseModel):
-    best_model: str = Field(
-        ...,
-        description="Description of the best-performing model."
-    )
-    metrics: Metric = Field(
-        ...,
-        description="Performance metrics of the best model."
-    )
-
 def execute_data_scientist_step(
     step: DataScientistStep,
     context_variables: ContextVariables,
@@ -44,16 +24,21 @@ def execute_data_scientist_step(
     """
     context_variables["current_agent"] = "DataScientist"
     return ReplyResult(
-        message=f"Hey Coder! Here is the instruction for the data science step:\n {step.instruction}\n Can you write Python code for me to execute it?",
+        message=f"""
+            Hey Coder! Can you write python code to achieve the following task:
+
+            {step.instruction}
+        """,
         target=AgentNameTarget("Coder"),
         context_variables=context_variables,
     )
 
 def complete_data_scientist_task(
+    answer: Annotated[str, "The final answer from the Data Scientist agent to the Business Translator agent."],
     context_variables: ContextVariables,
 ) -> ReplyResult:
     return ReplyResult(
-        message=f"Data science tasks are complete.",
+        message="Business Translator! " + answer,
         target=AgentNameTarget("BusinessTranslator"),
         context_variables=context_variables,
     )
@@ -62,7 +47,9 @@ class DataScientist(ConversableAgent):
     def __init__(self):
         llm_config = LLMConfig(
             api_type="openai",
-            model="gpt-5-mini",
+            model="gpt-4.1-mini",
+            temperature=0.3,
+            stream=False,
             parallel_tool_calls=False
         )
 
@@ -71,52 +58,27 @@ class DataScientist(ConversableAgent):
             llm_config=llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
-            update_agent_state_before_reply=[
-                UpdateSystemMessage(
-                """
-                    You are the DataScientist.
-                    Your role is to design, build, and evaluate machine learning models to achieve {objective} for a {problem_type} task.
-                    You translate business and analytical goals into concrete modeling strategies, ensuring results are accurate, explainable, and aligned with stakeholder expectations.
+            system_message = """
+                You are the Data Scientist.
 
-                    Workflow:
-                    1. Review Inputs
-                    - Understand the {objective} and determine the {problem_type} (e.g., regression, classification, clustering).
-                    - Identify key target variables, input features, and performance requirements.
+                Your role is to execute data science and analytical tasks as instructed by the Business Translator and return clear, validated quantitative findings. 
+                You do not communicate directly with the user or stakeholders — only with the Business Translator.
 
-                    2. Model Selection
-                    - Choose appropriate algorithms based on the {problem_type}.
-                    - For regression: consider models like LinearRegression, RandomForestRegressor, XGBoostRegressor.
-                    - For classification: consider LogisticRegression, RandomForestClassifier, XGBoostClassifier.
-                    - For clustering: consider KMeans, DBSCAN, or hierarchical clustering.
-                    - Document the reasoning behind the model choice.
+                Responsibilities:
+                1. Interpret the Business Translator’s instruction and decide the most suitable analytical or statistical method to address it.
+                2. Break down complex analysis into small, actionable steps.
+                3. For each step, call execute_data_scientist_step to instruct the Coder to implement the required computation.
+                4. Review the Coder’s output (not the code) to ensure the results make sense, then decide the next step if needed.
+                5. Do not request or produce visualizations or plots — focus only on data and numerical/text outputs.
+                6. Once the analysis is complete and results are validated, call complete_data_scientist_task to summarize findings and return them to the Business Translator.
 
-                    3. Model Training
-                    - Train selected models using the processed datasets.
-                    - Apply proper validation methods (e.g., train/test split, cross-validation).
-                    - Ensure data leakage prevention and reproducibility.
-
-                    4. Hyperparameter Tuning
-                    - Optimize model performance using grid search or randomized search.
-                    - Avoid overfitting by using validation data or cross-validation folds.
-
-                    5. Model Evaluation
-                    - Assess model performance using suitable metrics based on the {problem_type}.
-                    - Compare models and summarize performance results.
-
-                    6. Execution of Steps
-                    - For each modeling or evaluation step, call execute_data_scientist_step to delegate implementation to the Coder agent.
-
-                    7. Summarization
-                    - Summarize the final model, including algorithm, hyperparameters, key performance metrics, and interpretation of results.
-                    - Provide concise recommendations based on the evaluation results.
-
-                    Rules:
-                    - Do not perform any data cleaning or feature engineering (these are done by the DataEngineer).
-                    - Do not generate plots or visualizations.
-                    - Ensure models are reproducible, interpretable, and properly validated.
-                    - Focus on clarity, correctness, and alignment with the stated {objective}.
-                """
-                )
-            ],
-            functions=[execute_data_scientist_step]
+                Rules:
+                - if you need to build a machine learning model, you should choose strong model like RandomForest or XGBoost instead of simple model like Linear Regression or Decision Tree.
+                - Keep reasoning data-driven and concise.
+                - Do not explain algorithms or code to the Business Translator.
+                - Ensure all findings are clear, interpretable, and directly answer the Business Translator’s analytical question.
+                - Each response must be based on executed results, not assumptions.
+                - You operate in an iterative loop until the Business Translator confirms the objective is met.
+            """,
+            functions=[execute_data_scientist_step, complete_data_scientist_task],
         )

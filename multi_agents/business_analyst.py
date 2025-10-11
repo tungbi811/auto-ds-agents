@@ -62,7 +62,7 @@ def get_data_info(
     data_path: Annotated[str, "Dataset path"],
 ) -> ReplyResult:
     df = pd.read_csv(data_path)
-    markdown_response = convert_message_to_markdown(f"Take a look at the first few rows of the dataset:\n {df.head(5)}")
+    markdown_response = convert_message_to_markdown(f"Take a look at the first few rows of the dataset:\n {df.head(5)} \n Numerical columns: {df.select_dtypes(include=['number']).columns.tolist()} \n Categorical columns: {df.select_dtypes(include=['object', 'category']).columns.tolist()} \n Date columns: {df.select_dtypes(include=['datetime', 'datetimetz']).columns.tolist()} \n Total rows: {df.shape[0]}, Total columns: {df.shape[1]}")
     return ReplyResult(
         message=markdown_response,
         target=AgentNameTarget("BusinessAnalyst")

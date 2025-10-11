@@ -1,4 +1,5 @@
 from .business_analyst import BusinessAnalyst
+from .data_scientist import DataScientist
 from .business_translator import BusinessTranslator
 from .coder import Coder
 from autogen import UserProxyAgent
@@ -18,6 +19,7 @@ class GroupChat:
     
         coder = Coder()
         business_analyst = BusinessAnalyst()
+        data_scientist = DataScientist()
         business_translator = BusinessTranslator()
         user = UserProxyAgent(
             name="User",
@@ -25,11 +27,10 @@ class GroupChat:
         )
 
         business_translator.handoffs.set_after_work(RevertToUserTarget())
-        user.handoffs.set_after_work(AgentTarget(business_analyst))
 
         self.pattern = DefaultPattern(
             initial_agent=business_analyst,
-            agents=[business_analyst, coder, business_translator],
+            agents=[business_analyst, business_translator, data_scientist, coder],
             user_agent=user,
             context_variables=context_variables,
         )

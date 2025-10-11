@@ -31,11 +31,11 @@ def run_code(
         return ReplyResult(message=f"Execution failed: {e}", target=RevertToUserTarget())
 
     if result.exit_code == 0:
-        msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}"
+        msg = f"Output:\n{result.output}"
         target = AgentNameTarget(context_variables["current_agent"])
     else:
         result.output = result.output[:1000]  # truncate long output
-        msg = f"Exit code: {result.exit_code}\n\nOutput:\n{result.output}\n\nStderr:\n{getattr(result, 'stderr', '')}"
+        msg = f"Error:\n{result.output}"# \n\nStderr:\n{getattr(result, 'stderr', '')}"
         target = AgentNameTarget("Coder")
 
     return ReplyResult(message=msg, target=target)
@@ -56,8 +56,15 @@ class Coder(AssistantAgent):
             llm_config= llm_config,
             human_input_mode="NEVER",
             system_message = """
-                You are the Coder.
-                Your role is to take the structured step instructions and write complete, runnable Python code.
+                You are the Coder agent.
+
+                Your mission is to take structured analytical step instructions and implement them as complete, runnable Python code within a Jupyter Notebook environment.
+
+                Environment:
+                - You are working in a Jupyter Notebook, where common libraries (pandas, numpy, sklearn, etc.) may already be imported.
+                - Do not re-import standard libraries unless the required module has not been imported yet.
+                - Avoid redefining or recreating variables that already exist unless explicitly instructed to do so.
+                - Reuse context variables passed to you when appropriate.
 
                 Rules:
                 1. Always ensure the code is minimal, correct, and runnable.
@@ -69,12 +76,22 @@ class Coder(AssistantAgent):
                 - Use .copy() explicitly when a new DataFrame is intended.
                 5. Always call the run_code tool when writing Python code.
                 6. If the result indicates an error, fix it and output the corrected code again.
+                7. Never leave a variable name or expression alone on the last line of the code cell.
+                - Always print() the values you want to display.
+                - If you need to show multiple outputs, print summaries or formatted outputs.
+                - Never rely on implicit return display (e.g., do not end with 'df' or 'model').
 
-                Rules:
-                - Always include the following import at the very beginning of the script to ignore non-critical warnings:
+                Standard Imports:
+                - Always include the following import at the top of your script to suppress non-critical warnings:
                     import warnings
                     warnings.filterwarnings("ignore")
-                - This ensures that RuntimeWarnings or overflow/underflow logs do not clutter the output.
+                - This ensures RuntimeWarnings and overflow/underflow logs do not clutter the output.
+
+                Behavioral Guidelines:
+                - Write clear, readable, and reproducible code.
+                - Comment complex logic briefly and meaningfully.
+                - Maintain consistent variable names throughout the workflow.
+                - Focus on correctness and clarity over optimization or brevity.
             """,
             functions=[run_code]
         )

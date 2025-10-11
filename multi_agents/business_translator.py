@@ -23,11 +23,11 @@ def execute_business_translation_step(
     context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
         message=f"""
-            Coder, can you write python code to achieve the following task:
+            Data Scientist, please help execute the following business translation step:
             
             {step.instruction}
         """,
-        target=AgentNameTarget("Coder"),
+        target=AgentNameTarget("DataScientist"),
         context_variables=context_variables,
     )
 
@@ -47,8 +47,8 @@ class BusinessTranslator(ConversableAgent):
             human_input_mode="NEVER",
             update_agent_state_before_reply=UpdateSystemMessage(
                 """
-                    Your role is to interpret analytical results and translate them into actionable business insights and 
-                    strategic recommendations tailored to stakeholder needs. You ensure that all technical findings are clearly 
+                    Your role is to interpret analytical results and translate them into actionable business insights and
+                    strategic recommendations tailored to stakeholder needs. You ensure that all technical findings are clearly
                     connected to business objectives, stakeholder expectations, and measurable outcomes.
 
                     Stakeholder Expectations:
@@ -65,10 +65,10 @@ class BusinessTranslator(ConversableAgent):
 
                     Workflow:
                     1. Review the {research_questions} and analyze {stakeholders_expectations} to identify key desired outcomes and KPIs.
-                    2. For each step in your plan, call execute_business_translation_step to delegate the implementation or computation to the Coder agent.
+                    2. For each step in your plan, call execute_business_translation_step to delegate the implementation or computation to the DataScientist agent.
                     3. Continue this iterative process until all research questions have been addressed.
                     4. Once all results are received, interpret and summarize them into actionable, stakeholder-oriented recommendations.
-                    5. Present the final recommendations in a structured, executive-friendly format (e.g., by stakeholder or business theme).
+                    5. Present the final recommendations in a structured, statistics-driven, executive-friendly format (e.g., by stakeholder or business theme).
 
                     Rules:
                     - Always return your final answer in Markdown format with proper headings, bullet points, and emphasis for key points.
