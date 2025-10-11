@@ -3,6 +3,18 @@ import streamlit as st
 from .sidebar import ROLE_EMOJI
 from autogen import OpenAIWrapper
 
+def safe_md(text):
+    return (
+        text.replace("(", "\\(")
+            .replace(")", "\\)")
+            .replace("_", "\\_")
+            .replace("+", "&#43;")
+            .replace("~", "\\~")
+            .replace("$", "\\$")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+    )
+
 config_list = [
     {
         "model": "gpt-4.1-nano",
@@ -24,16 +36,13 @@ def convert_message_to_markdown(message):
             pass
     return text.strip()
 
+# 2️⃣ Keep your chat renderer clean
 def display_group_chat():
-    """Display stored chat messages with avatars."""
     for msg in st.session_state.messages:
         role = msg["role"]
         with st.chat_message(role, avatar=ROLE_EMOJI.get(role, "")):
             st.markdown(f"**{role}**")
-            if role == "Coder":
+            if role in ("Coder", "System"):
                 st.code(msg["content"])
             else:
-                if role == "System":
-                    st.code(msg["content"])
-                else:
-                    st.write(msg["content"])
+                st.markdown(safe_md(msg["content"]))  # No safe_md needed anymore
