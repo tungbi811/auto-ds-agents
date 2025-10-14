@@ -23,9 +23,11 @@ def render_messages_messenger_strict(
     """
     Messenger-like UI with strict visibility rules:
       - User messages: always visible (right-aligned).
-      - Business Translator: ONLY the latest BT message is visible; older BT messages are hidden.
-      - Business Analyst: visible ONLY if the message looks like a question (heuristic).
-      - All other messages (including non-question BA and older BT) go into a hidden 'backchannel' expander.
+      - Business Translator (BT): keep the LAST BT message of EACH user turn visible
+        (i.e., the last BT between two User messages, and the last BT at the tail).
+        All other BT messages go to backchannel.
+      - Business Analyst (BA): visible ONLY if the message looks like a question (heuristic).
+      - All other messages go into a hidden 'backchannel' expander.
     """
     if role_avatars is None:
         role_avatars = {
@@ -60,12 +62,20 @@ def render_messages_messenger_strict(
         st.info("No conversation yet. Start an analysis from the sidebar.")
         return
 
-    # Find the latest BT message index (if any)
-    latest_bt_idx = None
-    for i in range(len(msgs) - 1, -1, -1):
-        if msgs[i].get("role") in bt_roles:
-            latest_bt_idx = i
-            break
+    # --- NEW: Determine which BT messages are the last within each user turn ---
+    # We scan messages and whenever we hit a User message (and once at the end),
+    # we mark the most recent BT since the previous User as visible.
+    visible_bt_indices = set()
+    start = 0
+    # Append a sentinel User at the end to close the last turn
+    for j, m in enumerate(msgs + [{"role": user_role, "content": ""}]):
+        if m.get("role") == user_role:
+            # Look back from j-1 to start, keep the last BT
+            for k in range(j - 1, start - 1, -1):
+                if msgs[k].get("role") in bt_roles:
+                    visible_bt_indices.add(k)
+                    break
+            start = j + 1  # next segment starts after this user
 
     main_thread = []   # messages to show inline (Messenger style)
     backchannel = []   # messages hidden under expander
@@ -80,8 +90,8 @@ def render_messages_messenger_strict(
             continue
 
         if role in bt_roles:
-            # Only show the latest BT message
-            if latest_bt_idx is not None and idx == latest_bt_idx:
+            # NEW: show only the last BT per user turn
+            if idx in visible_bt_indices:
                 main_thread.append(m)
             else:
                 backchannel.append(m)
@@ -145,6 +155,8 @@ def render_messages_messenger_strict(
                                 st.code(content, language="python")
                             else:
                                 st.markdown(content)
+
+
 
 # -------------------------------
 # Initialize session state (unchanged)
