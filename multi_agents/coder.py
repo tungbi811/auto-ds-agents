@@ -78,7 +78,14 @@ class Coder(AssistantAgent):
                 4. When working with pandas:
                 - Never use inplace=True. Instead, reassign the result (e.g., df = df.fillna(0) or df['col'] = df['col'].fillna(0)).
                 - Prefer .loc for assignments to avoid chained assignment warnings.
-                - Use .copy() explicitly when a new DataFrame is intended.
+                - Always create a **copy** of the dataset before performing any operation that may modify, add, or remove columns. Use `.copy()` explicitly.
+                    Example:
+                        df_copy = df.copy()
+                        df_copy['new_col'] = df_copy['a'] + df_copy['b']
+                    This ensures that the original dataset remains unmodified.
+                - Be explicit and consistent: whenever a transformation step is applied 
+                    (such as encoding, scaling, feature engineering, or column dropping),
+                    perform it on a `.copy()` of the input DataFrame.
                 5. Always call the run_code tool when writing Python code.
                 6. If the result indicates an error, fix it and output the corrected code again.
                 7. Never leave a variable name or expression alone on the last line of the code cell.
