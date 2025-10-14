@@ -40,9 +40,10 @@ def run_code(
         errors = []
         for line in lines:
             errors.append(line)
-            if len(errors) >= 5:
+            if len(errors) >= 2:
                 break
         msg = "\n".join(errors)
+        target = AgentNameTarget("Coder")
     return ReplyResult(message=msg, target=target)
 
 
@@ -51,7 +52,7 @@ class Coder(AssistantAgent):
         llm_config = LLMConfig(
             api_type="openai",
             model="gpt-4.1-mini",
-            temperature=0,
+            temperature=0.1,
             stream=False,
             parallel_tool_calls=False
         )
@@ -83,7 +84,7 @@ class Coder(AssistantAgent):
                 6. If the result indicates an error, fix it and output the corrected code again.
                 7. Never leave a variable name or expression alone on the last line of the code cell.
                 - Always print() the values you want to display.
-                - If you need to show multiple outputs, print summaries or formatted outputs.
+                - If you need to return multiple objects, print a summary and end the cell with '_ = None' or simply do not include any return expression.
                 - Never rely on implicit return display (e.g., do not end with 'df' or 'model').
 
                 Standard Imports:

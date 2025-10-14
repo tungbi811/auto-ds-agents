@@ -67,6 +67,7 @@ with col2:
             if st.session_state.events:
                 if not st.session_state.user_input:
                     st.session_state.event = next(st.session_state.events)
+                    print(st.session_state.event)
 
                     if st.session_state.event.type == "text":
                         sender = st.session_state.event.content.sender
@@ -81,7 +82,8 @@ with col2:
                             st.session_state.messages.append(
                                 {
                                     "role": "Coder", 
-                                    "content": json.loads(st.session_state.event.content.tool_calls[0].function.arguments)["code"]
+                                    "content": json.loads(st.session_state.event.content.tool_calls[0].function.arguments)["code"],
+                                    "in_expander": True
                                 }
                             )
                         else:
@@ -91,7 +93,8 @@ with col2:
                             st.session_state.messages.append(
                                 {
                                     "role": st.session_state.last_agent_name, 
-                                    "content": st.session_state.event.content.content
+                                    "content": st.session_state.event.content.content,
+                                    "in_expander": st.session_state.last_agent_name != "BusinessAnalyst"
                                 }
                             )
                             st.session_state.last_agent_name = None
@@ -99,14 +102,15 @@ with col2:
                             st.session_state.messages.append(
                                 {
                                     "role": "System", 
-                                    "content": st.session_state.event.content.content
+                                    "content": st.session_state.event.content.content,
+                                    "in_expander": True
                                 }
                             )
                     elif st.session_state.event.type == "input_request":
                         st.session_state.awaiting_response = True
-                    elif st.session_state.event.type == "termination":
+                    elif st.session_state.event.type == "run_completion":
                         st.session_state.messages.append(
-                            {"role": "System", "content": st.session_state.event.content.termination_reason}
+                            {"role": "System", "content": st.session_state.event.content}
                         )
                         st.session_state.terminated = True
                 else:

@@ -20,7 +20,6 @@ def execute_business_translation_step(
     Translate a high-level business task into specific data science objectives.
     Example task: 'Increase customer retention by 10% over the next quarter.'
     """
-    context_variables["current_agent"] = "BusinessTranslator"
     return ReplyResult(
         message=f"""
             Data Scientist, please help execute the following business translation step:
@@ -36,7 +35,7 @@ class BusinessTranslator(ConversableAgent):
         llm_config = LLMConfig(
             api_type="openai",
             model="gpt-4.1-mini",
-            temperature=0.3,
+            temperature=0.5,
             stream=False,
             parallel_tool_calls=False
         )
@@ -72,7 +71,7 @@ class BusinessTranslator(ConversableAgent):
                     5. Present the final recommendations in a structured, statistics-driven, executive-friendly format (e.g., by stakeholder or business theme).
 
                     Rules:
-                    - Always return your final answer in Markdown format with proper headings, bullet points, and emphasis for key points.
+                    - Always return your final answer in Markdown format with proper headings, bullet points, and emphasis for key points using '''markdown ''' .
                     - Do not include technical details (algorithms, preprocessing, or model design).
                     - Use clear, persuasive, and business-oriented language suitable for executives and decision-makers.
                     - Keep recommendations practical, relevant, and impact-focused.

@@ -2,7 +2,6 @@ from autogen import ConversableAgent, LLMConfig, UpdateSystemMessage
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
 from pydantic import BaseModel, Field
 from typing import Annotated
-from utils.utils import convert_message_to_markdown
 
 class DataScientistStep(BaseModel):
     instruction: str = Field(
@@ -73,10 +72,9 @@ class DataScientist(ConversableAgent):
                 6. Once the analysis for the current task is complete and results are validated, call complete_data_scientist_task to summarize findings and return them to the Business Translator.
 
                 Rules:
-                - If you need to build a machine learning model, you should choose strong model like RandomForest or XGBoost instead of simple model like Linear Regression or Decision Tree.
+                - If you need to build a machine learning model, you should choose a robust model instead of a simple model like Linear Regression or Logistic Regression.
+                - Do not ask vague or open-ended questions for coders. The requirement should be small and specific.
                 - Keep reasoning data-driven and concise.
-                - Do not explain algorithms or code to the Business Translator.
-                - Do not ask vague or open-ended questions for coders. Be specific and precise. Don't ask coders to how to do something.
                 - Always use complete_data_scientist_task to hand off results — never respond directly.
                 - Ensure all findings are clear, interpretable, and directly answer the Business Translator’s analytical question.
                 - Each response must be based on executed results, not assumptions.

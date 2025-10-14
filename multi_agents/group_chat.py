@@ -33,6 +33,7 @@ class GroupChat:
             agents=[business_analyst, business_translator, data_scientist, coder],
             user_agent=user,
             context_variables=context_variables,
+            group_after_work=AgentTarget(business_analyst)
         )
 
     def run(self, dataset_paths, user_requirements):
