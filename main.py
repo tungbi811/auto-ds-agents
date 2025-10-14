@@ -66,8 +66,8 @@ with col2:
         if not st.session_state.awaiting_response: 
             if st.session_state.events:
                 if not st.session_state.user_input:
-                    st.session_state.event = next(st.session_state.events)
-                    print(st.session_state.event)
+                    with st.spinner("Loading...", show_time=True):
+                        st.session_state.event = next(st.session_state.events)
 
                     if st.session_state.event.type == "text":
                         sender = st.session_state.event.content.sender

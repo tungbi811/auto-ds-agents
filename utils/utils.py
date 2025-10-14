@@ -23,7 +23,7 @@ client = OpenAIWrapper(config_list=config_list)
 
 def convert_message_to_markdown(message):
     messages = [
-        {"role": "user", "content": f"Convert this whole message to markdown format:\n{message}"}
+        {"role": "user", "content": f"Convert the whole message to markdown format (do not summarise, just convert):\n{message}"}
     ]
     response = client.create(messages=messages)
     text = client.extract_text_or_completion_object(response)[0]

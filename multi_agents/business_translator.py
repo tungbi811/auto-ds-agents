@@ -71,7 +71,7 @@ class BusinessTranslator(ConversableAgent):
                     5. Present the final recommendations in a structured, statistics-driven, executive-friendly format (e.g., by stakeholder or business theme).
 
                     Rules:
-                    - Always return your final answer in Markdown format with proper headings, bullet points, and emphasis for key points using '''markdown ''' .
+                    - Always return your final answer in Markdown format with proper headings, bullet points, and emphasis for key points.
                     - Do not include technical details (algorithms, preprocessing, or model design).
                     - Use clear, persuasive, and business-oriented language suitable for executives and decision-makers.
                     - Keep recommendations practical, relevant, and impact-focused.
