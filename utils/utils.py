@@ -84,9 +84,8 @@ def display_group_chat():
                 else:
                     st.write(safe_md(content))
 
-    # If chat ends with expander messages, render the last expander
     if expander_buffer:
-        with st.expander("🧠 Technical Output", expanded=False):
+        with st.expander("🧠 Thinking ...", expanded=False):
             for emsg in expander_buffer:
                 erole = emsg["role"]
                 econtent = emsg["content"]

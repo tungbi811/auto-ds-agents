@@ -52,7 +52,7 @@ class Coder(AssistantAgent):
         llm_config = LLMConfig(
             api_type="openai",
             model="gpt-4.1-mini",
-            temperature=0.1,
+            temperature=0,
             stream=False,
             parallel_tool_calls=False
         )
