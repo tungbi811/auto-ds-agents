@@ -4,15 +4,7 @@ from typing import Annotated
 from autogen import AssistantAgent, LLMConfig
 from autogen.coding import CodeBlock
 from autogen.agentchat.group import AgentNameTarget, ReplyResult, ContextVariables, RevertToUserTarget
-from autogen.coding.jupyter import LocalJupyterServer, JupyterCodeExecutor
-
-output_dir = Path("./artifacts")
-output_dir.mkdir(parents=True, exist_ok=True)
-
-server = LocalJupyterServer(
-    log_file='./logs/jupyter_gateway.log',
-)
-executor = JupyterCodeExecutor(server, output_dir=output_dir, timeout=1200)
+from utils.utils import executor
 
 def run_code(
         code: Annotated[str, "Python code to run in Jupyter"], 
@@ -67,8 +59,7 @@ class Coder(AssistantAgent):
                 Your mission is to take structured analytical step instructions and implement them as complete, runnable Python code within a Jupyter Notebook environment.
 
                 Environment:
-                - You are working in a Jupyter Notebook, where common libraries (pandas, numpy, sklearn, etc.) may already be imported.
-                - Do not re-import standard libraries unless the required module has not been imported yet.
+                - You are working in a Jupyter Notebook 
                 - Avoid redefining or recreating variables that already exist unless explicitly instructed to do so.
                 - Reuse context variables passed to you when appropriate.
 
@@ -87,13 +78,11 @@ class Coder(AssistantAgent):
                 - If you need to return multiple objects, print a summary and end the cell with '_ = None' or simply do not include any return expression.
                 - Never rely on implicit return display (e.g., do not end with 'df' or 'model').
 
-                Standard Imports:
+                Rules:
+                - Do not re-import libraries or create features that have already been defined.
                 - Always include the following import at the top of your script to suppress non-critical warnings:
                     import warnings
                     warnings.filterwarnings("ignore")
-                - This ensures RuntimeWarnings and overflow/underflow logs do not clutter the output.
-
-                Behavioral Guidelines:
                 - Write clear, readable, and reproducible code.
                 - Comment complex logic briefly and meaningfully.
                 - Maintain consistent variable names throughout the workflow.
@@ -101,5 +90,3 @@ class Coder(AssistantAgent):
             """,
             functions=[run_code]
         )
-    
-    
