@@ -1,1 +1,0 @@
-<MESSAGE> <HELP> I need help. </HELP> </MESSAGE>
