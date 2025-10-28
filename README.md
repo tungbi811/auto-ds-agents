@@ -1,4 +1,4 @@
-# 🤓 Multi-Agent System for Automated Data Science Workflows
+# 🧠 Multi-Agent System for Automated Data Science Workflows
 
 A modular **multi-agent system (MAS)** that autonomously executes the entire data science workflow — from business problem understanding to model execution and actionable recommendation generation.  
 Built using **AG2** and **GPT-4o-mini**, the system coordinates multiple specialized agents that collaborate asynchronously to transform business questions into data-driven insights.
@@ -20,7 +20,7 @@ This project implements a **multi-agent architecture** where each agent speciali
 
 ---
 
-## ⚙️ System Architecture
+## 🏗️ Project Architecture
 
 ```
 AUTO-DS-AGENTS/
@@ -43,54 +43,66 @@ AUTO-DS-AGENTS/
 ├── LICENSE                      # MIT License
 ├── .gitignore                   # Ignored files and folders
 └── README.md                    # Project documentation
-
 ```
 
 ---
 
-## 🔧 Installation
+## ⚙️ Installation
 
 ### Prerequisites
-- Python 3.10+
-- OpenAI API key
+- **Conda** (Anaconda or Miniconda)
+- **Python 3.11+**
+- **OpenAI API key**
 - Basic Python data-science libraries: `pandas`, `numpy`, `scikit-learn`, `matplotlib`
 
 ### Setup Steps
 
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/tungbi811/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows.git
+   cd Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows
+   ```
+
+2. **Create and activate Conda environment**
+   ```bash
+   conda create -n auto_ds_agents python=3.11 -y
+   conda activate auto_ds_agents
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure environment variables**
+
+#### macOS / Linux
 ```bash
-git clone https://github.com/tungbi811/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows.git
-cd Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows
+export OPENAI_API_KEY=your_api_key_here
+```
 
-# Create virtual environment
-uv venv
-source .venv/bin/activate   # or .venv\Scripts\activate on Windows
-
-# Install dependencies
-uv pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Add your API key
-OPENAI_API_KEY=your_api_key_here
+#### Windows (PowerShell)
+```powershell
+setx OPENAI_API_KEY "your_api_key_here"
 ```
 
 ---
 
 ## 🎯 Usage
 
-Run the main system to start agent collaboration:
+To launch the interactive interface, run:
 
 ```bash
-python main.py
+streamlit run main.py
 ```
 
-Each run processes **one dataset and one analytical query** at a time.
+This opens the web interface at **http://localhost:8501**, where you can upload datasets and provide analytical queries.
 
 ### Example Input (User Agent)
 
 > **Question:** How can we accurately estimate the market value of a house given its features?
 >
-> **Dataset:** house_prices.csv
+> **Dataset:** `house_prices.csv`
 
 The agents then collaborate as follows:
 1. **Business Analyst** extracts objectives and defines the ML problem type (regression).
@@ -121,7 +133,7 @@ The agents then collaborate as follows:
 
 ---
 
-## 🕈️ Future Enhancements
+## 🔮 Future Enhancements
 
 - [ ] Add benchmarking and performance metrics for generated models
 - [ ] Expand to multi-query workflows
