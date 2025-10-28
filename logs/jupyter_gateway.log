@@ -4799,3 +4799,29 @@ Connecting to kernel 1310ad24-fe49-44f5-b0d7-72c2379ea45f.
 interrupted
 Shutting down...
 Kernel shutdown: 1310ad24-fe49-44f5-b0d7-72c2379ea45f
+Jupyter Kernel Gateway 3.0.1 is available at http://127.0.0.1:8888
+Kernel started: c1df4ebd-6859-4cac-bc0f-7c43f70b062e
+No session ID specified
+Connecting to kernel c1df4ebd-6859-4cac-bc0f-7c43f70b062e.
+WebSocket ping timeout after 115172 ms.
+Starting buffering for c1df4ebd-6859-4cac-bc0f-7c43f70b062e:b2884f50-23c00ca63a0dc1a5bb8d5229
+Kernel restarted: c1df4ebd-6859-4cac-bc0f-7c43f70b062e
+No session ID specified
+Connecting to kernel c1df4ebd-6859-4cac-bc0f-7c43f70b062e.
+Discarding 3 buffered messages for c1df4ebd-6859-4cac-bc0f-7c43f70b062e:b2884f50-23c00ca63a0dc1a5bb8d5229
+WebSocket ping timeout after 116741 ms.
+Starting buffering for c1df4ebd-6859-4cac-bc0f-7c43f70b062e:3d1f5bec-42bd01a8fe51761700e65023
+Kernel restarted: c1df4ebd-6859-4cac-bc0f-7c43f70b062e
+No session ID specified
+Connecting to kernel c1df4ebd-6859-4cac-bc0f-7c43f70b062e.
+Discarding 3 buffered messages for c1df4ebd-6859-4cac-bc0f-7c43f70b062e:3d1f5bec-42bd01a8fe51761700e65023
+WebSocket ping timeout after 119998 ms.
+Starting buffering for c1df4ebd-6859-4cac-bc0f-7c43f70b062e:8f3fa4d0-0bf06bb6eb956c72be83e036
+Kernel restarted: c1df4ebd-6859-4cac-bc0f-7c43f70b062e
+No session ID specified
+Connecting to kernel c1df4ebd-6859-4cac-bc0f-7c43f70b062e.
+Discarding 1 buffered messages for c1df4ebd-6859-4cac-bc0f-7c43f70b062e:8f3fa4d0-0bf06bb6eb956c72be83e036
+WebSocket ping timeout after 90000 ms.
+Starting buffering for c1df4ebd-6859-4cac-bc0f-7c43f70b062e:29bedd00-0f923be0e2f7e6e507895dfa
+received signal 15, stopping
+Kernel shutdown: c1df4ebd-6859-4cac-bc0f-7c43f70b062e

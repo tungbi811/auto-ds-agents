@@ -67,7 +67,6 @@ def display_group_chat():
         in_expander = msg.get("in_expander", False)
 
         if in_expander:
-            # Add message to current expander buffer
             expander_buffer.append(msg)
         else:
             # If we hit a normal message and there are buffered expander messages, render them first
