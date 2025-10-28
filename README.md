@@ -1,205 +1,135 @@
-# Multi-Agent Collaboration for Automated Data Science Workflows
+# 🤓 Multi-Agent System for Automated Data Science Workflows
 
-A sophisticated multi-agent AI assistant that orchestrates specialized tools to handle diverse tasks including web search, document analysis, code execution, and data science workflows. Built with a modular architecture that intelligently routes user requests to the most appropriate agent based on intent detection.
-
-## 🚀 Features
-
-### Multi-Agent Architecture
-- **Intelligent Intent Detection**: Automatically routes requests to specialized agents
-- **Web Search Agent**: Real-time information retrieval and synthesis
-- **Document Analysis Agent**: PDF processing and content extraction  
-- **Code Execution Agent**: Safe Python code generation and execution
-- **Data Analysis Agent**: Automated exploratory data analysis (EDA)
-
-### Key Capabilities
-- **Smart File Handling**: Upload and analyze PDFs and CSV files
-- **Interactive Chat Interface**: Streamlit-based web UI with chat history
-- **Configurable Prompts**: YAML-based prompt templates for easy customization
-- **Visualization Support**: Automatic chart generation and display
-- **Safety-First Code Execution**: Sandboxed environment with restricted imports
-
-## 🏗️ Architecture
-
-```
-├── main.py              # Streamlit web application
-├── agents/              # Core agent system
-│   ├── base_agent.py    # Main workflow orchestrator
-│   └── __init__.py      # Agent exports
-├── tools/               # Specialized tool implementations
-│   ├── web_search.py    # Web search functionality
-│   ├── document_analyze.py  # PDF analysis tools
-│   ├── code_execute.py  # Safe code execution
-│   └── basic_eda.py     # Data analysis tools
-├── utils/               # Shared utilities
-│   └── utils.py         # Helper functions and AI client
-└── prompts/             # Configuration files
-    └── prompt.yaml      # Agent prompt templates
-```
-
-## ⚙️ Installation
-
-### Prerequisites
-- Python 3.11+
-- OpenAI API key
-
-### Setup Steps
-
-1. **Clone the repository**
-   ```bash
-   git clone -b chi --single-branch https://github.com/tungbi811/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows.git
-   cd Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows
-   ```
-
-2. **Create and activate virtual environment**
-   ```bash
-   uv venv
-   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-   ```
-
-3. **Install dependencies**
-   ```bash
-   uv pip install -r requirements.txt
-   ```
-
-4. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your OpenAI API key:
-   OPENAI_API_KEY=your_api_key_here
-   ```
-
-## 🎯 Usage
-
-### Start the Application
-```bash
-streamlit run main.py
-```
-
-The web interface will open at `http://localhost:8501`
-
-### Supported Query Types
-
-**Web Search Queries**
-- "Search for the latest AI developments"
-- "Find current weather in Tokyo"
-- "What are the recent news about cryptocurrency?"
-
-**Code Execution**
-- "Calculate the factorial of 10"
-- "Plot a sine wave"
-- "Generate 100 random numbers and show statistics"
-
-**Document Analysis**
-- Upload a PDF and ask: "Summarize this document"
-- "Extract key findings from the uploaded report"
-
-**Data Analysis** 
-- Upload a CSV file and ask: "Analyze this dataset"
-- "Show me the correlation matrix for this data"
-- "Generate visualizations for the uploaded data"
-
-## 🔧 Configuration
-
-### Customizing Agent Behavior
-
-Edit `prompts/prompt.yaml` to modify how agents respond:
-
-```yaml
-web_search:
-  template: |
-    Your custom prompt template here...
-  model: "gpt-3.5-turbo"
-  temperature: 0.7
-
-code_generation:
-  template: |
-    Your custom code generation prompt...
-  model: "gpt-3.5-turbo" 
-  temperature: 0.1
-```
-
-### Adding New Tools
-
-1. Create a new tool in `tools/your_tool.py`
-2. Add the handler function following the existing pattern
-3. Update `agents/base_agent.py` to include your new intent detection
-4. Add corresponding prompts in `prompts/prompt.yaml`
-
-## 🛡️ Security Features
-
-- **Sandboxed Code Execution**: Limited to approved Python libraries
-- **No File System Access**: Code execution restricted from system operations
-- **Input Validation**: All user inputs are sanitized and validated
-- **API Key Protection**: Environment variables for sensitive credentials
-
-## 🧪 Testing
-
-The project includes comprehensive testing for all components:
-
-```bash
-# Run tests (when available)
-python -m pytest tests/
-```
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-- Follow PEP 8 style guidelines
-- Add tests for new features
-- Update documentation for API changes
-- Ensure all agents maintain the same interface pattern
-
-## 📋 Dependencies
-
-### Core Dependencies
-- **streamlit**: Web interface framework
-- **openai**: OpenAI API client
-- **pandas**: Data manipulation and analysis
-- **matplotlib**: Plotting and visualization
-- **beautifulsoup4**: Web scraping and HTML parsing
-- **PyPDF2**: PDF processing
-- **python-dotenv**: Environment variable management
-
-See `requirements.txt` for the complete list of dependencies.
-
-## 🎨 Future Enhancements
-
-- [ ] Additional agent types (image analysis, audio processing)
-- [ ] Multi-model support (Anthropic Claude, Google Gemini)
-- [ ] Advanced data visualization options
-- [ ] Conversation memory and context persistence
-- [ ] Plugin system for custom agents
-- [ ] REST API endpoints
-- [ ] Docker containerization
-
-## 👥 Contributors
-
-- Monika Shakya
-- Van Thang Doan  
-- Yamuna G C
-- Linh Chi Tong
-- Szu-Yu Lin
-- Duy Tung Nguyen
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For questions and support:
-1. Check the [Issues](https://github.com/your-username/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows/issues) page
-2. Create a new issue with detailed description
-3. Join our community discussions
+A modular **multi-agent system (MAS)** that autonomously executes the entire data science workflow — from business problem understanding to model execution and actionable recommendation generation.  
+Built using **AG2** and **GPT-4o-mini**, the system coordinates multiple specialized agents that collaborate asynchronously to transform business questions into data-driven insights.
 
 ---
 
-**Built with ❤️ for the data science and AI community**
+## 🚀 Overview
+
+Modern data science workflows involve complex, multi-stage tasks — from data preparation to modeling and interpretation.  
+This project implements a **multi-agent architecture** where each agent specializes in a specific stage, enabling modularity, explainability, and automation.
+
+### 🔹 Agents
+| Agent | Role | Model | Temperature |
+|--------|------|--------|--------------|
+| **Business Analyst** | Interprets business requirements and structures objectives | GPT-4o-mini | 0.5 |
+| **Business Translator** | Converts analytical results into actionable business recommendations | GPT-4o-mini | 0.3 |
+| **Data Scientist** | Designs the analytical plan and selects ML techniques | GPT-4o-mini | 0.3 |
+| **Coder** | Generates and executes Python code for data analysis and modeling | GPT-4o-mini | 0.0 |
+
+---
+
+## ⚙️ System Architecture
+
+```
+AUTO-DS-AGENTS/
+├── artifacts/                   # Generated models, reports, and visualizations
+├── configs/                     # Configuration files (e.g., environment, prompts)
+├── data/                        # Input datasets (CSV or structured files)
+├── logs/                        # Agent conversation and execution logs
+├── multi_agents/                # Core multi-agent system
+│   ├── __init__.py
+│   ├── business_analyst.py      # Interprets business problems and objectives
+│   ├── business_translator.py   # Converts results into actionable recommendations
+│   ├── coder.py                 # Generates and executes Python code
+│   ├── data_scientist.py        # Designs analytical strategy and methods
+│   └── group_chat.py            # Coordinates communication among agents
+├── utils/                       # Helper modules and shared utilities
+│   ├── sidebar.py               # (Optional) Streamlit/CLI integration support
+│   └── utils.py                 # Common helper functions
+├── main.py                      # Main entry point for executing a workflow
+├── requirements.txt             # Python dependencies
+├── LICENSE                      # MIT License
+├── .gitignore                   # Ignored files and folders
+└── README.md                    # Project documentation
+
+```
+
+---
+
+## 🔧 Installation
+
+### Prerequisites
+- Python 3.10+
+- OpenAI API key
+- Basic Python data-science libraries: `pandas`, `numpy`, `scikit-learn`, `matplotlib`
+
+### Setup Steps
+
+```bash
+git clone https://github.com/tungbi811/Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows.git
+cd Multi-Agent-Collaboration-for-Automated-Data-Science-Workflows
+
+# Create virtual environment
+uv venv
+source .venv/bin/activate   # or .venv\Scripts\activate on Windows
+
+# Install dependencies
+uv pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Add your API key
+OPENAI_API_KEY=your_api_key_here
+```
+
+---
+
+## 🎯 Usage
+
+Run the main system to start agent collaboration:
+
+```bash
+python main.py
+```
+
+Each run processes **one dataset and one analytical query** at a time.
+
+### Example Input (User Agent)
+
+> **Question:** How can we accurately estimate the market value of a house given its features?
+>
+> **Dataset:** house_prices.csv
+
+The agents then collaborate as follows:
+1. **Business Analyst** extracts objectives and defines the ML problem type (regression).
+2. **Business Translator** formulates clear analytical tasks for the Data Scientist.
+3. **Data Scientist** designs the modeling strategy.
+4. **Coder** executes the code via `JupyterCodeExecutor` and returns results.
+5. **Business Translator** produces the final business recommendations in Markdown.
+
+---
+
+## 🔬 Example Output
+
+```
+## Business Recommendations
+- **Insight:** Location and overall quality have the strongest influence on house prices.
+- **Recommendation:** Focus on improving property quality in mid-range neighborhoods to maximize value.
+- **Next Step:** Consider developing price prediction dashboards for real-time valuation updates.
+```
+
+---
+
+## 🛡️ Safety & Design Principles
+
+- Agents communicate asynchronously using AG2 message routing.
+- `JupyterCodeExecutor` ensures code runs safely in a sandboxed backend environment.
+- Each agent follows structured input/output schemas (Pydantic models) for consistency.
+- The system maintains full execution logs for transparency and traceability.
+
+---
+
+## 🕈️ Future Enhancements
+
+- [ ] Add benchmarking and performance metrics for generated models
+- [ ] Expand to multi-query workflows
+- [ ] Integrate data visualization dashboards
+- [ ] Support for multi-model agents (e.g., Claude, Gemini)
+
+---
+
+**Developed by:** Monika Shakya, Van Thang Doan, Yamuna G C, Linh Chi Tong, Szu-Yu Lin, Duy Tung Nguyen  
+**License:** MIT  
+**Built with ❤️ for data science automation and intelligent workflows**
