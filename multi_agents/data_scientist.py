@@ -1,9 +1,7 @@
-from typing import Annotated
-
-from autogen import ConversableAgent, LLMConfig
+from autogen import ConversableAgent, LLMConfig, UpdateSystemMessage
 from autogen.agentchat.group import AgentNameTarget, ContextVariables, ReplyResult
 from pydantic import BaseModel, Field
-
+from typing import Annotated
 
 class DataScientistStep(BaseModel):
     instruction: str = Field(
@@ -13,9 +11,8 @@ class DataScientistStep(BaseModel):
             ""
             "Use KMeans algorithm from sklearn for clustering tasks, determining optimal number of clusters with the elbow method.",
             "For time series forecasting, implement ARIMA model using statsmodels library.",
-        ],
+        ]
     )
-
 
 def execute_data_scientist_step(
     step: DataScientistStep,
@@ -35,11 +32,8 @@ def execute_data_scientist_step(
         context_variables=context_variables,
     )
 
-
 def complete_data_scientist_task(
-    answer: Annotated[
-        str, "The final answer from the Data Scientist agent to the Business Translator agent."
-    ],
+    answer: Annotated[str, "The final answer from the Data Scientist agent to the Business Translator agent."],
     context_variables: ContextVariables,
 ) -> ReplyResult:
     return ReplyResult(
@@ -48,15 +42,22 @@ def complete_data_scientist_task(
         context_variables=context_variables,
     )
 
-
 class DataScientist(ConversableAgent):
-    def __init__(self, llm_config: LLMConfig):
+    def __init__(self):
+        llm_config = LLMConfig(
+            api_type="openai",
+            model="gpt-4.1-mini",
+            temperature=0.3,
+            stream=False,
+            parallel_tool_calls=False
+        )
+
         super().__init__(
             name="DataScientist",
             llm_config=llm_config,
             human_input_mode="NEVER",
             code_execution_config=False,
-            system_message="""
+            system_message = """
                 You are the Data Scientist.
 
                 Your role is to execute data science and analytical tasks as instructed by the Business Translator and return clear, validated quantitative findings. 

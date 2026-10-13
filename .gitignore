@@ -20,8 +20,3 @@ test_ui.py
 
 # Folder
 template/
-
-.venv/
-artifacts/runs/
-.pytest_cache/
-.ruff_cache/
